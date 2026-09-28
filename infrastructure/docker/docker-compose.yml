@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  infi-timepro-mysql:
+    image: mysql:8.4
+    container_name: infi-timepro-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_sec123!
+      MYSQL_DATABASE: infi_timepro_db
+      MYSQL_USER: infi_timepro_user
+      MYSQL_PASSWORD: infi_timepro_secret_pass!
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ../database/migrations:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  infi-timepro-redis:
+    image: redis:7.2-alpine
+    container_name: infi-timepro-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  mysql_data:
+  redis_data:

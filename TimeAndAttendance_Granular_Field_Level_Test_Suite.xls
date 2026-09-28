@@ -1,0 +1,1189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <Styles>
+  <Style ss:ID="Header">
+   <Font ss:Bold="1" ss:Color="#FFFFFF" ss:Size="11"/>
+   <Interior ss:Color="#1E1B4B" ss:Pattern="Solid"/>
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="Cell">
+   <Font ss:Size="10"/>
+   <Alignment ss:Vertical="Top" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="P0">
+   <Font ss:Bold="1" ss:Color="#991B1B" ss:Size="10"/>
+   <Interior ss:Color="#FEE2E2" ss:Pattern="Solid"/>
+   <Alignment ss:Horizontal="Center" ss:Vertical="Top"/>
+  </Style>
+  <Style ss:ID="P1">
+   <Font ss:Bold="1" ss:Color="#9A3412" ss:Size="10"/>
+   <Interior ss:Color="#FFEDD5" ss:Pattern="Solid"/>
+   <Alignment ss:Horizontal="Center" ss:Vertical="Top"/>
+  </Style>
+  <Style ss:ID="P2">
+   <Font ss:Size="10"/>
+   <Alignment ss:Horizontal="Center" ss:Vertical="Top"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Exhaustive Field Level Tests">
+  <Table>
+   <Column ss:Width="100"/>
+   <Column ss:Width="140"/>
+   <Column ss:Width="160"/>
+   <Column ss:Width="110"/>
+   <Column ss:Width="80"/>
+   <Column ss:Width="240"/>
+   <Column ss:Width="180"/>
+   <Column ss:Width="180"/>
+   <Column ss:Width="260"/>
+   <Column ss:Width="140"/>
+   <Column ss:Width="280"/>
+   <Column ss:Width="90"/>
+   <Column ss:Width="80"/>
+   <Row ss:Height="28">
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Test Case ID</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Page / View</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Component / Field</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Test Level</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">User Role</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Test Case Title</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Field Validation Rule</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Pre-conditions</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Test Steps</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Sample Input Data</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Expected Result</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Priority</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">Test Type</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0001</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Login Page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Persona Dropdown</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ALL</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Persona Selection Default Value</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Required dropdown selection</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /login page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Click Persona dropdown. 2. Inspect available options.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN, MANAGER, EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Dropdown contains 3 distinct personas: ADMIN (Naresh), MANAGER (Vikram), EMPLOYEE (Sarah). Default option is selected.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0002</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Login Page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Persona Dropdown</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ALL</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Persona Selection Switch Behavior</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Required</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /login page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Select &quot;MANAGER (Vikram)&quot;. 2. Observe avatar and title update.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">MANAGER persona</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Avatar icon updates to Manager branding, helper text shows &quot;Logged in as Vikram Singh (Manager)&quot;.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">UI/UX</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0003</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Login Page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Password Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ALL</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Password Masking Character Verification</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Masked input (type=&quot;password&quot;)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /login page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Type password into input field.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Pass@123</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Password characters are masked with dots/bullets.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Security</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0004</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Login Page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Password Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ALL</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Password Show/Hide Toggle Button</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Interactive toggle</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /login page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Type password. 2. Click Eye icon toggle.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Pass@123</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Password text toggles between masked dots and plain text.</Data></Cell>
+    <Cell ss:StyleID="P2"><Data ss:Type="String">P2 - Medium</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">UI/UX</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0005</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Login Page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Password Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ALL</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Empty Password Submission Validation</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Required field validation</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /login page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Leave password input blank. 2. Click Sign In.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Empty string</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Inline validation error &quot;Password is required&quot; displayed under input field; form submission prevented.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Negative</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0006</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Login Page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Password Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ALL</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">SQL Injection Payload in Password Field</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Sanitization check</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /login page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter SQL injection payload in password.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">' OR '1'='1</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Authentication fails cleanly; system sanitizes input, displays &quot;Invalid credentials&quot; without DB exception leaks.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Security</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0007</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Login Page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Password Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ALL</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">XSS Script Payload in Password Field</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">XSS prevention</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /login page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter XSS payload in password field.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">&lt;script&gt;alert(1)&lt;/script&gt;</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Input is encoded safely; no alert script executes; error message shown safely.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Security</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0008</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Login Page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Sign In Button</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ALL</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Sign In Button Loading State</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">State indicator</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /login page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Fill credentials. 2. Click &quot;Sign In&quot;.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Valid credentials</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Button shows spinner icon, text changes to &quot;Signing in...&quot;, button is disabled during API request.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">UI/UX</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0009</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Login Page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Sign In Button</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ALL</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Enter Key Keyboard Submission Trigger</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Form submission keypress</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Password field focused</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Type password. 2. Press &quot;Enter&quot; key on keyboard.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Valid credentials</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Form submits automatically without needing mouse click on Sign In button.</Data></Cell>
+    <Cell ss:StyleID="P2"><Data ss:Type="String">P2 - Medium</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">UI/UX</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0010</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Dashboard</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Top KPI Cards</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Total Employees KPI Widget Format &amp; Value</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Integer display</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Logged in as ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. View &quot;Total Employees&quot; KPI card.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Live DB query</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Renders exact non-zero integer count (e.g. 1,250) with trend indicator.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0011</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Dashboard</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Top KPI Cards</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Present Today KPI Widget Percentage Calculation</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Percentage format</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Logged in as ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. View &quot;Present Today&quot; KPI card.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Present count / Total count</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Displays count and calculated percentage (e.g. 1,180 / 94.4%) matching database.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0012</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Dashboard</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Clock In Button</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Clock In Button Initial State &amp; Click Action</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Stateful button toggle</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Logged in as EMPLOYEE (Not clocked in)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. View Clock In button on dashboard.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Click action</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Button displays green icon &quot;Clock In&quot;. Upon click, triggers API, starts live timer widget.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0013</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Dashboard</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Clock Out Button</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Clock Out Button Active Shift State</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Stateful button toggle</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Logged in as EMPLOYEE (Clocked in)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. View Clock Out button.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Click action</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Button displays red/amber icon &quot;Clock Out&quot;, shows elapsed shift timer (e.g. 04:32:15). Upon click, records end time.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0014</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Dashboard</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Pending Approvals Badge</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">MANAGER</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Pending Leave Requests Badge Counter</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Numeric badge</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Logged in as MANAGER with 3 pending requests</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Inspect header notification badge.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Pending requests count = 3</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Badge displays &quot;3&quot; in red circle; clicking opens approval list.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0015</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Employee Profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Full Name Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Full Name Required &amp; Max Length Check</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Required, Text max 100 chars</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Editing Employee profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Clear Full Name input. 2. Attempt Save.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Empty string</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Inline validation error &quot;Full Name is required&quot;.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Negative</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0016</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Employee Profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Full Name Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Full Name Special Character &amp; Accent Support</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unicode string support</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Editing Employee profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter name with accents &amp; hyphens.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">François René-D'Silva</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Name saves correctly with accents preserved in DB and UI.</Data></Cell>
+    <Cell ss:StyleID="P2"><Data ss:Type="String">P2 - Medium</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0017</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Employee Profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Email Address Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Email Format Syntax Validation</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Email regex format</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Editing Employee profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter invalid email syntax.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">sarah.jenkins@company</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Inline error &quot;Please enter a valid email address (e.g. user@domain.com)&quot;.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Negative</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0018</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Employee Profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Email Address Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Duplicate Email Uniqueness Check</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unique constraint</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Editing Employee profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter email already assigned to Vikram.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">vikram.singh@company.com</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">API returns error &quot;Email address already registered to another employee&quot;.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Negative</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0019</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Employee Profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Employee Code Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Employee Code Read-Only / Immutable Check</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Immutable primary identifier</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Editing Employee profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Inspect Employee Code field.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMP-1001</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Field is disabled / read-only; cannot be altered once created.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Security</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0020</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Employee Profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Department Dropdown</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Department Selection Dropdown List</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Enum selection</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Editing Employee profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Click Department dropdown.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Engineering, HR, Sales, Operations, Finance</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">List contains all configured active company departments.</Data></Cell>
+    <Cell ss:StyleID="P2"><Data ss:Type="String">P2 - Medium</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0021</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Employee Profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Designation Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Designation Max Length 50 Chars</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">String max 50 chars</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Editing Employee profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Type designation exceeding 50 chars.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Senior Lead Principal Staff Software System Architect Specialist</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Input truncates at 50 characters or shows validation warning.</Data></Cell>
+    <Cell ss:StyleID="P2"><Data ss:Type="String">P2 - Medium</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Boundary</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0022</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Employee Profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Date of Joining Picker</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Date of Joining Format &amp; Future Date Warning</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ISO Date YYYY-MM-DD</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Editing Employee profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Select joining date in future (e.g. 2026-12-01).</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">2026-12-01</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Warning badge displayed &quot;Future Joining Date&quot;. Saved successfully.</Data></Cell>
+    <Cell ss:StyleID="P2"><Data ss:Type="String">P2 - Medium</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0023</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Employee Profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Base Salary Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Base Salary Non-Negative Numeric Format</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Numeric &gt; 0, max 2 decimal places</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Editing Employee profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter negative salary.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">-50000</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Inline error &quot;Base Salary must be a positive number&quot;.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Negative</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0024</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Employee Profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Base Salary Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Base Salary Visibility &amp; Edit Lock for Employee Persona</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Role-restricted edit</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Logged in as EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Open /profile page. 2. Inspect Base Salary field.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Sarah profile</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Base salary displays value (or redacted as per privacy setting), EDIT button is completely hidden.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Security</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0025</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Geofencing</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Latitude Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Latitude Range Validation (-90 to +90)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Decimal -90.0 to +90.0</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /geofencing config</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter latitude out of range.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">105.4321</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;Latitude must be between -90 and +90 degrees&quot;.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Boundary</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0026</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Geofencing</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Longitude Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Longitude Range Validation (-180 to +180)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Decimal -180.0 to +180.0</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /geofencing config</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter longitude out of range.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">-200.1234</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;Longitude must be between -180 and +180 degrees&quot;.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Boundary</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0027</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Geofencing</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Geofence Radius Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Radius Minimum Value Validation (&gt;= 10m)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Integer 10 to 5000 meters</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /geofencing config</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter radius = 0m or -5m.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">0</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;Radius must be at least 10 meters&quot;.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Boundary</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0028</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Attendance</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Punch Notes Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Optional Punch Notes Max 200 Chars</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Optional text max 200</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /attendance web punch modal</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter 250 characters note. 2. Punch.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Text string &gt; 200 chars</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Note truncates at 200 characters cleanly.</Data></Cell>
+    <Cell ss:StyleID="P2"><Data ss:Type="String">P2 - Medium</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Boundary</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0029</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Attendance</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On-Site Status Badge</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Geofence Verification Status Badge Render</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Enum status badge</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">After GPS punch</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Inspect status badge.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Distance &lt;= 100m</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Displays green badge &quot;VERIFIED_INSIDE (42m from site)&quot;.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0030</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Attendance</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Outside Radius Alert Badge</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Outside Geofence Red Warning Render</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Enum status badge</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">After GPS punch 2km away</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Inspect status badge.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Distance = 2,450m</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Displays red warning badge &quot;OUTSIDE_GEOFENCE (2,450m from site)&quot;.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0031</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Regularization</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Missing Date Selector</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Date Selection Limit to Past 30 Days</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Date picker past 30d</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /attendance/regularize</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Attempt selecting date 60 days ago or future date.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">2024-01-01</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Future dates disabled; dates older than 30 days show warning or disabled.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Boundary</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0032</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Regularization</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Regularization Reason Dropdown</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Reason Classification Select Options</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Required Enum</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /attendance/regularize</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Open Reason dropdown.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Client Site Visit, Technical Issue, Forgot Clock-Out, Medical Emergency, Other</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Contains 5 predefined categories.</Data></Cell>
+    <Cell ss:StyleID="P2"><Data ss:Type="String">P2 - Medium</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0033</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Regularization</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Detailed Remarks Textarea</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Remarks Required Min Length 10 Chars</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Required string min 10 chars</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /attendance/regularize</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Type 3 characters &quot;Did&quot;. 2. Click Submit.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Short text</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;Remarks must be at least 10 characters explaining reason&quot;.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Negative</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0034</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Shift Library</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Shift Name Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Shift Name Unique Validation</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Required unique text</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /shifts/library</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Create shift with existing name &quot;General Day Shift&quot;.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">General Day Shift</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Error message &quot;A shift with name 'General Day Shift' already exists&quot;.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Negative</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0035</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Shift Library</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Start Time Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Start Time 24h Time Format (HH:mm)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Time HH:mm</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /shifts/library</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Select 09:00.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">09:00</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Start time stored accurately in 24h format.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0036</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Shift Library</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">End Time Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">End Time Overnight Cross-Midnight Support</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Time HH:mm</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /shifts/library</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Set Start = 22:00, End = 06:00.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Start 22:00, End 06:00</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">System recognizes overnight shift (8 hours total across midnight).</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0037</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Shift Library</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Break Duration Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Break Duration Non-Negative Minutes</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Integer 0 to 180 mins</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /shifts/library</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter break = -15 mins.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">-15</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;Break duration cannot be negative&quot;.</Data></Cell>
+    <Cell ss:StyleID="P2"><Data ss:Type="String">P2 - Medium</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Negative</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0038</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Team Schedule</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Roster Grid Cell</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">MANAGER</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Grid Cell Drag &amp; Drop Shift Assign</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Interactive grid cell</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /team-schedule weekly view</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Drag &quot;Night Shift&quot; onto Employee Sarah on Tuesday cell.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Drag &amp; drop action</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Cell updates immediately to Night Shift color badge, unsaved indicator shown.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">UI/UX</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0039</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Leave Application</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Leave Type Dropdown</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Leave Type Selection List &amp; Balance Display</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Enum dropdown</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /leaves apply modal</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Open Leave Type dropdown.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Casual (8 left), Sick (5 left), Earned (12 left)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Dropdown shows each leave type alongside real available balance counter.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0040</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Leave Application</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Start Date Picker</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Start Date Selection Rule</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Date picker</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /leaves apply modal</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Select Start Date.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">2025-10-15</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Start date selected; End date picker auto-sets minimum date to Start Date.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0041</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Leave Application</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">End Date Picker</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">End Date Before Start Date Validation</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Date logic end &gt;= start</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /leaves apply modal</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Set Start Date = 2025-10-15. 2. Set End Date = 2025-10-10.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">End before Start</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;End Date cannot be earlier than Start Date&quot;.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Negative</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0042</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Leave Application</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Half Day Checkbox</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Half Day Toggle &amp; Session Selection (First/Second Half)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Boolean + Enum</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /leaves apply modal</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Check &quot;Half Day&quot;. 2. Select &quot;First Half&quot;.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Half Day = true</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Leave duration calculated as 0.5 days instead of 1.0 day.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0043</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Leave Encashment</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Encashment Days Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Encashment Days Max Limit Check</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Integer &lt;= Available Earned Leave</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /leaves/encashment</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Employee has 10 Earned Leaves. Enter 15 days encashment.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">15</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;Encashment days (15) cannot exceed available Earned Leave balance (10)&quot;.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Boundary</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0044</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Leave Encashment</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Calculated Amount Preview</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Encashment Formula Preview Display</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Currency formula calculation</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /leaves/encashment</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Select employee with ₹60,000 Basic and 5 Encashment Days.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Basic = 60000, Days = 5</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Formula preview displays `(₹60,000 / 30) × 5 = ₹10,000` accurately.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0045</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Policy Engine</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Standard OT Multiplier Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">OT Multiplier Range Validation (1.0x to 3.0x)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Decimal 1.0 to 3.0</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /policies page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter OT multiplier = 0.5x or 5.0x.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">0.5</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;Overtime multiplier must be between 1.0x and 3.0x&quot;.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Boundary</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0046</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Policy Engine</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Max OT Hours Per Day Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Max Daily OT Limit (0 to 8 hours)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Integer 0 to 8</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /policies page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter Max OT = 12 hours.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">12</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;Max OT hours per day cannot exceed statutory limit of 8 hours&quot;.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Boundary</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0047</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Policy Engine</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Policy Save Button</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Save Policy Button Hidden for Employee Persona</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Role-based authorization</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Logged in as EMPLOYEE on /policies</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Inspect page controls.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Sarah persona</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Save / Edit buttons are completely hidden; text displays &quot;Read-Only Mode&quot;.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Security</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0048</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Reports Hub</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Report Type Dropdown</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Report Classification Options</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Required Enum</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /reports page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Click Report Type dropdown.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Attendance Summary, Late Coming, Overtime, Leave Balance, Audit Trail</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Contains all 5 standard company report classifications.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0049</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Reports Hub</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Date Range Picker</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Custom Date Range Filter</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Date range YYYY-MM-DD</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /reports page</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Select Date Range: 2025-09-01 to 2025-09-15.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Start 09-01, End 09-15</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Report table filters results strictly within selected 15-day date range.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0050</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Reports Hub</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Export to CSV Button</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">CSV Download Trigger &amp; Format Verification</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">File download trigger</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Report displayed on screen</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Click &quot;Export to CSV&quot;.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Click event</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Browser downloads `.csv` file with correct headers, UTF-8 BOM, and matching table rows.</Data></Cell>
+    <Cell ss:StyleID="P2"><Data ss:Type="String">P2 - Medium</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0051</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Marketplace</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Add-on Subscribe Toggle</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Add-on Activation Toggle Switch</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Boolean toggle</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /marketplace</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Toggle &quot;Core HR Suite&quot; switch to ON.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Toggle click</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Modal appears confirming subscription cost; upon confirmation, module status becomes &quot;Active&quot;.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0052</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Core HR</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Onboarding Employee Name</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">New Hire Onboarding Required Name</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Required string</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /hr/onboarding modal</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Leave Name blank. 2. Submit.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Empty string</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;Onboarding Employee Name is required&quot;.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Negative</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0053</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Core HR</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Asset Clearance Checkbox</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Exit Clearance IT Asset Handover Toggle</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Boolean checkbox</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /hr/offboarding clearance</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Check &quot;Laptop Returned&quot;. 2. Check &quot;ID Badge Returned&quot;.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Checked = true</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Clearance progress updates to 100%; &quot;Generate Exit Letter&quot; button becomes enabled.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0054</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">T&amp;M Billing</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Client Name Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Client Name Unique Validation</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Required unique text</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /tm/clients</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Add Client with existing name &quot;Acme Corp&quot;.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Acme Corp</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Error message &quot;Client 'Acme Corp' already exists&quot;.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Negative</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0055</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">T&amp;M Billing</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Hourly Rate Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Rate Card Hourly Billing Rate (&gt; $0)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Numeric &gt; 0</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /tm/rate-cards</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter hourly rate = $0 or -$50.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">0</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;Hourly rate must be greater than 0&quot;.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Boundary</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0056</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">T&amp;M Billing</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Timesheet Hours Logged Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Timesheet Daily Hours Limit (0.5 to 24.0 hrs)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Decimal 0.5 to 24.0</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /tm/timesheets</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter hours logged = 28 hrs.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">28</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;Hours logged cannot exceed 24 hours per day&quot;.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Boundary</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0057</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">T&amp;M Billing</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Invoice Currency Dropdown</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Multi-Currency Selection (USD, EUR, GBP, INR, AED)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Enum dropdown</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /tm/invoices</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Select Currency &quot;AED&quot;.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">AED</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Invoice summary converts currency symbol to &quot;AED &quot; and formats decimal totals accordingly.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0058</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">AI Security</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Liveness Score Threshold Slider</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Liveness Confidence Threshold Setting (50% to 99%)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Range slider 0.50 to 0.99</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /security/settings</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Drag slider to 95%. 2. Save.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">0.95</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Punches with liveness score &lt; 95% will be automatically rejected as spoof attempts.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0059</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">AI Security</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">App Blacklist Package Name Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Blacklist Package Name Format Validation</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Android package format (com.xxx.yyy)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /security/blacklist</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter invalid package format &quot;fake-gps&quot;.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">fake-gps</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;Package name must follow reverse-domain format (e.g. com.fake.gps)&quot;.</Data></Cell>
+    <Cell ss:StyleID="P2"><Data ss:Type="String">P2 - Medium</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Negative</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0060</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Direct Payroll</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bank Account Number Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bank Account Number Format &amp; Length</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Digits 9 to 18 chars</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /payroll-disbursement/bank-accounts</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter non-numeric chars &quot;ABC12345&quot;.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ABC12345</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;Bank Account Number must contain digits only&quot;.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Negative</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0061</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Direct Payroll</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">IFSC / IBAN / ABA Code Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Bank Routing Code Syntax Validation</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Alpha-numeric syntax</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /payroll-disbursement/bank-accounts</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter valid IFSC &quot;SBIN0001234&quot;.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">SBIN0001234</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Routing code validated successfully; bank branch auto-populated.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0062</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Direct Payroll</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EWA Requested Amount Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Earned Wage Access Available Accrued Limit Check</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Numeric &lt;= Accrued Salary</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /payroll-disbursement/ewa</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Accrued Salary = ₹15,000. Enter withdrawal request = ₹25,000.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">25000</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;Requested amount exceeds max available accrued balance of ₹15,000&quot;.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Boundary</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0063</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Field Force</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Job Priority Dropdown</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">MANAGER</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Job Order Priority Enum Options</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Required Enum</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /field-force/jobs modal</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Open Priority dropdown.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">low, normal, high, critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Contains 4 priority levels with distinct color-coding (Critical = Red border).</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0064</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Field Force</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Odometer Reading Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">MANAGER</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Fleet Odometer Non-Decreasing Check</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Integer &gt;= Current Odometer</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /field-force/fleet</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Current Odometer = 45,000 km. Enter new reading = 42,000 km.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">42000</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;New odometer reading cannot be less than current odometer (45,000 km)&quot;.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Negative</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0065</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Field Force</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Mileage Distance Km Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Mileage Claim Distance Range Check (0.1 to 1000 km)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Numeric 0.1 to 1000.0</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /field-force/mileage</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter distance = -50 km.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">-50</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;Distance travelled must be greater than 0 km&quot;.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Negative</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0066</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Global Payroll</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Country Selector Dropdown</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">15 Country Profiles Availability</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Enum select 15 codes</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /global-payroll/calculator</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Open Country dropdown.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">IN, AE, SA, QA, DE, FR, ES, GB, AU, CA, US, BR, JP, SG, KR, SE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Lists all 15 supported country rate-table profiles with flags and currency symbols.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0067</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Global Payroll</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Gross Annual Salary Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Gross Annual Salary Positive Numeric Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Numeric &gt; 0</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /global-payroll/calculator</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter Gross Annual = 0 or -10000.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">0</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Validation error &quot;Gross Annual Salary must be greater than 0&quot;.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Negative</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0068</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Global Payroll</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Basic Salary % Slider</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Basic Salary Range Slider (30% to 80%)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Range 0.30 to 0.80</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /global-payroll/calculator</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Drag slider to 50%.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">0.50</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Calculates Basic Annual = 50% of Gross Annual; updates EPF/EOSB basis in real-time.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0069</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Global Payroll</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Years of Service Input</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Years of Service Integer Input (1 to 30 years)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Integer 1 to 30</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /global-payroll/calculator</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Enter Years = 6 for UAE profile.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">6</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EOSB gratuity engine applies 21 days/year for first 5 years + 30 days/year for year 6.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0070</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Global Payroll</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">IsNational Checkbox Toggle</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">GCC National Social Security Pension Applicability Toggle</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Boolean checkbox</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /global-payroll/calculator (UAE/Saudi selected)</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Check &quot;Is Country National&quot;.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Checked = true</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Applies GPSSA 5% employee + 12.5% employer pension for UAE national; 0% if unchecked (expat).</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0071</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Global Payroll</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Net Take-Home Calculation Display</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Gross-to-Net Formula Output Accuracy</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Computed currency output</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">After calculation</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Inspect Net Annual output.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Gross - Tax - EmpSS</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Net Annual equals `Gross Annual - Income Tax - Total Employee Social Security` exactly.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0072</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Mobile Simulator</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Offline Mode Toggle</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Offline Network Simulation Switch</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Boolean switch</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /mobile/simulator</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Toggle &quot;Offline Mode&quot; ON.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Offline = true</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Mobile status changes to &quot;OFFLINE (Queuing punches locally)&quot;, banner turns orange.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0073</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Mobile Simulator</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Buffered Events Queue Counter</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">EMPLOYEE</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Offline Queue Item Counter</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Integer counter</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Offline mode enabled</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Punch In twice while offline.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">2 punches offline</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Buffer counter displays &quot;2 Pending Events Queued&quot;.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0074</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Multi-Tenancy</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">x-tenant-id API Header</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">SYSTEM</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Tenant Header Segregation Check</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Header string validation</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">API Request</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Send request with header `x-tenant-id: tenant-999`.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">tenant-999</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Returns empty array for tenant-001 data; absolute zero cross-tenant data leakage.</Data></Cell>
+    <Cell ss:StyleID="P0"><Data ss:Type="String">P0 - Critical</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Security</Data></Cell>
+   </Row>
+   <Row ss:Height="45">
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">TC-FLD-0075</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Audit Logs</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Action Filter Dropdown</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Unit/Field-Level</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">ADMIN</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Audit Event Action Classification Filter</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Enum dropdown</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">On /admin/audit-logs</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">1. Select Action &quot;PAYROLL_APPROVED&quot;.</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">PAYROLL_APPROVED</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Audit log table filters strictly for payroll approval audit entries with timestamp and user ID.</Data></Cell>
+    <Cell ss:StyleID="P1"><Data ss:Type="String">P1 - High</Data></Cell>
+    <Cell ss:StyleID="Cell"><Data ss:Type="String">Positive</Data></Cell>
+   </Row>
+  </Table>
+ </Worksheet>
+</Workbook>

@@ -1,0 +1,30 @@
+{
+  "name": "infi-timepro",
+  "version": "1.0.0",
+  "private": true,
+  "description": "InfiTimePro - Enterprise Time & Attendance SaaS Platform",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:api": "npm run dev --workspace=apps/api",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "keywords": [
+    "time-and-attendance",
+    "enterprise-saas",
+    "workforce-management",
+    "infi-timepro"
+  ],
+  "author": "InfiTimePro Enterprise Architect Team",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}
