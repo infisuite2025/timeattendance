@@ -110,9 +110,9 @@ jobs:
           path: prod-timeattendance-complete-fs.txt
           retention-days: 1
      
-      # - name: Fail workflow if Trivy found vulnerabilities
-      #   if: steps.trivy.outcome == 'failure'
-      #   run: exit 1
+      - name: Fail workflow if Trivy found vulnerabilities
+        if: steps.trivy.outcome == 'failure'
+        run: exit 1
         
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -171,14 +171,15 @@ jobs:
           path: |
              timeattendance-backend-image.txt
              timeattendance-frontend-image.txt
+          retention-days: 1
 
-      # - name: Fail workflow if Trivy found vulnerabilities
-      #   if: steps.trivy-2.outcome == 'failure'
-      #   run: exit 1
+      - name: Fail workflow if Trivy found vulnerabilities
+        if: steps.trivy-2.outcome == 'failure'
+        run: exit 1
         
-      # - name: Fail workflow if Trivy found vulnerabilities
-      #   if: steps.trivy-3.outcome == 'failure'
-      #   run: exit 1
+      - name: Fail workflow if Trivy found vulnerabilities
+        if: steps.trivy-3.outcome == 'failure'
+        run: exit 1
        
       - name: image push
         env:
