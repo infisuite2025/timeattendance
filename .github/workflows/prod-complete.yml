@@ -1,0 +1,209 @@
+name: deploying the timeattendance complete application
+on:
+  push:
+    branches: main
+    
+permissions:
+  contents: read
+  actions: write
+  
+jobs:
+  code-build-test-deploy:
+    name: checkout
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+             
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+           
+      - name: building the code
+        run: npm run build
+
+      - name: run test cases
+        run: npm run test
+        
+      - name: Set short SHA
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+        
+      - name: SonarQube Scan (backend)
+        uses: SonarSource/sonarqube-scan-action@v3
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+         projecBasetDir: apps/api/
+         args: >
+          -Dsonar.projectKey=timeattendance-backend
+          -Dsonar.projectName=timeattendance-backend
+          -Dsonar.sources=src
+          -Dsonar.exclusions="**/*.test.ts,**/*.spec.ts,**/*.d.ts,**/generated/**"
+          
+      - name: SonarQube Quality Gate (backend)
+        uses: SonarSource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 10
+        with:
+          scanMetadataReportFile: apps/api/.scannerwork/report-task.txt
+        continue-on-error: false
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: SonarQube Scan (frontend)
+        uses: SonarSource/sonarqube-scan-action@v3
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+         projecBasetDir: apps/web/
+         args: >
+          -Dsonar.projectKey=timeattendance-frontend
+          -Dsonar.projectName=timeattendance-frontend
+          -Dsonar.sources=src
+          -Dsonar.exclusions=**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/*.spec.tsx,**/*.d.ts
+          
+      - name: SonarQube Quality Gate (frontend)
+        uses: SonarSource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 10
+        with:
+          scanMetadataReportFile: apps/web/.scannerwork/report-task.txt
+        continue-on-error: false
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          
+      - name: Free GitHub runner disk space
+        run: |
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/local/share/boost
+          df -h
+
+      - name: Run Trivy FS Scan (TXT)
+        id: trivy
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: '.'
+          format: table
+          output: prod-timeattendance-complete-fs.txt
+          severity: HIGH,CRITICAL
+          scanners: vuln,secret
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Upload Trivy TXT Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-txt-report
+          path: prod-timeattendance-complete-fs.txt
+          retention-days: 1
+     
+      # - name: Fail workflow if Trivy found vulnerabilities
+      #   if: steps.trivy.outcome == 'failure'
+      #   run: exit 1
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: private
+          
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build --no-cache -f Dockerfiles/Dockerfile.api -t $ECR_REGISTRY/timeattendance-backend:${SHORT_SHA} .
+          docker build --no-cache -f Dockerfiles/Dockerfile.web -t $ECR_REGISTRY/timeattendance-frontend:${SHORT_SHA} .
+            
+      - name: Trivy image scan (backend)
+        uses: aquasecurity/trivy-action@master
+        id: trivy-2
+        continue-on-error: true
+        env:
+          IMAGE_REF: ${{ steps.login-ecr.outputs.registry }}/timeattendance-backend:${{ env.SHORT_SHA }}
+        with:
+          image-ref: ${{ env.IMAGE_REF }}
+          format: table
+          output: timeattendance-backend-image.txt
+          severity: HIGH,CRITICAL,MEDIUM
+          scanners: vuln,secret
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Trivy image scan (frontend)
+        uses: aquasecurity/trivy-action@master
+        id: trivy-3
+        continue-on-error: true
+        env:
+          IMAGE_REF: ${{ steps.login-ecr.outputs.registry }}/timeattendance-frontend:${{ env.SHORT_SHA }}
+        with:
+          image-ref: ${{ env.IMAGE_REF }}
+          format: table
+          output: timeattendance-frontend-image.txt
+          severity: HIGH,CRITICAL,MEDIUM
+          scanners: vuln,secret
+          ignore-unfixed: true
+          exit-code: "1"
+        
+      - name: Upload Trivy TXT Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-txt-report
+          path: |
+             timeattendance-backend-image.txt
+             timeattendance-frontend-image.txt
+
+      # - name: Fail workflow if Trivy found vulnerabilities
+      #   if: steps.trivy-2.outcome == 'failure'
+      #   run: exit 1
+        
+      # - name: Fail workflow if Trivy found vulnerabilities
+      #   if: steps.trivy-3.outcome == 'failure'
+      #   run: exit 1
+       
+      - name: image push
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}/timeattendance-backend:${{ env.SHORT_SHA }}
+          ECR_REGISTRY_2: ${{ steps.login-ecr.outputs.registry }}/timeattendance-frontend:${{ env.SHORT_SHA }}
+        run: |
+          docker push $ECR_REGISTRY
+          docker push $ECR_REGISTRY_2
+          
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            AWS_REGION=ap-south-1
+            ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
+
+            aws ecr get-login-password --region $AWS_REGION | \
+            docker login --username AWS --password-stdin $ECR_REGISTRY
+
+            # image tag changing
+            cd /home/ubuntu/applications/timeattendance
+            sed -E -i "s/(^[[:blank:]]*image.*timeattendance-backend:)(.*)/\1${{ env.SHORT_SHA }}/" docker-compose.yml || echo 'image tag not changed'
+            sed -E -i "s/(^[[:blank:]]*image.*timeattendance-frontend:)(.*)/\1${{ env.SHORT_SHA }}/" docker-compose.yml || echo 'image tag not changed'
+            docker compose pull || echo 'pull failed'
+            docker compose down && docker compose up -d && echo 'deployed successfully'  
