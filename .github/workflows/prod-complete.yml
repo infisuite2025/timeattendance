@@ -39,7 +39,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         with:
-         projecBasetDir: apps/api/
+         projecBaseDir: apps/api/
          args: >
           -Dsonar.projectKey=timeattendance-backend
           -Dsonar.projectName=timeattendance-backend
@@ -62,7 +62,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         with:
-         projecBasetDir: apps/web/
+         projecBaseDir: apps/web/
          args: >
           -Dsonar.projectKey=timeattendance-frontend
           -Dsonar.projectName=timeattendance-frontend
