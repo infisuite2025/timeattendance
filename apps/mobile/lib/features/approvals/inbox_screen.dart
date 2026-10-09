@@ -5,6 +5,7 @@ import '../../app/navigation.dart';
 import '../../app/theme.dart';
 import '../../core/app_state.dart';
 import '../../core/models.dart';
+import '../../shared/feedback.dart';
 import '../../shared/widgets.dart';
 import 'decision_screen.dart';
 import 'history_screen.dart';
@@ -105,7 +106,7 @@ class _ApprovalCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(item.id, style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.indigo, fontSize: 12)),
+              Text(item.id, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.indigo, fontSize: 12)),
               const SizedBox(width: 8),
               StatusPill(label: item.priority, color: item.priority == 'High' ? AppColors.rose : AppColors.slate500),
               const Spacer(),
@@ -113,7 +114,7 @@ class _ApprovalCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          Text(item.employee, style: const TextStyle(fontWeight: FontWeight.w800)),
+          Text(item.employee, style: const TextStyle(fontWeight: FontWeight.w600)),
           Text('${item.kind} · ${item.summary}', style: const TextStyle(fontSize: 13, color: AppColors.slate700)),
           const SizedBox(height: 10),
           Row(
@@ -128,7 +129,22 @@ class _ApprovalCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              Expanded(child: FilledButton(onPressed: () => _quick(context, 'Approved'), child: const Text('Approve'))),
+              Expanded(
+                child: FilledButton(
+                  onPressed: () async {
+                    final confirmed = await showAppConfirm(
+                      context,
+                      title: 'Approve request?',
+                      message: 'Approve ${item.id} for ${item.employee}? This records an approval.',
+                      confirmLabel: 'Approve',
+                      icon: Icons.check_circle_outline,
+                    );
+                    if (!confirmed || !context.mounted) return;
+                    _quick(context, 'Approved');
+                  },
+                  child: const Text('Approve'),
+                ),
+              ),
             ],
           ),
         ],
@@ -142,12 +158,20 @@ class _ApprovalCard extends StatelessWidget {
       final controller = TextEditingController();
       final ok = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Reject request'),
-          content: TextField(controller: controller, maxLength: 500, decoration: const InputDecoration(labelText: 'Comment')),
+        builder: (context) => AppDialog(
+          title: 'Reject request?',
+          message: 'A comment is required before this request is rejected.',
+          icon: Icons.cancel_outlined,
+          accent: AppColors.rose,
+          alignCenter: false,
+          body: TextField(controller: controller, maxLength: 500, decoration: const InputDecoration(labelText: 'Comment')),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.pop(context, controller.text.trim().isNotEmpty), child: const Text('Reject')),
+            OutlinedButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: AppColors.rose),
+              onPressed: () => Navigator.pop(context, controller.text.trim().isNotEmpty),
+              child: const Text('Reject'),
+            ),
           ],
         ),
       );
@@ -157,7 +181,7 @@ class _ApprovalCard extends StatelessWidget {
     }
     if (!context.mounted) return;
     context.read<AppState>().decideApproval(item.id, decision, comment);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${item.id} marked $decision.')));
+    showAppToast(context, '${item.id} marked $decision.', success: true);
   }
 }
 

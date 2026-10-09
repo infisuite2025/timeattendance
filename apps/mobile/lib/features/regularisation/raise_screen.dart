@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../app/theme.dart';
 import '../../core/api_client.dart';
 import '../../core/app_state.dart';
+import '../../shared/feedback.dart';
 import '../../shared/widgets.dart';
 
 class RaiseRegularisationScreen extends StatefulWidget {
@@ -68,8 +69,8 @@ class _RaiseRegularisationScreenState extends State<RaiseRegularisationScreen> {
   }
 
   Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
+    final picked = await showAppDatePicker(
+      context,
       initialDate: _date,
       firstDate: DateTime(2024, 1, 1),
       lastDate: DateTime(2024, 12, 31),
@@ -78,7 +79,7 @@ class _RaiseRegularisationScreenState extends State<RaiseRegularisationScreen> {
   }
 
   Future<void> _pickTime(bool actual) async {
-    final picked = await showTimePicker(context: context, initialTime: actual ? _actual : _corrected);
+    final picked = await showAppTimePicker(context, initialTime: actual ? _actual : _corrected);
     if (picked == null) return;
     setState(() {
       if (actual) {
@@ -91,6 +92,16 @@ class _RaiseRegularisationScreenState extends State<RaiseRegularisationScreen> {
 
   Future<void> _save(String status) async {
     if (!_formKey.currentState!.validate()) return;
+    if (status == 'Pending') {
+      final confirmed = await showAppConfirm(
+        context,
+        title: 'Submit request?',
+        message: 'This sends the regularisation to the workspace for approval.',
+        confirmLabel: 'Submit',
+        icon: Icons.send_rounded,
+      );
+      if (!confirmed || !mounted) return;
+    }
     try {
       await context.read<AppState>().saveRequest(
             id: _editing ? widget.requestId : null,
@@ -105,13 +116,15 @@ class _RaiseRegularisationScreenState extends State<RaiseRegularisationScreen> {
             attachment: _attachment,
           );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(status == 'Draft' ? 'Draft saved on this device.' : 'Request sent to the workspace.')),
+      showAppToast(
+        context,
+        status == 'Draft' ? 'Draft saved on this device.' : 'Request sent to the workspace.',
+        success: true,
       );
       Navigator.pop(context);
     } on ApiException catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+      showAppToast(context, error.message, error: true);
     }
   }
 
@@ -133,7 +146,7 @@ class _RaiseRegularisationScreenState extends State<RaiseRegularisationScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text('Request information', style: TextStyle(fontWeight: FontWeight.w800)),
+            const Text('Request information', style: TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             AppDropdown<String>(
               value: _type,
@@ -156,7 +169,7 @@ class _RaiseRegularisationScreenState extends State<RaiseRegularisationScreen> {
               onChanged: (value) => setState(() => _issue = value ?? _issue),
             ),
             const SizedBox(height: 16),
-            const Text('Time details', style: TextStyle(fontWeight: FontWeight.w800)),
+            const Text('Time details', style: TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -166,7 +179,7 @@ class _RaiseRegularisationScreenState extends State<RaiseRegularisationScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            const Text('Work location', style: TextStyle(fontWeight: FontWeight.w800)),
+            const Text('Work location', style: TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             AppDropdown<String>(
               value: _location,
@@ -175,7 +188,7 @@ class _RaiseRegularisationScreenState extends State<RaiseRegularisationScreen> {
               onChanged: (value) => setState(() => _location = value ?? _location),
             ),
             const SizedBox(height: 16),
-            const Text('Additional information', style: TextStyle(fontWeight: FontWeight.w800)),
+            const Text('Additional information', style: TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             TextFormField(
               controller: _reason,
@@ -210,7 +223,18 @@ class _RaiseRegularisationScreenState extends State<RaiseRegularisationScreen> {
                         ListTile(
                           leading: const Icon(Icons.close),
                           title: const Text('Remove attachment'),
-                          onTap: () => Navigator.pop(context, ''),
+                          onTap: () async {
+                            final confirmed = await showAppConfirm(
+                              context,
+                              title: 'Remove attachment?',
+                              message: 'This clears the file attached to this request.',
+                              confirmLabel: 'Remove',
+                              danger: true,
+                              icon: Icons.delete_outline,
+                            );
+                            if (!confirmed || !context.mounted) return;
+                            Navigator.pop(context, '');
+                          },
                         ),
                       ],
                     ),
@@ -224,7 +248,7 @@ class _RaiseRegularisationScreenState extends State<RaiseRegularisationScreen> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.slate200),
+                  border: Border.all(color: AppColors.line),
                   color: AppColors.slate50,
                 ),
                 child: Text(

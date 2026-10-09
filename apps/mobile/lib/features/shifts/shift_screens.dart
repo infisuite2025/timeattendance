@@ -6,6 +6,7 @@ import '../../app/theme.dart';
 import '../../core/app_state.dart';
 import '../../core/demo_data.dart';
 import '../../core/models.dart';
+import '../../shared/feedback.dart';
 import '../../shared/widgets.dart';
 
 class ShiftLibraryScreen extends StatelessWidget {
@@ -32,7 +33,7 @@ class ShiftLibraryScreen extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Expanded(child: Text(shift.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16))),
+                      Expanded(child: Text(shift.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16))),
                       StatusPill(label: shift.code, color: AppColors.primary, soft: const Color(0xFFEFF6FF)),
                     ],
                   ),
@@ -99,7 +100,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
 
   void _save() {
     if (_name.text.trim().isEmpty || _code.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Name and code are required.')));
+      showAppToast(context, 'Name and code are required.', error: true);
       setState(() => _tab = 0);
       return;
     }
@@ -117,7 +118,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
             duration: 'See timings',
           ),
         );
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Shift saved on this device.')));
+    showAppToast(context, 'Shift saved on this device.', success: true);
     Navigator.pop(context);
   }
 
@@ -168,7 +169,7 @@ class _CreateShiftScreenState extends State<CreateShiftScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(_name.text.isEmpty ? 'Untitled shift' : _name.text, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+                        Text(_name.text.isEmpty ? 'Untitled shift' : _name.text, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18)),
                         const SizedBox(height: 6),
                         Text('${_code.text.isEmpty ? '—' : _code.text.toUpperCase()} · ${_start.text} – ${_end.text}'),
                         Text('Break ${_break.text}'),
@@ -224,7 +225,7 @@ class ShiftGroupsScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(group.name, style: const TextStyle(fontWeight: FontWeight.w800)),
+                          Text(group.name, style: const TextStyle(fontWeight: FontWeight.w600)),
                           Text('${group.employees} people · ${group.pattern}', style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
                           Text(group.summary, style: const TextStyle(fontSize: 13)),
                         ],
@@ -272,7 +273,7 @@ class ShiftSwapsScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Expanded(child: Text(swap.id, style: const TextStyle(fontWeight: FontWeight.w800))),
+                        Expanded(child: Text(swap.id, style: const TextStyle(fontWeight: FontWeight.w600))),
                         StatusPill(label: swap.status, color: colorForRequestStatus(swap.status)),
                       ],
                     ),
@@ -307,7 +308,16 @@ class ShiftSwapsScreen extends StatelessWidget {
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(foregroundColor: AppColors.rose),
                   onPressed: swap.status == 'Pending'
-                      ? () {
+                      ? () async {
+                          final confirmed = await showAppConfirm(
+                            context,
+                            title: 'Reject swap?',
+                            message: 'Reject ${swap.id}? This swap will not be applied.',
+                            confirmLabel: 'Reject',
+                            danger: true,
+                            icon: Icons.cancel_outlined,
+                          );
+                          if (!confirmed || !context.mounted) return;
                           context.read<AppState>().decideSwap(swap.id, false);
                           Navigator.pop(context);
                         }
@@ -319,7 +329,15 @@ class ShiftSwapsScreen extends StatelessWidget {
               Expanded(
                 child: FilledButton(
                   onPressed: swap.status == 'Pending'
-                      ? () {
+                      ? () async {
+                          final confirmed = await showAppConfirm(
+                            context,
+                            title: 'Approve swap?',
+                            message: 'Approve ${swap.id} between ${swap.fromName} and ${swap.toName}?',
+                            confirmLabel: 'Approve',
+                            icon: Icons.check_circle_outline,
+                          );
+                          if (!confirmed || !context.mounted) return;
                           context.read<AppState>().decideSwap(swap.id, true);
                           Navigator.pop(context);
                         }
@@ -389,7 +407,7 @@ class _ShiftAssignmentScreenState extends State<ShiftAssignmentScreen> {
           ),
           Material(
             elevation: 8,
-            color: AppColors.white,
+            color: AppColors.surface,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
               child: Column(
@@ -424,21 +442,31 @@ class _ShiftAssignmentScreenState extends State<ShiftAssignmentScreen> {
                   FilledButton(
                     onPressed: _selected.isEmpty
                         ? null
-                        : () {
+                        : () async {
                             if (_to.isBefore(_from)) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Effective to cannot be before effective from.')));
+                              showAppToast(context, 'Effective to cannot be before effective from.', error: true);
                               return;
                             }
                             final targets = _replace
                                 ? _selected.toList()
                                 : _selected.where((id) => !state.assignments.containsKey(id)).toList();
                             if (targets.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Everyone selected already has a shift. Turn on replace to overwrite it.')));
+                              showAppToast(context, 'Everyone selected already has a shift. Turn on replace to overwrite it.', error: true);
                               return;
                             }
+                            final confirmed = await showAppConfirm(
+                              context,
+                              title: 'Assign this shift?',
+                              message: '$selectedShift will be assigned to ${targets.length} ${targets.length == 1 ? 'person' : 'people'}.',
+                              confirmLabel: 'Assign',
+                              icon: Icons.event_available_outlined,
+                            );
+                            if (!confirmed || !context.mounted) return;
                             context.read<AppState>().assignShift(employeeIds: targets, shiftName: selectedShift);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('$selectedShift assigned to ${targets.length} people${_notify ? '. They will see it on this device.' : '.'}')),
+                            showAppToast(
+                              context,
+                              '$selectedShift assigned to ${targets.length} people${_notify ? '. They will see it on this device.' : '.'}',
+                              success: true,
                             );
                             Navigator.pop(context);
                           },
@@ -454,8 +482,8 @@ class _ShiftAssignmentScreenState extends State<ShiftAssignmentScreen> {
   }
 
   Future<void> _pick(bool from) async {
-    final picked = await showDatePicker(
-      context: context,
+    final picked = await showAppDatePicker(
+      context,
       initialDate: from ? _from : _to,
       firstDate: DateTime(2024, 9, 1),
       lastDate: DateTime(2024, 9, 30),
@@ -501,7 +529,7 @@ class TeamScheduleScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(person.name, style: const TextStyle(fontWeight: FontWeight.w800)),
+                    Text(person.name, style: const TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -522,7 +550,7 @@ class TeamScheduleScreen extends StatelessWidget {
                                     ),
                                     child: Text(
                                       _code(state.shiftFor(person)),
-                                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.primary),
+                                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary),
                                     ),
                                   ),
                                 ],
@@ -541,11 +569,37 @@ class TeamScheduleScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          OutlinedButton(onPressed: () => context.read<AppState>().copyLastWeek(), child: const Text('Copy Last Week')),
+          OutlinedButton(
+            onPressed: () async {
+              final confirmed = await showAppConfirm(
+                context,
+                title: 'Copy last week?',
+                message: 'This replaces the current roster with last week’s assignments.',
+                confirmLabel: 'Copy week',
+                icon: Icons.content_copy_rounded,
+              );
+              if (!confirmed || !context.mounted) return;
+              context.read<AppState>().copyLastWeek();
+            },
+            child: const Text('Copy Last Week'),
+          ),
           const SizedBox(height: 8),
           OutlinedButton(onPressed: () => openPage(context, const ShiftAssignmentScreen()), child: const Text('Assign Shift')),
           const SizedBox(height: 8),
-          FilledButton(onPressed: () => context.read<AppState>().publishSchedule(), child: const Text('Publish Schedule')),
+          FilledButton(
+            onPressed: () async {
+              final confirmed = await showAppConfirm(
+                context,
+                title: 'Publish schedule?',
+                message: 'Publishing makes this week visible to the team.',
+                confirmLabel: 'Publish',
+                icon: Icons.publish_rounded,
+              );
+              if (!confirmed || !context.mounted) return;
+              context.read<AppState>().publishSchedule();
+            },
+            child: const Text('Publish Schedule'),
+          ),
         ],
       ),
     );

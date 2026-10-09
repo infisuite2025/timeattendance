@@ -34,7 +34,7 @@ class DayDetailScreen extends StatelessWidget {
                 onPressed: day > 1 ? () => _go(context, day - 1) : null,
                 icon: const Icon(Icons.chevron_left),
               ),
-              Text(prettyDay(day), style: const TextStyle(fontWeight: FontWeight.w800)),
+              Text(prettyDay(day), style: const TextStyle(fontWeight: FontWeight.w600)),
               IconButton(
                 onPressed: day < 30 ? () => _go(context, day + 1) : null,
                 icon: const Icon(Icons.chevron_right),
@@ -50,7 +50,7 @@ class DayDetailScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(DemoData.currentUserName, style: TextStyle(fontWeight: FontWeight.w800)),
+                      Text(DemoData.currentUserName, style: TextStyle(fontWeight: FontWeight.w600)),
                       Text('${DemoData.currentUserCode} · HR Bangalore', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
                     ],
                   ),
@@ -64,7 +64,7 @@ class DayDetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Shift information', style: TextStyle(fontWeight: FontWeight.w800)),
+                const Text('Shift information', style: TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 6),
                 Text(record.shift, style: const TextStyle(fontSize: 13)),
                 const Text('Break 01h 00m · Late grace 15 mins · Early exit grace 15 mins', style: TextStyle(fontSize: 12, color: AppColors.slate500)),

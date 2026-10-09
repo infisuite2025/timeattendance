@@ -34,6 +34,7 @@ class AppState extends ChangeNotifier {
   bool actionBusy = false;
 
   bool get isBusy => syncing || locating || actionBusy;
+  String get displayName => '$firstName $lastName'.trim();
   String get initials {
     final parts = displayName.split(RegExp(r'\s+')).where((part) => part.isNotEmpty).toList();
     if (parts.isEmpty) return 'NA';

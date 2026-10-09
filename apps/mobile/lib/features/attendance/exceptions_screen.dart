@@ -5,6 +5,7 @@ import '../../app/navigation.dart';
 import '../../app/theme.dart';
 import '../../core/app_state.dart';
 import '../../core/models.dart';
+import '../../shared/feedback.dart';
 import '../../shared/widgets.dart';
 import '../regularisation/raise_screen.dart';
 
@@ -48,7 +49,7 @@ class _ExceptionsScreenState extends State<ExceptionsScreen> {
             color: AppColors.amberSoft,
             child: Text(
               '$openCount exceptions require action today',
-              style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.amber),
+              style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.amber),
             ),
           ),
           const SizedBox(height: 12),
@@ -144,7 +145,7 @@ class _ExceptionCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text(item.employee, style: const TextStyle(fontWeight: FontWeight.w800))),
+              Expanded(child: Text(item.employee, style: const TextStyle(fontWeight: FontWeight.w600))),
               StatusPill(label: item.priority, color: color),
             ],
           ),
@@ -188,7 +189,15 @@ class _ExceptionCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           OutlinedButton(
-            onPressed: () {
+            onPressed: () async {
+              final confirmed = await showAppConfirm(
+                context,
+                title: 'Mark as reviewed?',
+                message: 'This closes ${item.code} without raising a regularisation.',
+                confirmLabel: 'Mark reviewed',
+                icon: Icons.task_alt_rounded,
+              );
+              if (!confirmed || !context.mounted) return;
               context.read<AppState>().reviewException(item.id);
               Navigator.pop(context);
             },

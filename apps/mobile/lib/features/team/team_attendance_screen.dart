@@ -147,7 +147,7 @@ class _TeamCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(person.name, style: const TextStyle(fontWeight: FontWeight.w800)),
+                Text(person.name, style: const TextStyle(fontWeight: FontWeight.w600)),
                 Text('${person.code} · ${person.department}', style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
                 Text('$shift · ${person.checkIn ?? 'No check-in'}', style: const TextStyle(fontSize: 12)),
                 if (person.delay != null)

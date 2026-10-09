@@ -56,7 +56,7 @@ class _RegularisationHistoryScreenState extends State<RegularisationHistoryScree
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Request trend', style: TextStyle(fontWeight: FontWeight.w800)),
+                Text('Request trend', style: TextStyle(fontWeight: FontWeight.w600)),
                 SizedBox(height: 4),
                 Text('Last 6 months', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
                 SizedBox(height: 12),
@@ -95,7 +95,7 @@ class _RegularisationHistoryScreenState extends State<RegularisationHistoryScree
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(request.dateLabel, style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
-                          Text(request.type, style: const TextStyle(fontWeight: FontWeight.w800)),
+                          Text(request.type, style: const TextStyle(fontWeight: FontWeight.w600)),
                           Text(request.reason, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
                           const Text('Approver: Naresh Andukoori', style: TextStyle(fontSize: 11, color: AppColors.slate400)),
                         ],

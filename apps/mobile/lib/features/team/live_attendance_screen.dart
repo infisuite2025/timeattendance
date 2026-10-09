@@ -55,7 +55,7 @@ class _LiveAttendanceScreenState extends State<LiveAttendanceScreen> {
         if (!widget.embedded)
           const Padding(
             padding: EdgeInsets.only(bottom: 8),
-            child: Text('Live Attendance', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+            child: Text('Live Attendance', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
           ),
         const Text("Who's in, who's out — a real-time view of your organisation.", style: TextStyle(color: AppColors.slate500, fontSize: 13)),
         const SizedBox(height: 4),
@@ -142,7 +142,7 @@ class _PersonRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(person.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+                Text(person.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                 Text(
                   '${person.checkIn ?? '—'} · ${person.location}',
                   style: const TextStyle(fontSize: 12, color: AppColors.slate500),

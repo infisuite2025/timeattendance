@@ -53,7 +53,7 @@ class _ApprovalHistoryScreenState extends State<ApprovalHistoryScreen> {
                     children: [
                       Row(
                         children: [
-                          Expanded(child: Text('${item.id} · ${item.kind}', style: const TextStyle(fontWeight: FontWeight.w800))),
+                          Expanded(child: Text('${item.id} · ${item.kind}', style: const TextStyle(fontWeight: FontWeight.w600))),
                           StatusPill(label: item.status, color: colorForRequestStatus(item.status)),
                         ],
                       ),

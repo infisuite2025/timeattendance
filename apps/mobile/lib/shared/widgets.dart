@@ -18,9 +18,10 @@ class AppCard extends StatelessWidget {
       width: double.infinity,
       padding: padding,
       decoration: BoxDecoration(
-        color: color ?? AppColors.white,
+        color: color ?? AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.slate200),
+        border: Border.all(color: AppColors.line),
+        boxShadow: const [BoxShadow(color: Color(0x0A0F172A), blurRadius: 16, offset: Offset(0, 4))],
       ),
       child: child,
     );
@@ -77,7 +78,7 @@ class MetricTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 16),
+            style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 16),
           ),
           const SizedBox(height: 4),
           Text(
@@ -162,7 +163,7 @@ class AppDropdown<T> extends StatelessWidget {
         final picked = await showModalBottomSheet<T>(
           context: context,
           isScrollControlled: true,
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surface,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
           builder: (context) {
             final bottom = MediaQuery.viewPaddingOf(context).bottom;
@@ -174,7 +175,7 @@ class AppDropdown<T> extends StatelessWidget {
                   children: [
                     Container(width: 36, height: 4, decoration: BoxDecoration(color: AppColors.slate200, borderRadius: BorderRadius.circular(4))),
                     const SizedBox(height: 12),
-                    Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                    Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     Flexible(
                       child: ListView(
@@ -237,7 +238,7 @@ class AvatarBadge extends StatelessWidget {
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(color: const Color(0xFFDBEAFE), borderRadius: BorderRadius.circular(size)),
-      child: Text(initials, style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w800, fontSize: size * 0.34)),
+      child: Text(initials, style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: size * 0.34)),
     );
   }
 }
@@ -305,7 +306,7 @@ class DonutChart extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(center, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.slate900)),
+              Text(center, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppColors.slate900)),
               Text(caption, style: const TextStyle(fontSize: 10, color: AppColors.slate500)),
             ],
           ),
@@ -387,7 +388,7 @@ class PageIntro extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.slate900, letterSpacing: -0.3)),
+              Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.slate900, letterSpacing: -0.3)),
               if (subtitle != null) ...[
                 const SizedBox(height: 4),
                 Text(subtitle!, style: const TextStyle(fontSize: 13, height: 1.35, color: AppColors.slate500)),
@@ -492,7 +493,7 @@ class AppTabBar extends StatelessWidget {
         itemBuilder: (context, i) {
           final selected = i == index;
           return Material(
-            color: selected ? const Color(0xFFDBEAFE) : Colors.white,
+            color: selected ? const Color(0xFFDBEAFE) : AppColors.surface,
             borderRadius: BorderRadius.circular(12),
             child: InkWell(
               onTap: () => onChanged(i),
@@ -502,7 +503,7 @@ class AppTabBar extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: selected ? AppColors.primary : AppColors.slate200),
+                  border: Border.all(color: selected ? AppColors.primary : AppColors.line),
                 ),
                 child: Text(
                   labels[i],
@@ -523,7 +524,7 @@ void showInfoSheet(BuildContext context, {required String title, required Widget
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.white,
+    backgroundColor: AppColors.surface,
     shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
     builder: (context) {
       final bottom = MediaQuery.viewPaddingOf(context).bottom + MediaQuery.viewInsetsOf(context).bottom;
@@ -537,7 +538,7 @@ void showInfoSheet(BuildContext context, {required String title, required Widget
             children: [
               Center(child: Container(width: 36, height: 4, decoration: BoxDecoration(color: AppColors.slate200, borderRadius: BorderRadius.circular(4)))),
               const SizedBox(height: 14),
-              Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
               const SizedBox(height: 10),
               const Divider(height: 1, color: AppColors.slate200),
               const SizedBox(height: 12),

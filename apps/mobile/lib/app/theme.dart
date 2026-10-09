@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
   static const primary = Color(0xFF2563EB);
@@ -17,9 +18,12 @@ class AppColors {
   static const slate700 = Color(0xFF334155);
   static const slate500 = Color(0xFF64748B);
   static const slate400 = Color(0xFF94A3B8);
-  static const slate200 = Color(0xFFE2E8F0);
+  static const slate200 = Color(0xFFD3DBE6);
   static const slate100 = Color(0xFFF1F5F9);
   static const slate50 = Color(0xFFF8FAFC);
+  static const canvas = Color(0xFFE8ECF1);
+  static const surface = Color(0xFFF3F4F6);
+  static const line = Color(0xFFD5DCE4);
   static const white = Colors.white;
 
   static const present = Color(0xFF059669);
@@ -34,39 +38,56 @@ class AppColors {
 }
 
 ThemeData buildAppTheme() {
+  final textTheme = GoogleFonts.sourceSans3TextTheme().apply(
+    bodyColor: AppColors.slate900,
+    displayColor: AppColors.slate900,
+  );
   final scheme = ColorScheme.fromSeed(
     seedColor: AppColors.primary,
     primary: AppColors.primary,
     secondary: AppColors.emerald,
-    surface: AppColors.white,
+    surface: AppColors.surface,
   );
 
   return ThemeData(
     useMaterial3: true,
+    fontFamily: GoogleFonts.sourceSans3().fontFamily,
+    textTheme: textTheme,
+    primaryTextTheme: textTheme,
     colorScheme: scheme,
-    scaffoldBackgroundColor: const Color(0xFFE7EEF6),
-    dividerColor: AppColors.slate200,
-    appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.white,
+    scaffoldBackgroundColor: AppColors.canvas,
+    dividerColor: AppColors.line,
+    appBarTheme: AppBarTheme(
+      backgroundColor: AppColors.surface,
       foregroundColor: AppColors.slate900,
+      surfaceTintColor: Colors.transparent,
       elevation: 0,
-      scrolledUnderElevation: 0.5,
+      scrolledUnderElevation: 0,
       centerTitle: false,
-      titleTextStyle: TextStyle(
+      toolbarHeight: 64,
+      titleSpacing: 16,
+      iconTheme: const IconThemeData(color: AppColors.slate700, size: 22),
+      actionsIconTheme: const IconThemeData(color: AppColors.slate700, size: 22),
+      shape: const Border(bottom: BorderSide(color: AppColors.line)),
+      titleTextStyle: GoogleFonts.sourceSans3(
         color: AppColors.slate900,
         fontSize: 18,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
         letterSpacing: -0.2,
+        height: 1.2,
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.surface,
+      elevation: 8,
+      shadowColor: const Color(0x140F172A),
+      surfaceTintColor: Colors.transparent,
       indicatorColor: const Color(0xFFDBEAFE),
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         final selected = states.contains(WidgetState.selected);
         return TextStyle(
           fontSize: 11,
-          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
           color: selected ? AppColors.primary : AppColors.slate500,
         );
       }),
@@ -80,24 +101,24 @@ ThemeData buildAppTheme() {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: AppColors.slate50,
+      fillColor: AppColors.canvas,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      hintStyle: const TextStyle(color: AppColors.slate400, fontSize: 14),
-      labelStyle: const TextStyle(color: AppColors.slate700, fontWeight: FontWeight.w600, fontSize: 13),
+      hintStyle: GoogleFonts.sourceSans3(color: AppColors.slate400, fontSize: 14, fontWeight: FontWeight.w400),
+      labelStyle: GoogleFonts.sourceSans3(color: AppColors.slate700, fontWeight: FontWeight.w600, fontSize: 13),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.slate200),
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: AppColors.line),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.slate200),
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: AppColors.line),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         borderSide: const BorderSide(color: AppColors.primary, width: 1.4),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         borderSide: const BorderSide(color: AppColors.rose),
       ),
     ),
@@ -106,26 +127,59 @@ ThemeData buildAppTheme() {
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
         minimumSize: const Size.fromHeight(48),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        textStyle: GoogleFonts.sourceSans3(fontWeight: FontWeight.w600, fontSize: 15),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.slate900,
         minimumSize: const Size.fromHeight(48),
-        side: const BorderSide(color: AppColors.slate200),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+        side: const BorderSide(color: AppColors.line),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        textStyle: GoogleFonts.sourceSans3(fontWeight: FontWeight.w600, fontSize: 15),
       ),
     ),
-    dialogTheme: const DialogThemeData(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(24))),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.primary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        textStyle: GoogleFonts.sourceSans3(fontWeight: FontWeight.w600, fontSize: 15),
+      ),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: AppColors.surface,
+      surfaceTintColor: Colors.transparent,
+      elevation: 8,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+      titleTextStyle: GoogleFonts.sourceSans3(color: AppColors.slate900, fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: -0.2),
+      contentTextStyle: GoogleFonts.sourceSans3(color: AppColors.slate500, fontSize: 14, height: 1.45, fontWeight: FontWeight.w400),
+    ),
+    datePickerTheme: DatePickerThemeData(
+      backgroundColor: AppColors.surface,
+      surfaceTintColor: Colors.transparent,
+      headerBackgroundColor: AppColors.surface,
+      headerForegroundColor: AppColors.slate900,
+      weekdayStyle: GoogleFonts.sourceSans3(color: AppColors.slate500, fontWeight: FontWeight.w600, fontSize: 12),
+      dayStyle: GoogleFonts.sourceSans3(color: AppColors.slate900, fontWeight: FontWeight.w500),
+      todayForegroundColor: const WidgetStatePropertyAll(AppColors.primary),
+      todayBackgroundColor: const WidgetStatePropertyAll(Color(0xFFEFF6FF)),
+      dayForegroundColor: const WidgetStatePropertyAll(AppColors.slate900),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+    ),
+    timePickerTheme: const TimePickerThemeData(
+      backgroundColor: AppColors.surface,
+      hourMinuteColor: AppColors.slate50,
+      hourMinuteTextColor: AppColors.slate900,
+      dayPeriodColor: AppColors.slate100,
+      dayPeriodTextColor: AppColors.slate900,
+      dialHandColor: AppColors.primary,
+      dialBackgroundColor: AppColors.slate50,
+      entryModeIconColor: AppColors.slate700,
     ),
     bottomSheetTheme: const BottomSheetThemeData(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      backgroundColor: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
     ),
   );
 }

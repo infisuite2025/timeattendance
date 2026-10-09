@@ -5,6 +5,7 @@ import '../../app/theme.dart';
 import '../../core/app_state.dart';
 import '../../core/demo_data.dart';
 import '../../app/navigation.dart';
+import '../../shared/feedback.dart';
 import '../../shared/widgets.dart';
 import '../approvals/history_screen.dart';
 import '../approvals/inbox_screen.dart';
@@ -34,7 +35,7 @@ class MoreScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(state.displayName, style: const TextStyle(fontWeight: FontWeight.w800)),
+                      Text(state.displayName, style: const TextStyle(fontWeight: FontWeight.w600)),
                       Text(
                         '${DemoData.currentUserCode} · ${state.organization}',
                         style: const TextStyle(fontSize: 12, color: AppColors.slate500),
@@ -66,7 +67,18 @@ class MoreScreen extends StatelessWidget {
           ]),
           const SizedBox(height: 16),
           OutlinedButton.icon(
-            onPressed: () => context.read<AppState>().signOut(),
+            onPressed: () async {
+              final confirmed = await showAppConfirm(
+                context,
+                title: 'Sign out?',
+                message: 'Are you sure you want to sign out? You will need to sign in again to open this workspace.',
+                confirmLabel: 'Sign out',
+                danger: true,
+                icon: Icons.logout_rounded,
+              );
+              if (!confirmed || !context.mounted) return;
+              context.read<AppState>().signOut();
+            },
             icon: const Icon(Icons.logout),
             label: const Text('Sign out'),
           ),

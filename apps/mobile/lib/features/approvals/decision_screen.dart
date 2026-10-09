@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../app/theme.dart';
 import '../../core/app_state.dart';
 import '../../core/models.dart';
+import '../../shared/feedback.dart';
 import '../../shared/widgets.dart';
 
 class ApprovalDecisionScreen extends StatefulWidget {
@@ -42,7 +43,7 @@ class _ApprovalDecisionScreenState extends State<ApprovalDecisionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.employee, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                Text(item.employee, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
                 Text('${item.employeeCode} · ${item.department}', style: const TextStyle(color: AppColors.slate500, fontSize: 12)),
                 const SizedBox(height: 8),
                 Text(item.summary, style: const TextStyle(height: 1.35)),
@@ -68,7 +69,7 @@ class _ApprovalDecisionScreenState extends State<ApprovalDecisionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Approval trail', style: TextStyle(fontWeight: FontWeight.w800)),
+                Text('Approval trail', style: TextStyle(fontWeight: FontWeight.w600)),
                 SizedBox(height: 6),
                 Text('Submitted by the employee'),
                 Text('Waiting on you'),
@@ -120,14 +121,29 @@ class _ApprovalDecisionScreenState extends State<ApprovalDecisionScreen> {
     }
   }
 
-  void _decide(BuildContext context, ApprovalItem item, String decision) {
+  Future<void> _decide(BuildContext context, ApprovalItem item, String decision) async {
     final comment = _comment.text.trim();
     if (decision != 'Approved' && comment.length < 3) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Add a short comment before sending this back or rejecting it.')));
+      showAppToast(context, 'Add a short comment before sending this back or rejecting it.', error: true);
       return;
     }
+    final rejecting = decision == 'Rejected';
+    final sendingBack = decision == 'Sent Back';
+    final confirmed = await showAppConfirm(
+      context,
+      title: rejecting ? 'Reject this request?' : sendingBack ? 'Send this back?' : 'Approve this request?',
+      message: rejecting
+          ? 'This marks ${item.id} as rejected.'
+          : sendingBack
+              ? 'This sends ${item.id} back to the requester.'
+              : 'This records an approval for ${item.id}.',
+      confirmLabel: rejecting ? 'Reject' : sendingBack ? 'Send back' : 'Approve',
+      danger: rejecting,
+      icon: rejecting ? Icons.cancel_outlined : sendingBack ? Icons.undo_rounded : Icons.check_circle_outline,
+    );
+    if (!confirmed || !context.mounted) return;
     context.read<AppState>().decideApproval(item.id, decision, comment.isEmpty ? 'Approved.' : comment);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${item.id} marked $decision.')));
+    showAppToast(context, '${item.id} marked $decision.', success: true);
     Navigator.pop(context);
   }
 }
@@ -142,7 +158,7 @@ class _Snapshot extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Original vs requested', style: TextStyle(fontWeight: FontWeight.w800)),
+          const Text('Original vs requested', style: TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           const Row(
             children: [
@@ -177,7 +193,7 @@ class _SwapCompare extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Before and after', style: TextStyle(fontWeight: FontWeight.w800)),
+          const Text('Before and after', style: TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Text('Requester: ${item.employee}'),
           for (final entry in item.original.entries) Text('Before ${entry.key}: ${entry.value}'),

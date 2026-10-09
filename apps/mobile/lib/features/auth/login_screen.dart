@@ -5,6 +5,7 @@ import '../../app/theme.dart';
 import '../../core/api_client.dart';
 import '../../core/app_state.dart';
 import '../../core/demo_data.dart';
+import '../../shared/feedback.dart';
 import '../../shared/widgets.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -42,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
           );
     } on ApiException catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message)));
+        showAppToast(context, error.message, error: true);
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -54,32 +55,22 @@ class _LoginScreenState extends State<LoginScreen> {
     await showDialog<void>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Forgot password?'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Password resets are sent by your workspace administrator. This app does not email a reset link on its own.',
-                style: TextStyle(fontSize: 14, height: 1.4),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: email,
-                decoration: const InputDecoration(labelText: 'Work email'),
-                keyboardType: TextInputType.emailAddress,
-              ),
-            ],
+        return AppDialog(
+          title: 'Forgot password?',
+          message: 'Password resets are sent by your workspace administrator. This app does not email a reset link on its own.',
+          icon: Icons.lock_reset_rounded,
+          alignCenter: false,
+          body: TextField(
+            controller: email,
+            decoration: const InputDecoration(labelText: 'Work email'),
+            keyboardType: TextInputType.emailAddress,
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+            OutlinedButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
             FilledButton(
               onPressed: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(this.context).showSnackBar(
-                  const SnackBar(content: Text('Ask your administrator to reset this workspace password.')),
-                );
+                showAppToast(this.context, 'Ask your administrator to reset this workspace password.', warning: true);
               },
               child: const Text('Request reset'),
             ),
@@ -91,18 +82,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _sso() async {
-    final proceed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Microsoft SSO'),
-        content: const Text(
+    final proceed = await showAppConfirm(
+      context,
+      title: 'Continue with a local session?',
+      message:
           'Microsoft sign-in is handled by the workspace server. This build keeps the session on the device, so you can continue with a local demo session for the selected organization.',
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Continue')),
-        ],
-      ),
+      confirmLabel: 'Continue',
+      icon: Icons.window_outlined,
     );
     if (proceed == true && mounted) {
       await context.read<AppState>().signIn(
@@ -117,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Form(
           key: _formKey,
@@ -140,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const Text(
                 'InfiTimePro',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.4),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, letterSpacing: -0.4),
               ),
               const SizedBox(height: 8),
               const Text(
@@ -238,7 +224,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.slate50,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.slate200),
+                  border: Border.all(color: AppColors.line),
                 ),
                 child: const Row(
                   children: [

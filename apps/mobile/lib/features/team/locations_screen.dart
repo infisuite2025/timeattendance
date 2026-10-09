@@ -81,7 +81,7 @@ class _LocationsScreenState extends State<LocationsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(row.$1, style: const TextStyle(fontWeight: FontWeight.w800)),
+                    Text(row.$1, style: const TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 4),
                     StatusPill(label: row.$2, color: AppColors.rose, soft: AppColors.roseSoft),
                     const SizedBox(height: 6),
@@ -173,7 +173,7 @@ class _SiteTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(site.name, style: const TextStyle(fontWeight: FontWeight.w800)),
+                    Text(site.name, style: const TextStyle(fontWeight: FontWeight.w600)),
                     Text(site.kind, style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
                   ],
                 ),

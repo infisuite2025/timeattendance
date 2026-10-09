@@ -83,7 +83,7 @@ class _PunchTimelineScreenState extends State<PunchTimelineScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${event.timeLabel}  ${event.type}', style: const TextStyle(fontWeight: FontWeight.w800)),
+                          Text('${event.timeLabel}  ${event.type}', style: const TextStyle(fontWeight: FontWeight.w600)),
                           const SizedBox(height: 4),
                           Text('${event.source} · ${event.place}', style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
                         ],

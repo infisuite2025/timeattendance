@@ -32,7 +32,7 @@ class CalendarScreen extends StatelessWidget {
             children: [
               IconButton(onPressed: () => context.read<AppState>().shiftMonth(-1), icon: const Icon(Icons.chevron_left)),
               Expanded(
-                child: Text(monthTitle(month), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                child: Text(monthTitle(month), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
               ),
               IconButton(onPressed: () => context.read<AppState>().shiftMonth(1), icon: const Icon(Icons.chevron_right)),
             ],
@@ -146,7 +146,7 @@ class _MonthGrid extends StatelessWidget {
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: selected ? color : Colors.transparent, width: 1.4),
+              border: Border.all(color: selected ? color : AppColors.line, width: selected ? 1.5 : 1),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -184,7 +184,7 @@ class _SelectedDay extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text(prettyDay(day.day), style: const TextStyle(fontWeight: FontWeight.w800))),
+              Expanded(child: Text(prettyDay(day.day), style: const TextStyle(fontWeight: FontWeight.w600))),
               StatusPill(label: dayKindLabel(day.kind), color: color),
             ],
           ),

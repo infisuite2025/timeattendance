@@ -35,7 +35,7 @@ class MyAttendanceScreen extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Text("Today's status", style: TextStyle(fontWeight: FontWeight.w800)),
+                  const Text("Today's status", style: TextStyle(fontWeight: FontWeight.w600)),
                   const Spacer(),
                   StatusPill(
                     label: state.checkedIn ? 'Present' : (state.clockOutLabel != null ? 'Checked out' : 'Not in'),
@@ -101,7 +101,7 @@ class MyAttendanceScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Weekly summary', style: TextStyle(fontWeight: FontWeight.w800)),
+              Text('Weekly summary', style: TextStyle(fontWeight: FontWeight.w600)),
               SizedBox(height: 4),
               Text('Hours recorded this week', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
               SizedBox(height: 12),
@@ -183,7 +183,7 @@ class _InfoBox extends StatelessWidget {
         children: [
           Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.slate500, fontWeight: FontWeight.w600)),
           const SizedBox(height: 4),
-          Text(value, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+          Text(value, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
           Text(hint, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.slate500)),
         ],
       ),
@@ -204,7 +204,7 @@ Widget _hub(BuildContext context, IconData icon, String title, String subtitle, 
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
+              Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
               Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.slate500)),
             ],
           ),

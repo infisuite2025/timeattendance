@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../app/navigation.dart';
 import '../../app/theme.dart';
 import '../../core/app_state.dart';
+import '../../shared/feedback.dart';
 import '../../shared/widgets.dart';
 import 'raise_screen.dart';
 
@@ -33,7 +34,7 @@ class RegularisationDetailScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(request.employeeName, style: const TextStyle(fontWeight: FontWeight.w800)),
+                      Text(request.employeeName, style: const TextStyle(fontWeight: FontWeight.w600)),
                       Text('${request.employeeCode} · ${request.department}', style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
                     ],
                   ),
@@ -47,7 +48,7 @@ class RegularisationDetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Request information', style: TextStyle(fontWeight: FontWeight.w800)),
+                const Text('Request information', style: TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 _line('Type', request.type),
                 _line('Date', request.dateLabel),
@@ -62,7 +63,7 @@ class RegularisationDetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Reason', style: TextStyle(fontWeight: FontWeight.w800)),
+                const Text('Reason', style: TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 6),
                 Text(request.reason, style: const TextStyle(height: 1.4)),
               ],
@@ -73,7 +74,7 @@ class RegularisationDetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Attendance snapshot', style: TextStyle(fontWeight: FontWeight.w800)),
+                const Text('Attendance snapshot', style: TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 _line('Original', request.actualTime),
                 _line('Requested', request.correctedTime),
@@ -92,7 +93,7 @@ class RegularisationDetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Approval workflow', style: TextStyle(fontWeight: FontWeight.w800)),
+                Text('Approval workflow', style: TextStyle(fontWeight: FontWeight.w600)),
                 SizedBox(height: 8),
                 Text('1. Request submitted'),
                 Text('2. Manager review — pending with Naresh Andukoori', style: TextStyle(color: AppColors.amber, fontWeight: FontWeight.w700)),
@@ -111,9 +112,18 @@ class RegularisationDetailScreen extends StatelessWidget {
           OutlinedButton(
             style: OutlinedButton.styleFrom(foregroundColor: AppColors.rose, side: const BorderSide(color: AppColors.rose)),
             onPressed: pending
-                ? () {
+                ? () async {
+                    final confirmed = await showAppConfirm(
+                      context,
+                      title: 'Withdraw request?',
+                      message: 'This removes ${request.id} from the approval queue. You can raise it again later.',
+                      confirmLabel: 'Withdraw',
+                      danger: true,
+                      icon: Icons.undo_rounded,
+                    );
+                    if (!confirmed || !context.mounted) return;
                     context.read<AppState>().withdrawRequest(request.id);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Request withdrawn.')));
+                    showAppToast(context, 'Request withdrawn.', success: true);
                   }
                 : null,
             child: const Text('Withdraw Request'),

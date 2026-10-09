@@ -143,7 +143,7 @@ class _RequestTile extends StatelessWidget {
               children: [
                 Text(request.dateLabel, style: const TextStyle(fontSize: 12, color: AppColors.slate500, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
-                Text(request.type, style: const TextStyle(fontWeight: FontWeight.w800)),
+                Text(request.type, style: const TextStyle(fontWeight: FontWeight.w600)),
                 Text('${request.location} · ${request.timings}', style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
                 Text(request.reason, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
               ],

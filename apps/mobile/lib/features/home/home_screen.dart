@@ -5,6 +5,7 @@ import '../../app/navigation.dart';
 import '../../app/theme.dart';
 import '../../core/app_state.dart';
 import '../../core/demo_data.dart';
+import '../../shared/feedback.dart';
 import '../../shared/widgets.dart';
 import '../approvals/inbox_screen.dart';
 import '../attendance/attendance_screen.dart';
@@ -37,7 +38,7 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       '${greetingForNow()}, ${state.firstName}',
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.3),
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600, letterSpacing: -0.3),
                     ),
                   ],
                 ),
@@ -155,7 +156,7 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Expanded(child: Text('My Team Today', style: TextStyle(fontWeight: FontWeight.w800))),
+                    const Expanded(child: Text('My Team Today', style: TextStyle(fontWeight: FontWeight.w600))),
                     TextButton(
                       onPressed: () => openPage(context, const LiveAttendanceScreen()),
                       child: const Text('View team'),
@@ -190,14 +191,13 @@ class HomeScreen extends StatelessWidget {
   Future<void> _clockIn(BuildContext context) async {
     final message = await context.read<AppState>().clockIn();
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    final checkedIn = context.read<AppState>().checkedIn;
+    showAppToast(context, message, success: checkedIn, error: !checkedIn);
   }
 
   void _clockOut(BuildContext context) {
     context.read<AppState>().clockOut();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Checked out. The punch is saved on this device.')),
-    );
+    showAppToast(context, 'Checked out. The punch is saved on this device.', success: true);
   }
 }
 
@@ -313,7 +313,7 @@ class _SummaryCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Attendance rate 82%', style: TextStyle(fontWeight: FontWeight.w800)),
+                Text('Attendance rate 82%', style: TextStyle(fontWeight: FontWeight.w600)),
                 SizedBox(height: 2),
                 Text('↑ 6% vs last month', style: TextStyle(color: AppColors.emerald, fontSize: 12, fontWeight: FontWeight.w700)),
                 SizedBox(height: 10),
@@ -353,7 +353,7 @@ class _AlertRow extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+              Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 2),
               Text(body, style: const TextStyle(fontSize: 12, color: AppColors.slate500, height: 1.3)),
             ],
@@ -374,7 +374,7 @@ class _TinyStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(value, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+        Text(value, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
         Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, color: AppColors.slate500)),
       ],
     );
@@ -398,7 +398,7 @@ class _InfoBox extends StatelessWidget {
         children: [
           Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.slate500, fontWeight: FontWeight.w600)),
           const SizedBox(height: 4),
-          Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+          Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
           Text(hint, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, color: AppColors.slate500)),
         ],
       ),
@@ -425,7 +425,7 @@ Widget _action(
           children: [
             Icon(icon, color: tint, size: 22),
             const SizedBox(height: 6),
-            Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
+            Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
             Text(caption, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, color: AppColors.slate500)),
           ],
         ),
