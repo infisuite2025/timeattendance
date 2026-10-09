@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { apiClient } from '../services/apiClient.ts';
 
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CORPORATE_HR' | 'PAYROLL_ADMIN' | 'MANAGER' | 'EMPLOYEE' | 'DATA_PROTECTION_OFFICER';
 
@@ -117,7 +118,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('infi_timepro_user_role', user.role);
   }, [user]);
 
-  const login = (email: string, _password?: string, explicitRole?: UserRole): UserRole => {
+  useEffect(() => {
+    const handleTokenExpired = () => {
+      console.warn('[AuthContext] Session token expired. Purging stale auth state.');
+      apiClient.clearAuth();
+    };
+
+    window.addEventListener('infi:token-expired', handleTokenExpired);
+    return () => {
+      window.removeEventListener('infi:token-expired', handleTokenExpired);
+    };
+  }, []);
+
+  const login = (email: string, password?: string, explicitRole?: UserRole): UserRole => {
     let resolvedRole: UserRole = 'ADMIN';
 
     if (explicitRole) {
@@ -135,6 +148,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const newUser = PERSONA_PROFILES[resolvedRole];
     setUser(newUser);
     localStorage.setItem('infi_timepro_user_role', resolvedRole);
+
+    // Reset stale tokens immediately to prevent ERR_TOKEN_EXPIRED loops
+    apiClient.clearAuth();
+
+    // Asynchronously authenticate against backend to establish fresh JWT & Refresh tokens
+    apiClient
+      .post('/auth/login', { email, password: password || 'Admin@123' })
+      .then((res) => {
+        if (res.success && res.data?.token) {
+          apiClient.setAuth(res.data.token, res.data.refreshToken, res.data.user?.tenantId);
+        }
+      })
+      .catch((err) => {
+        console.warn('[AuthContext.login] Backend login fallback to demo token:', err);
+      });
+
     return resolvedRole;
   };
 
@@ -142,9 +171,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const newUser = PERSONA_PROFILES[role];
     setUser(newUser);
     localStorage.setItem('infi_timepro_user_role', role);
+    // Clear stale session on persona switch
+    apiClient.clearAuth();
   };
 
   const logout = () => {
+    apiClient.post('/auth/logout').catch(() => {});
+    apiClient.clearAuth();
     localStorage.removeItem('infi_timepro_user_role');
     setUser(PERSONA_PROFILES.ADMIN);
   };

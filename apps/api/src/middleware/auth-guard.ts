@@ -50,7 +50,16 @@ export function authGuard(req: AuthenticatedRequest, res: Response, next: NextFu
   }
 
   try {
-    const decoded = jwt.verify(token, config.jwtSecret) as UserProfileDTO;
+    const decoded = jwt.verify(token, config.jwtSecret) as UserProfileDTO & { tokenType?: string };
+
+    if (decoded.tokenType === 'refresh') {
+      return res.status(401).json({
+        success: false,
+        error: { code: 'ERR_TOKEN_INVALID', message: 'Refresh token cannot be used to authenticate API requests' },
+        timestamp: new Date().toISOString(),
+        requestId: req.headers['x-request-id'] || 'req_unknown',
+      });
+    }
 
     if (TokenBlacklistService.isTenantSuspended(decoded.tenantId)) {
       return res.status(403).json({
@@ -63,7 +72,7 @@ export function authGuard(req: AuthenticatedRequest, res: Response, next: NextFu
 
     req.user = decoded;
     next();
-  } catch (err) {
+  } catch (err: any) {
     if (isDevelopment && token.startsWith('demo-jwt-token')) {
       req.user = {
         id: 'usr_naresh_001',
@@ -81,9 +90,18 @@ export function authGuard(req: AuthenticatedRequest, res: Response, next: NextFu
       };
       return next();
     }
+
+    const isExpired = err instanceof jwt.TokenExpiredError || err?.name === 'TokenExpiredError';
+    const errorCode = isExpired ? 'ERR_TOKEN_EXPIRED' : 'ERR_TOKEN_INVALID';
+    const errorMessage = isExpired ? 'Access token expired or invalid' : 'Invalid or malformed authentication token';
+
     return res.status(401).json({
       success: false,
-      error: { code: 'ERR_TOKEN_EXPIRED', message: 'Access token expired or invalid' },
+      error: {
+        code: errorCode,
+        message: errorMessage,
+        ...(isExpired && err.expiredAt ? { expiredAt: err.expiredAt.toISOString() } : {}),
+      },
       timestamp: new Date().toISOString(),
       requestId: req.headers['x-request-id'] || 'req_unknown',
     });
