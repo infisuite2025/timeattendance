@@ -94,28 +94,6 @@ class _LoginScreenState extends State<LoginScreen> {
     email.dispose();
   }
 
-  Future<void> _sso() async {
-    final proceed = await showAppConfirm(
-      context,
-      title: 'Continue with a local session?',
-      message:
-          'Microsoft sign-in is handled by the workspace server. This build keeps the session on the device, so you can continue with a local demo session for the selected organization.',
-      confirmLabel: 'Continue',
-      icon: Icons.window_outlined,
-    );
-    if (proceed != true || !mounted) return;
-    if (_email.text.trim().isEmpty || _password.text.trim().isEmpty) {
-      showAppToast(context, 'Enter your work email and password first.', warning: true);
-      return;
-    }
-    await context.read<AppState>().signIn(
-          nextEmail: _email.text,
-          nextOrganization: _organization,
-          remember: _remember,
-          password: _password.text,
-        );
-  }
-
   @override
   Widget build(BuildContext context) {
     final connectionError = context.watch<AppState>().connectionError;
@@ -245,10 +223,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Text(_busy ? 'Signing in…' : 'Sign In'),
               ),
               const SizedBox(height: 10),
-              OutlinedButton.icon(
-                onPressed: _busy ? null : _sso,
-                icon: const Icon(Icons.window_outlined, size: 18),
-                label: const Text('Sign in with Microsoft (SSO)'),
+              const Text(
+                'Sign in with your work email. Microsoft sign-in is not connected on this build.',
+                style: TextStyle(fontSize: 12, color: AppColors.slate500),
               ),
               const SizedBox(height: 28),
               Container(

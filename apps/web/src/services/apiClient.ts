@@ -201,6 +201,19 @@ class ApiClient {
   async patch<T = any>(endpoint: string, body?: any): Promise<ApiResponse<T>> {
     return this.executeFetch<T>(endpoint, { method: 'PATCH', body });
   }
+
+  async download(endpoint: string, fileName: string): Promise<void> {
+    const url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    const response = await fetch(url, { headers: this.getHeaders() });
+    if (!response.ok) throw new Error('The file could not be downloaded.');
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(objectUrl);
+  }
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);

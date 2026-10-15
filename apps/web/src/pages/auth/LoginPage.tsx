@@ -172,9 +172,9 @@ export const LoginPage: React.FC = () => {
                 />
                 <span>Remember me</span>
               </label>
-              <a href="#forgot" className="font-semibold text-blue-600 hover:underline">
-                Forgot password?
-              </a>
+              <span className="font-semibold text-slate-500">
+                Ask your administrator to reset a password.
+              </span>
             </div>
 
             {loginError && <p className="rounded-lg bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">{loginError}</p>}

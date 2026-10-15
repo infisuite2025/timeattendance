@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AlertTriangle,
   Clock,
@@ -22,6 +22,7 @@ import {
   Check
 } from 'lucide-react';
 import { useI18n } from '../../context/I18nContext.tsx';
+import { apiClient } from '../../services/apiClient';
 import {
   AttendanceExceptionDTO,
   ExceptionType,
@@ -44,137 +45,47 @@ export const AttendanceExceptionsPage: React.FC = () => {
   const [manualOutTime, setManualOutTime] = useState('06:00 PM');
   const [isResolving, setIsResolving] = useState(false);
 
-  // Mock Exceptions
-  const [exceptions, setExceptions] = useState<AttendanceExceptionDTO[]>([
-    {
-      id: 'exc-001',
-      tenantId: 'tenant-demo-001',
-      employeeId: 'emp-006',
-      employeeCode: 'EMP-1006',
-      employeeName: 'Vikram Malhotra',
-      department: 'Engineering',
-      avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150',
-      date: '2026-09-14',
-      shiftName: 'Night Shift',
-      shiftTiming: '10:00 PM - 06:30 AM',
-      exceptionType: 'missing_out_punch',
-      severity: 'critical',
-      description: 'Employee logged IN at 10:02 PM but no OUT punch recorded before shift window closed.',
-      firstIn: '10:02 PM',
-      lastOut: undefined,
-      shortfallMinutes: 508,
-      status: 'open',
-      createdAt: '2026-09-14T07:00:00.000Z'
-    },
-    {
-      id: 'exc-002',
-      tenantId: 'tenant-demo-001',
-      employeeId: 'emp-003',
-      employeeCode: 'EMP-1003',
-      employeeName: 'Priya Sharma',
-      department: 'Operations',
-      avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
-      date: '2026-09-14',
-      shiftName: 'Morning Shift',
-      shiftTiming: '07:00 AM - 03:30 PM',
-      exceptionType: 'late_arrival',
-      severity: 'warning',
-      description: 'Arrival at 07:35 AM exceeds 15-minute grace threshold by 20 minutes (Late penalty tier 1).',
-      firstIn: '07:35 AM',
-      lastOut: '03:40 PM',
-      shortfallMinutes: 0,
-      status: 'in_review',
-      createdAt: '2026-09-14T07:36:00.000Z'
-    },
-    {
-      id: 'exc-003',
-      tenantId: 'tenant-demo-001',
-      employeeId: 'emp-003',
-      employeeCode: 'EMP-1003',
-      employeeName: 'Priya Sharma',
-      department: 'Operations',
-      avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
-      date: '2026-09-14',
-      shiftName: 'Morning Shift',
-      shiftTiming: '07:00 AM - 03:30 PM',
-      exceptionType: 'geofence_breach',
-      severity: 'critical',
-      description: 'Mobile GPS punch registered 520m outside authorized Bengaluru HQ perimeter.',
-      firstIn: '07:35 AM',
-      shortfallMinutes: 0,
-      status: 'open',
-      createdAt: '2026-09-14T07:35:10.000Z'
-    },
-    {
-      id: 'exc-004',
-      tenantId: 'tenant-demo-001',
-      employeeId: 'emp-005',
-      employeeCode: 'EMP-1005',
-      employeeName: 'Elena Rostova',
-      department: 'Marketing',
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-      date: '2026-09-14',
-      shiftName: 'General Shift',
-      shiftTiming: '09:00 AM - 06:00 PM',
-      exceptionType: 'mock_gps_detected',
-      severity: 'critical',
-      description: 'Device sensor telemetry reported Mock GPS Location App active during check-in.',
-      firstIn: '09:00 AM',
-      shortfallMinutes: 0,
-      status: 'open',
-      createdAt: '2026-09-14T09:00:15.000Z'
-    },
-    {
-      id: 'exc-005',
-      tenantId: 'tenant-demo-001',
-      employeeId: 'emp-002',
-      employeeCode: 'EMP-1002',
-      employeeName: 'Michael Chang',
-      department: 'Product Design',
-      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-      date: '2026-09-11',
-      shiftName: 'General Shift',
-      shiftTiming: '09:00 AM - 06:00 PM',
-      exceptionType: 'missing_in_punch',
-      severity: 'warning',
-      description: 'Check-in punch missing; employee punched OUT at 06:20 PM.',
-      firstIn: undefined,
-      lastOut: '06:20 PM',
-      shortfallMinutes: 240,
-      status: 'resolved',
-      resolutionAction: 'regularised',
-      resolvedBy: 'Sarah Jenkins',
-      resolvedAt: '2026-09-12T10:15:00.000Z',
-      resolutionNotes: 'Regularisation request #REG-8091 approved by L1 Manager.',
-      createdAt: '2026-09-11T19:00:00.000Z'
-    }
-  ]);
+  const [exceptions, setExceptions] = useState<AttendanceExceptionDTO[]>([]);
 
-  const handleResolveSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    apiClient.get<any[]>('/exceptions').then((res) => {
+      const rows = Array.isArray(res.data) ? res.data : [];
+      setExceptions(rows.map((row) => ({
+        id: row.id,
+        tenantId: '',
+        employeeId: '',
+        employeeCode: row.employeeCode || '',
+        employeeName: row.employeeName || '',
+        department: '',
+        date: '',
+        shiftName: 'General Shift',
+        shiftTiming: '09:00 AM - 06:00 PM',
+        exceptionType: row.exceptionType === 'geofence_breach' ? 'geofence_breach' : 'missing_in_punch',
+        severity: row.severity === 'high' || row.severity === 'critical' ? 'critical' : 'warning',
+        description: row.description || '',
+        shortfallMinutes: 0,
+        status: row.status === 'resolved' || row.status === 'rejected' ? 'resolved' : 'open',
+        createdAt: new Date().toISOString(),
+      })) as AttendanceExceptionDTO[]);
+    }).catch(() => setExceptions([]));
+  }, []);
+
+  const handleResolveSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activeException) return;
     setIsResolving(true);
-
-    setTimeout(() => {
-      setExceptions(prev =>
-        prev.map(item => {
-          if (item.id === activeException.id) {
-            return {
-              ...item,
-              status: resolutionTab === 'waive' ? 'waived' : 'resolved',
-              resolutionAction: resolutionTab === 'waive' ? 'waived' : (resolutionTab === 'apply_penalty' ? 'penalty_applied' : 'manual_punch'),
-              resolvedBy: 'HR Admin (Sarah Jenkins)',
-              resolvedAt: new Date().toISOString(),
-              resolutionNotes: resolutionReason || 'Action processed via Exceptions Hub'
-            };
-          }
-          return item;
-        })
-      );
-      setIsResolving(false);
+    try {
+      await apiClient.post('/exceptions/resolve', {
+        exceptionId: activeException.id,
+        action: resolutionTab === 'waive' ? 'waive' : 'resolve',
+        notes: resolutionReason,
+      });
+      setExceptions((prev) => prev.map((item) => item.id === activeException.id ? { ...item, status: 'resolved' as ExceptionStatus } : item));
       setActiveException(null);
       setResolutionReason('');
-    }, 500);
+    } finally {
+      setIsResolving(false);
+    }
   };
 
   const filteredExceptions = exceptions.filter(e => {

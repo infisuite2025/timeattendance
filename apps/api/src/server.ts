@@ -43,7 +43,7 @@ const app = express();
 // Security & Middlewares
 app.use(helmet());
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
-app.use(express.json());
+app.use(express.json({ limit: '12mb' }));
 
 // Tenant-Aware API Rate Limiting
 const limiter = rateLimit({

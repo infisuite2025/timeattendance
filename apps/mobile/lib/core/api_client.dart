@@ -1,22 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-/// Live InfiTimePro API. Same host as the web app at attendance.digixlabs.io.
-///
-/// Override for a local API with `--dart-define=API_BASE_URL=http://127.0.0.1:4000/api/v1`
-/// or `--dart-define=API_HOST=127.0.0.1`.
-const String liveWorkspaceBaseUrl = 'https://attendance.digixlabs.io/api/v1';
+import 'remote_api.dart';
 
-String workspaceBaseUrl() {
-  const explicit = String.fromEnvironment('API_BASE_URL', defaultValue: '');
-  if (explicit.isNotEmpty) return explicit;
-  const host = String.fromEnvironment('API_HOST', defaultValue: '');
-  if (host.isNotEmpty) {
-    const port = String.fromEnvironment('API_PORT', defaultValue: '4000');
-    return 'http://$host:$port/api/v1';
-  }
-  return liveWorkspaceBaseUrl;
-}
+String workspaceBaseUrl() => activeApiBaseUrl;
 
 class ApiException implements Exception {
   ApiException(this.message);

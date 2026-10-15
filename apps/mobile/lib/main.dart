@@ -5,12 +5,14 @@ import 'app/theme.dart';
 import 'core/api_client.dart';
 import 'core/app_state.dart';
 import 'core/push_messaging.dart';
+import 'core/remote_api.dart';
 import 'features/auth/login_screen.dart';
 import 'features/shell/shell_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await PushMessaging.start();
+  await loadRemoteApiBaseUrl();
   runApp(const InfiTimeProApp());
 }
 

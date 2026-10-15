@@ -1,18 +1,25 @@
 import { Router, Response } from 'express';
+import type { RowDataPacket } from 'mysql2';
 import { DevicesService } from './devices.service.js';
 import { AuthenticatedRequest, authGuard } from '../../middleware/auth-guard.js';
+import { pool } from '../../database/db.js';
 
 export const devicesRouter = Router();
 
 // GET /api/v1/devices
 devicesRouter.get('/', authGuard, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const tenantId = (req as any).tenantId || 'tenant-demo-001';
-    const filter = {
-      status: req.query.status as string,
-      search: req.query.search as string
-    };
-    const data = await DevicesService.getDevices(tenantId, filter);
+    const tenantId = req.user?.tenantId || 'ten_acme_001';
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT d.id, d.device_identifier AS deviceIdentifier, d.name, d.device_type AS deviceType,
+              d.status, d.ip_address AS ipAddress, d.last_heartbeat_at AS lastHeartbeatAt, l.name AS locationName
+       FROM tp_devices d
+       LEFT JOIN tp_locations l ON l.id = d.location_id
+       WHERE d.tenant_id = ?
+       ORDER BY d.name`,
+      [tenantId]
+    );
+    const data = rows;
     res.json({
       success: true,
       data,
@@ -68,8 +75,13 @@ devicesRouter.post('/:id/command', authGuard, async (req: AuthenticatedRequest, 
 // GET /api/v1/devices/geofences
 devicesRouter.get('/geofences', authGuard, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const tenantId = (req as any).tenantId || 'tenant-demo-001';
-    const data = await DevicesService.getGeofences(tenantId);
+    const tenantId = req.user?.tenantId || 'ten_acme_001';
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT id, name, latitude, longitude, geofence_radius_meters AS radiusMeters
+       FROM tp_locations WHERE tenant_id = ? AND is_active = 1 ORDER BY name`,
+      [tenantId]
+    );
+    const data = rows;
     res.json({
       success: true,
       data,

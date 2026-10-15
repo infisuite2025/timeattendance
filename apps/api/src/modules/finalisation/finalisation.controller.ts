@@ -1,63 +1,45 @@
-import { Router, Request, Response } from 'express';
-import { FinalisationService } from './finalisation.service.js';
+import { Router, Response } from 'express';
+import { AuthenticatedRequest } from '../../middleware/auth-guard.js';
+import { listRecords, musterRoll, payPeriod, saveRecord } from '../../database/live-records.js';
 
 export const finalisationRouter = Router();
 
-finalisationRouter.get('/periods', async (req: Request, res: Response) => {
-  try {
-    const tenantId = req.headers['x-tenant-id'] as string || 'tenant-demo-001';
-    const periods = await FinalisationService.getPeriods(tenantId);
-    res.json({ success: true, data: periods });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
-  }
+function tenant(req: AuthenticatedRequest) {
+  return req.user?.tenantId || 'ten_acme_001';
+}
+
+finalisationRouter.get('/periods', async (req: AuthenticatedRequest, res: Response) => {
+  res.json({ success: true, data: [await payPeriod(tenant(req))] });
 });
 
-finalisationRouter.get('/reconciliation/:periodId', async (req: Request, res: Response) => {
-  try {
-    const { periodId } = req.params;
-    const reconciliation = await FinalisationService.getReconciliation(periodId);
-    res.json({ success: true, data: reconciliation });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
-  }
+finalisationRouter.get('/reconciliation/:periodId', async (req: AuthenticatedRequest, res: Response) => {
+  const period = await payPeriod(tenant(req));
+  res.json({ success: true, data: { periodId: req.params.periodId, departments: [], summary: period } });
 });
 
-finalisationRouter.post('/recalculate/:periodId', async (req: Request, res: Response) => {
-  try {
-    const { periodId } = req.params;
-    const result = await FinalisationService.recalculatePeriod(periodId);
-    res.json({ success: true, data: result });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
-  }
+finalisationRouter.post('/recalculate/:periodId', async (req: AuthenticatedRequest, res: Response) => {
+  res.json({ success: true, data: await payPeriod(tenant(req)) });
 });
 
-finalisationRouter.post('/lock', async (req: Request, res: Response) => {
-  try {
-    const user = (req as any).user?.name || 'Anita Desai (Head of HR)';
-    const result = await FinalisationService.lockPeriod(req.body, user);
-    res.json({ success: true, data: result, message: 'Pay period successfully locked with cryptographic signature' });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
-  }
+finalisationRouter.post('/lock', async (req: AuthenticatedRequest, res: Response) => {
+  const period = await payPeriod(tenant(req));
+  const data = await saveRecord(tenant(req), 'pay_lock', { ...period, status: 'locked', lockedAt: new Date().toISOString() });
+  res.json({ success: true, data, message: 'This month is marked locked in InfiTimePro. It does not pay salaries.' });
 });
 
-finalisationRouter.post('/export', async (req: Request, res: Response) => {
-  try {
-    const user = (req as any).user?.name || 'Anita Desai (Head of HR)';
-    const result = await FinalisationService.exportPayroll(req.body, user);
-    res.json({ success: true, data: result, message: 'Payroll export batch generated successfully' });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
-  }
+finalisationRouter.post('/export', async (req: AuthenticatedRequest, res: Response) => {
+  const period = await payPeriod(tenant(req));
+  const roll = await musterRoll(tenant(req), period.startDate, period.endDate);
+  const data = await saveRecord(tenant(req), 'payroll_export', {
+    periodCode: period.periodCode,
+    generatedAt: new Date().toISOString(),
+    employeeCount: roll.records.length,
+    records: roll.records,
+    format: req.body?.format || 'json',
+  });
+  res.json({ success: true, data, message: 'Attendance export saved. This file is not sent to a bank or payroll vendor.' });
 });
 
-finalisationRouter.get('/export-history', async (req: Request, res: Response) => {
-  try {
-    const history = await FinalisationService.getExportHistory();
-    res.json({ success: true, data: history });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
-  }
+finalisationRouter.get('/export-history', async (req: AuthenticatedRequest, res: Response) => {
+  res.json({ success: true, data: await listRecords(tenant(req), 'payroll_export') });
 });

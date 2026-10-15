@@ -11,3 +11,5 @@ build/
 coverage/
 .DS_Store
 *.tsbuildinfo
+apps/api/uploads/*
+!apps/api/uploads/.gitkeep

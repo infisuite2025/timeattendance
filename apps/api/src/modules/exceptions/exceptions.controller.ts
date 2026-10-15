@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
 import { AuthenticatedRequest, authGuard } from '../../middleware/auth-guard.js';
-import { createRegularisation, decideRegularisation, listExceptions, listRegularisations } from '../../database/core-repository.js';
+import { createRegularisation, decideRegularisation, listExceptions, listRegularisations, resolveException } from '../../database/core-repository.js';
 
 export const exceptionsRouter = Router();
 
@@ -23,8 +23,18 @@ exceptionsRouter.get('/', authGuard, async (req: AuthenticatedRequest, res: Resp
 });
 
 // POST /api/v1/exceptions/resolve
-exceptionsRouter.post('/resolve', authGuard, async (_req: AuthenticatedRequest, res: Response) => {
-  res.status(404).json({ success: false, error: { code: 'ERR_NOT_FOUND', message: 'No open exception matches this request.' } });
+exceptionsRouter.post('/resolve', authGuard, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (req.user?.role === 'EMPLOYEE') {
+      return res.status(403).json({ success: false, error: { code: 'ERR_FORBIDDEN', message: 'Employees cannot resolve exceptions.' } });
+    }
+    const exceptionId = String(req.body?.exceptionId || req.body?.id || '');
+    const data = await resolveException(req.user?.tenantId || 'ten_acme_001', exceptionId, String(req.body?.action || 'resolve'), req.body?.notes, req.user?.id);
+    res.json({ success: true, data, timestamp: new Date().toISOString() });
+  } catch (error: any) {
+    const status = Number(error.statusCode) || 500;
+    res.status(status).json({ success: false, error: { code: status === 404 ? 'ERR_NOT_FOUND' : 'RESOLVE_ERROR', message: error.message } });
+  }
 });
 
 // GET /api/v1/exceptions/regularisations

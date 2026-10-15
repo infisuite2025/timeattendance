@@ -309,19 +309,24 @@ export const TeamSchedulePage: React.FC = () => {
     );
   };
 
-  const handleSwapSubmit = (e: React.FormEvent) => {
+  const handleSwapSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmittingSwap(true);
-
-    setTimeout(() => {
-      setIsSubmittingSwap(false);
+    try {
+      await apiClient.post('/shifts/swaps', {
+        date: swapDate,
+        reason: swapReason || 'Shift swap',
+        currentShift: 'General Shift',
+        requestedShift: 'General Shift',
+      });
       setShowSwapModal(false);
       setSwapReason('');
-      toast.success(
-        'Shift Swap Requested',
-        `Swap request for ${swapDate} submitted to manager for approval.`
-      );
-    }, 450);
+      toast.success('Shift Swap Requested', `Swap request for ${swapDate} was sent to your manager.`);
+    } catch {
+      toast.error('Swap was not saved', 'Check that you are signed in and try again.');
+    } finally {
+      setIsSubmittingSwap(false);
+    }
   };
 
   // Month View Day Shift Calculation for Month Grid
@@ -396,24 +401,7 @@ export const TeamSchedulePage: React.FC = () => {
               <RotateCcw className="h-4 w-4" />
               <span>Request Shift Swap</span>
             </button>
-          ) : (
-            <>
-              <button
-                onClick={() => toast.success('Roster Broadcast', 'Published weekly schedule notification to team!')}
-                className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition"
-              >
-                <Send className="h-4 w-4" />
-                <span>Publish Schedule</span>
-              </button>
-              <button 
-                onClick={() => toast.info('Export Matrix', 'Generating CSV roster export...')}
-                className="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-600 hover:bg-slate-50 transition"
-                title="Export schedule"
-              >
-                <Download className="h-4 w-4" />
-              </button>
-            </>
-          )}</div>
+          ) : null}</div>
       </div>
 
       {/* Admin Module Sub-navigation (Hidden for Employee) */}
@@ -815,11 +803,6 @@ export const TeamSchedulePage: React.FC = () => {
               {isEmployee && (
                 <div className="p-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                   <span>Showing personal roster schedule for <strong>{user.name} ({user.employeeCode})</strong></span>
-                  <button
-                    onClick={() => toast.info('Roster Export', 'Downloading your monthly schedule in PDF...')}
-                    className="font-semibold text-blue-600 hover:underline"
-                  >
-                    {t('shifts.downloadRosterPdf', 'Download My Roster (PDF)')}</button>
                 </div>
               )}
             </>
@@ -1076,30 +1059,6 @@ export const TeamSchedulePage: React.FC = () => {
               </>
             ) : (
               <>
-                <button
-                  onClick={async () => {
-                    const confirmed = await confirm({
-                      title: 'Copy Previous Week Assignments?',
-                      text: 'This will copy all shift allocations from the preceding week into the current schedule.',
-                      confirmButtonText: 'Yes, Copy Schedule',
-                      icon: 'info',
-                    });
-                    if (confirmed) {
-                      toast.success('Roster Cloned', 'Successfully cloned schedule pattern to active week!');
-                    }
-                  }}
-                  className="flex w-full items-center gap-2 rounded-lg bg-blue-50 p-2 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition"
-                >
-                  <Copy className="h-3.5 w-3.5" />
-                  <span>Copy Last Week</span>
-                </button>
-                <button
-                  onClick={() => toast.info('Auto Roster', 'Auto-assigning balanced morning/evening rotation...')}
-                  className="flex w-full items-center gap-2 rounded-lg border border-slate-200 p-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
-                >
-                  <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-                  <span>Auto-Balance Shifts</span>
-                </button>
                 <NavLink
                   to="/shifts/library"
                   className="flex items-center gap-2 rounded-lg border border-slate-200 p-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"

@@ -1238,6 +1238,115 @@ export async function listExceptions(tenantId: string, role?: string, employeeId
   }));
 }
 
+export async function resolveException(tenantId: string, exceptionId: string, action: string, notes: string | undefined, resolvedBy: string | undefined) {
+  const status = action === 'waive' ? 'resolved' : action === 'reject' ? 'rejected' : 'resolved';
+  const [result] = await pool.query(
+    `UPDATE tp_attendance_exceptions
+     SET status = ?, resolution_notes = ?, resolved_by = ?, resolved_at = CURRENT_TIMESTAMP
+     WHERE tenant_id = ? AND id = ? AND status = 'open'`,
+    [status, notes || null, resolvedBy || null, tenantId, exceptionId]
+  );
+  if ((result as { affectedRows?: number }).affectedRows === 0) {
+    const error = new Error('No open exception matches this request.') as Error & { statusCode?: number };
+    error.statusCode = 404;
+    throw error;
+  }
+  return { id: exceptionId, status, resolutionNotes: notes || '' };
+}
+
+async function ensureSwapTable() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS tp_shift_swaps (
+      id VARCHAR(36) PRIMARY KEY,
+      tenant_id VARCHAR(36) NOT NULL,
+      request_code VARCHAR(50) NOT NULL,
+      requester_employee_id VARCHAR(36) NOT NULL,
+      swap_with_employee_id VARCHAR(36) NULL,
+      swap_date DATE NOT NULL,
+      current_shift VARCHAR(100) NOT NULL,
+      requested_shift VARCHAR(100) NOT NULL,
+      reason TEXT NOT NULL,
+      status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  `);
+}
+
+function mapSwap(row: RowDataPacket) {
+  return {
+    id: row.id,
+    requestCode: row.request_code,
+    requesterId: row.requester_employee_id,
+    requesterName: `${row.requester_first || ''} ${row.requester_last || ''}`.trim(),
+    swapWithId: row.swap_with_employee_id,
+    swapWithName: `${row.target_first || ''} ${row.target_last || ''}`.trim() || 'Team',
+    date: String(row.swap_date).slice(0, 10),
+    currentShift: row.current_shift,
+    requestedShift: row.requested_shift,
+    reason: row.reason,
+    status: row.status,
+  };
+}
+
+const swapSelect = `
+  SELECT s.*, r.first_name AS requester_first, r.last_name AS requester_last,
+         t.first_name AS target_first, t.last_name AS target_last
+  FROM tp_shift_swaps s
+  JOIN tp_employees r ON r.id = s.requester_employee_id
+  LEFT JOIN tp_employees t ON t.id = s.swap_with_employee_id
+`;
+
+export async function listShiftSwaps(tenantId: string, role?: string, employeeId?: string) {
+  await ensureSwapTable();
+  const values: unknown[] = [tenantId];
+  let scope = '';
+  if (role === 'EMPLOYEE' && employeeId) {
+    scope = 'AND s.requester_employee_id = ?';
+    values.push(employeeId);
+  } else if (role === 'MANAGER' && employeeId) {
+    scope = 'AND (r.reporting_manager_id = ? OR s.requester_employee_id = ?)';
+    values.push(employeeId, employeeId);
+  }
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `${swapSelect} WHERE s.tenant_id = ? ${scope} ORDER BY s.created_at DESC`,
+    values
+  );
+  return rows.map(mapSwap);
+}
+
+export async function createShiftSwap(tenantId: string, employeeId: string, payload: {
+  swapWithId?: string;
+  date?: string;
+  currentShift?: string;
+  requestedShift?: string;
+  reason?: string;
+}) {
+  await ensureSwapTable();
+  const id = `swp_${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`;
+  const code = `SSW-${Date.now().toString().slice(-6)}`;
+  const swapDate = String(payload.date || DateTime.now().setZone(ZONE).toISODate());
+  await pool.query(
+    `INSERT INTO tp_shift_swaps
+      (id, tenant_id, request_code, requester_employee_id, swap_with_employee_id, swap_date, current_shift, requested_shift, reason)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [id, tenantId, code, employeeId, payload.swapWithId || null, swapDate, payload.currentShift || 'General Shift', payload.requestedShift || 'General Shift', payload.reason || 'Shift swap']
+  );
+  const [rows] = await pool.query<RowDataPacket[]>(`${swapSelect} WHERE s.id = ?`, [id]);
+  return mapSwap(rows[0]);
+}
+
+export async function decideShiftSwap(tenantId: string, id: string, status: 'approved' | 'rejected') {
+  await ensureSwapTable();
+  const [result] = await pool.query(
+    `UPDATE tp_shift_swaps SET status = ? WHERE tenant_id = ? AND id = ? AND status = 'pending'`,
+    [status, tenantId, id]
+  );
+  if ((result as { affectedRows?: number }).affectedRows === 0) return null;
+  const [rows] = await pool.query<RowDataPacket[]>(`${swapSelect} WHERE s.id = ?`, [id]);
+  return rows[0] ? mapSwap(rows[0]) : null;
+}
+
 export async function databaseReachable(): Promise<boolean> {
   try {
     await pool.query('SELECT 1');
