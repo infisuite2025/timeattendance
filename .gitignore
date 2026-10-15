@@ -5,6 +5,8 @@ build/
 .env.*
 .env.local
 !.env.example
+**/google-services.json
+**/firebase-service-account.json
 *.log
 coverage/
 .DS_Store
