@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import type { RowDataPacket } from 'mysql2';
 import { pool } from './db.js';
 import { hashPassword } from './password.js';
+import { notifyManagerOf } from '../modules/notifications/push.js';
 
 const ZONE = 'Asia/Kolkata';
 
@@ -1044,7 +1045,14 @@ export async function createRegularisation(tenantId: string, employeeId: string,
       [`appr_${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`, tenantId, id, assigneeId]
     );
   }
-  return mapRegularisation(rows[0]);
+  const saved = mapRegularisation(rows[0]);
+  void notifyManagerOf(
+    tenantId,
+    employeeId,
+    'Attendance request',
+    `${saved.employeeName || 'An employee'} sent a request that needs a decision.`
+  ).catch(() => undefined);
+  return saved;
 }
 
 export async function listApprovalInbox(tenantId: string, role?: string, employeeId?: string) {

@@ -138,6 +138,7 @@ class AppState extends ChangeNotifier {
         api.refreshToken = null;
       } else if (api.token != null || (api.refreshToken != null && api.refreshToken!.isNotEmpty)) {
         await loadWorkspace();
+        await PushMessaging.register(api);
       }
     } catch (_) {
       signedIn = false;
