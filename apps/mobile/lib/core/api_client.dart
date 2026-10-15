@@ -1,16 +1,21 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-/// Workspace API used by the phone. Override [host] with `--dart-define=API_HOST=...`.
+/// Live InfiTimePro API. Same host as the web app at attendance.digixlabs.io.
+///
+/// Override for a local API with `--dart-define=API_BASE_URL=http://127.0.0.1:4000/api/v1`
+/// or `--dart-define=API_HOST=127.0.0.1`.
+const String liveWorkspaceBaseUrl = 'https://attendance.digixlabs.io/api/v1';
+
 String workspaceBaseUrl() {
+  const explicit = String.fromEnvironment('API_BASE_URL', defaultValue: '');
+  if (explicit.isNotEmpty) return explicit;
   const host = String.fromEnvironment('API_HOST', defaultValue: '');
-  const port = String.fromEnvironment('API_PORT', defaultValue: '4000');
-  if (host.isNotEmpty) return 'http://$host:$port/api/v1';
-  if (kIsWeb) return 'http://localhost:$port/api/v1';
-  if (defaultTargetPlatform == TargetPlatform.android) {
-    return 'http://127.0.0.1:$port/api/v1';
+  if (host.isNotEmpty) {
+    const port = String.fromEnvironment('API_PORT', defaultValue: '4000');
+    return 'http://$host:$port/api/v1';
   }
-  return 'http://localhost:$port/api/v1';
+  return liveWorkspaceBaseUrl;
 }
 
 class ApiException implements Exception {
@@ -37,15 +42,29 @@ class WorkspaceApi {
 
   final Dio dio;
   String? token;
+  String? refreshToken;
   String tenantId = 'ten_acme_001';
 
-  Map<String, String> get _headers => {
-        if (token != null && token!.isNotEmpty) 'Authorization': 'Bearer $token',
+  /// Called after a silent refresh so the app can store the new tokens.
+  void Function()? onSessionRefreshed;
+
+  Future<bool>? _refreshing;
+
+  Map<String, String> _headers({required bool authenticated}) => {
+        if (authenticated && token != null && token!.isNotEmpty) 'Authorization': 'Bearer $token',
         'x-tenant-id': tenantId,
       };
 
   Future<Map<String, dynamic>> login({required String email, required String password}) async {
-    final data = await _send('POST', '/auth/login', body: {'email': email, 'password': password});
+    // A saved access token must not ride along. An expired bearer makes the
+    // server reject the login itself, and the user can never sign in again.
+    final data = await _send(
+      'POST',
+      '/auth/login',
+      body: {'email': email, 'password': password},
+      authenticated: false,
+      retry: false,
+    );
     if (data is! Map) throw ApiException('The workspace did not return a session.');
     return Map<String, dynamic>.from(data);
   }
@@ -62,7 +81,14 @@ class WorkspaceApi {
     return _send('PATCH', path, body: body ?? {});
   }
 
-  Future<dynamic> _send(String method, String path, {Map<String, dynamic>? query, Map<String, dynamic>? body}) async {
+  Future<dynamic> _send(
+    String method,
+    String path, {
+    Map<String, dynamic>? query,
+    Map<String, dynamic>? body,
+    bool authenticated = true,
+    bool retry = true,
+  }) async {
     final started = DateTime.now();
     appLog('-> $method $path');
     try {
@@ -70,10 +96,25 @@ class WorkspaceApi {
         path,
         data: body,
         queryParameters: query,
-        options: Options(method: method, headers: _headers, validateStatus: (status) => status != null && status < 500),
+        options: Options(
+          method: method,
+          headers: _headers(authenticated: authenticated),
+          validateStatus: (status) => status != null && status < 500,
+        ),
       );
       final elapsed = DateTime.now().difference(started).inMilliseconds;
       final json = response.data;
+      if ((response.statusCode ?? 500) == 401) {
+        appLog('<- $method $path 401 ${elapsed}ms UNAUTHORIZED');
+        if (retry && path != '/auth/login' && path != '/auth/refresh' && await _refreshSession()) {
+          return _send(method, path, query: query, body: body, authenticated: authenticated, retry: false);
+        }
+        final serverMessage = _serverMessage(json);
+        if (path == '/auth/login') {
+          throw ApiException(serverMessage ?? 'Invalid email or password.');
+        }
+        throw ApiException(serverMessage ?? 'Your workspace session expired. Sign in again.');
+      }
       if (json is Map && json['success'] == false) {
         final error = json['error'];
         final message = error is Map ? error['message']?.toString() : null;
@@ -92,6 +133,46 @@ class WorkspaceApi {
       final message = _networkMessage(error);
       appLog('xx $method $path FAILED $message');
       throw ApiException(message);
+    }
+  }
+
+  String? _serverMessage(dynamic json) {
+    if (json is Map && json['error'] is Map) {
+      final message = json['error']['message']?.toString();
+      if (message != null && message.isNotEmpty) return message;
+    }
+    return null;
+  }
+
+  Future<bool> _refreshSession() {
+    final inFlight = _refreshing;
+    if (inFlight != null) return inFlight;
+    final run = _refreshSessionOnce();
+    _refreshing = run;
+    return run.whenComplete(() => _refreshing = null);
+  }
+
+  Future<bool> _refreshSessionOnce() async {
+    final currentRefresh = refreshToken;
+    if (currentRefresh == null || currentRefresh.isEmpty) return false;
+    try {
+      final data = await _send(
+        'POST',
+        '/auth/refresh',
+        body: {'refreshToken': currentRefresh},
+        authenticated: false,
+        retry: false,
+      );
+      if (data is! Map || data['token'] == null) return false;
+      token = data['token'].toString();
+      final nextRefresh = data['refreshToken']?.toString();
+      if (nextRefresh != null && nextRefresh.isNotEmpty) refreshToken = nextRefresh;
+      onSessionRefreshed?.call();
+      appLog('session refreshed');
+      return true;
+    } catch (error) {
+      appLog('session refresh FAILED $error');
+      return false;
     }
   }
 

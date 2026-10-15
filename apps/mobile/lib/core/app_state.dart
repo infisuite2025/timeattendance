@@ -4,13 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'api_client.dart';
-import 'demo_data.dart';
 import 'geofence.dart';
 import 'models.dart';
+import 'push_messaging.dart';
+import 'workspace_accounts.dart';
 import 'workspace_mapper.dart';
 
 class AppState extends ChangeNotifier {
   AppState({WorkspaceApi? api}) : api = api ?? WorkspaceApi() {
+    this.api.onSessionRefreshed = () {
+      _persist();
+    };
+    PushMessaging.listen(addPushNotice);
     restore();
   }
 
@@ -22,18 +27,23 @@ class AppState extends ChangeNotifier {
   bool signedIn = false;
   bool rememberMe = true;
   bool syncing = false;
-  String email = 'priya.nair@company.com';
-  String organization = DemoData.organizations.first.name;
-  String firstName = 'Priya';
-  String lastName = 'Nair';
-  String employeeId = 'emp_priya_003';
+  String email = '';
+  String organization = '';
+  String firstName = '';
+  String lastName = '';
+  String employeeId = '';
+  String employeeCode = '';
+  String role = '';
   String? connectionError;
   bool workspaceLinked = false;
-  DateTime loadedMonth = DateTime(2024, 9, 1);
+  DateTime loadedMonth = DateTime(DateTime.now().year, DateTime.now().month, 1);
 
   bool actionBusy = false;
+  String? sessionNotice;
 
   bool get isBusy => syncing || locating || actionBusy;
+  bool get canManageTeam => role == 'ADMIN' || role == 'MANAGER';
+  bool get canAdminister => role == 'ADMIN';
   String get displayName => '$firstName $lastName'.trim();
   String get initials {
     final parts = displayName.split(RegExp(r'\s+')).where((part) => part.isNotEmpty).toList();
@@ -42,37 +52,47 @@ class AppState extends ChangeNotifier {
     return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
   }
 
-  bool checkedIn = true;
+  bool checkedIn = false;
   bool onBreak = false;
-  String clockInLabel = '09:05 AM';
+  String clockInLabel = '—';
   String? clockOutLabel;
-  String breakLabel = '01:00 PM – 02:00 PM';
-  int workedMinutes = 156;
-  String locationLabel = 'Bangalore HQ';
+  String breakLabel = '';
+  int workedMinutes = 0;
+  String assignedShift = '';
+  String locationLabel = '';
   bool locationMock = false;
   bool insideFence = true;
   String locationSource = 'assigned_site';
   bool locating = false;
 
-  DateTime calendarMonth = DateTime(2024, 9, 1);
-  int selectedDay = 10;
+  DateTime calendarMonth = DateTime(DateTime.now().year, DateTime.now().month, 1);
+  int selectedDay = DateTime.now().day;
 
-  final List<RegularisationRequest> requests = DemoData.requests();
-  final List<ApprovalItem> approvals = DemoData.approvals();
-  final List<ApprovalItem> approvalHistory = DemoData.approvalHistory();
-  final List<ShiftTemplate> shifts = DemoData.shifts();
-  final List<ShiftGroup> groups = DemoData.groups();
-  final List<SwapRequest> swaps = DemoData.swaps();
-  final List<TeamMember> org = DemoData.orgMembers();
-  final List<TeamMember> team = DemoData.teamMembers();
-  final List<SiteOffice> sites = DemoData.sites();
-  final List<AttendanceException> exceptions = DemoData.exceptions();
-  final Map<int, DayAttendance> september = DemoData.september();
-  final List<AppNotification> notifications = DemoData.notifications();
+  final List<RegularisationRequest> requests = [];
+  final List<ApprovalItem> approvals = [];
+  final List<ApprovalItem> approvalHistory = [];
+  final List<ShiftTemplate> shifts = [];
+  final List<ShiftGroup> groups = [];
+  final List<SwapRequest> swaps = [];
+  final List<TeamMember> org = [];
+  final List<TeamMember> team = [];
+  final List<SiteOffice> sites = [];
+  final List<PunchFence> fences = [];
+  final List<AttendanceException> exceptions = [];
+  final Map<int, DayAttendance> september = {};
+  final List<AppNotification> notifications = [];
+  final List<PunchEvent> punches = [];
+  final List<RosterPerson> roster = [];
 
   final Map<String, String> assignments = {};
-  bool schedulePublished = true;
-  String scheduleNote = 'Week of 16 Sep 2024';
+  bool schedulePublished = false;
+  String scheduleNote = '';
+
+  int monthPresent = 0;
+  int monthAbsent = 0;
+  int monthLate = 0;
+  int monthLeave = 0;
+  int monthRate = 0;
 
   int get unreadNotifications => notifications.where((n) => !n.read).length;
 
@@ -82,10 +102,8 @@ class AppState extends ChangeNotifier {
     return september[value] ??
         DayAttendance(
           day: value,
-          kind: DayKind.present,
-          inTime: clockInLabel,
-          outTime: clockOutLabel,
-          hours: formatDuration(workedMinutes),
+          kind: DayKind.absent,
+          shift: '',
         );
   }
 
@@ -107,13 +125,18 @@ class AppState extends ChangeNotifier {
           if (data['workedMinutes'] is int) workedMinutes = data['workedMinutes'] as int;
           locationLabel = (data['locationLabel'] as String?) ?? locationLabel;
           api.token = data['token'] as String?;
+          api.refreshToken = data['refreshToken'] as String?;
           api.tenantId = (data['tenantId'] as String?) ?? api.tenantId;
           firstName = (data['firstName'] as String?) ?? firstName;
           lastName = (data['lastName'] as String?) ?? lastName;
           employeeId = (data['employeeId'] as String?) ?? employeeId;
+          role = (data['role'] as String?) ?? role;
         }
       }
-      if (signedIn && api.token != null) {
+      if (!signedIn) {
+        api.token = null;
+        api.refreshToken = null;
+      } else if (api.token != null || (api.refreshToken != null && api.refreshToken!.isNotEmpty)) {
         await loadWorkspace();
       }
     } catch (_) {
@@ -145,10 +168,12 @@ class AppState extends ChangeNotifier {
           'workedMinutes': workedMinutes,
           'locationLabel': locationLabel,
           'token': api.token,
+          'refreshToken': api.refreshToken,
           'tenantId': api.tenantId,
           'firstName': firstName,
           'lastName': lastName,
           'employeeId': employeeId,
+          'role': role,
         }),
       );
     } catch (_) {}
@@ -162,11 +187,15 @@ class AppState extends ChangeNotifier {
   }) async {
     appLog('sign in ${nextEmail.trim()}');
     syncing = true;
+    connectionError = null;
     notifyListeners();
     try {
-    final session = await api.login(email: nextEmail.trim(), password: password);
+    final typedLogin = nextEmail.trim();
+    api.token = null;
+    final session = await api.login(email: typedLogin, password: password);
     final user = session['user'];
     api.token = session['token']?.toString();
+    api.refreshToken = session['refreshToken']?.toString();
     if (api.token == null || api.token!.isEmpty) {
       throw ApiException('The workspace did not return a session.');
     }
@@ -175,16 +204,45 @@ class AppState extends ChangeNotifier {
       firstName = user['firstName']?.toString() ?? firstName;
       lastName = user['lastName']?.toString() ?? lastName;
       employeeId = user['employeeId']?.toString() ?? employeeId;
-      email = user['email']?.toString() ?? nextEmail.trim();
+      employeeCode = user['employeeCode']?.toString() ?? employeeCode;
+      role = user['role']?.toString() ?? role;
+      email = user['email']?.toString() ?? typedLogin;
+      if (serverReturnedPlaceholderAdmin(Map<String, dynamic>.from(user), typedLogin)) {
+        final account = accountForLogin(typedLogin);
+        firstName = account.firstName;
+        lastName = account.lastName;
+        role = account.role;
+        if (account.employeeId.isNotEmpty) employeeId = account.employeeId;
+        if (account.employeeCode.isNotEmpty) employeeCode = account.employeeCode;
+        email = account.email.contains('@') ? account.email : typedLogin;
+      }
     } else {
-      email = nextEmail.trim();
+      final account = accountForLogin(typedLogin);
+      firstName = account.firstName;
+      lastName = account.lastName;
+      role = account.role;
+      email = account.email.contains('@') ? account.email : typedLogin;
     }
     appLog('session ready for $email');
+    checkedIn = false;
+    onBreak = false;
+    clockInLabel = '—';
+    clockOutLabel = null;
+    workedMinutes = 0;
+    september.clear();
+    team.clear();
+    org.clear();
+    requests.clear();
+    approvals.clear();
+    approvalHistory.clear();
+    exceptions.clear();
+    punches.clear();
     organization = nextOrganization;
     rememberMe = remember;
     signedIn = true;
     notifyListeners();
     await loadWorkspace();
+    await PushMessaging.register(api);
     await _persist();
     } finally {
       if (syncing) {
@@ -194,10 +252,16 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  Future<void> signOut() async {
+  void clearSessionNotice() {
+    sessionNotice = null;
+  }
+
+  Future<void> signOut({String? notice}) async {
     signedIn = false;
     api.token = null;
+    api.refreshToken = null;
     connectionError = null;
+    sessionNotice = notice;
     notifyListeners();
     await _persist();
   }
@@ -209,11 +273,21 @@ class AppState extends ChangeNotifier {
     final missed = <String>[];
     var loadedAny = false;
 
+    var sessionRejected = false;
+
     Future<void> pull(String label, Future<void> Function() action) async {
+      if (sessionRejected) return;
       try {
         await action();
         loadedAny = true;
         appLog('workspace loaded $label');
+      } on ApiException catch (error) {
+        if (error.message.contains('Sign in again')) {
+          sessionRejected = true;
+          return;
+        }
+        missed.add(label);
+        appLog('workspace $label FAILED $error');
       } catch (error) {
         missed.add(label);
         appLog('workspace $label FAILED $error');
@@ -221,54 +295,52 @@ class AppState extends ChangeNotifier {
     }
 
     await pull('attendance', () async {
-      final data = await api.get('/attendance/my-attendance', query: {'month': 'September', 'year': '2026'});
+      final now = DateTime.now();
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      final data = await api.get('/attendance/my-attendance', query: {'month': monthNames[now.month - 1], 'year': '${now.year}'});
       final mapped = mapMyAttendance(data);
-      if (mapped.days.isNotEmpty) {
-        september
-          ..clear()
-          ..addAll(mapped.days);
-      }
+      september
+        ..clear()
+        ..addAll(mapped.days);
       if (mapped.loadedMonth != null) {
         loadedMonth = mapped.loadedMonth!;
         calendarMonth = mapped.loadedMonth!;
       }
-      if (mapped.checkedIn != null) checkedIn = mapped.checkedIn!;
-      if (mapped.clockInLabel != null && mapped.clockInLabel!.isNotEmpty) clockInLabel = mapped.clockInLabel!;
-      if (mapped.clockOutLabel != null && mapped.clockOutLabel!.isNotEmpty && mapped.clockOutLabel != '--') {
-        clockOutLabel = mapped.clockOutLabel;
-      }
+      checkedIn = mapped.checkedIn ?? false;
+      onBreak = false;
+      clockInLabel = (mapped.clockInLabel != null && mapped.clockInLabel!.isNotEmpty) ? mapped.clockInLabel! : '—';
+      clockOutLabel = (mapped.clockOutLabel != null && mapped.clockOutLabel!.isNotEmpty && mapped.clockOutLabel != '--') ? mapped.clockOutLabel : null;
+      monthPresent = mapped.presentDays;
+      monthAbsent = mapped.absentDays;
+      monthLate = mapped.lateDays;
+      monthLeave = mapped.leaveDays;
+      monthRate = mapped.attendancePercentage;
+      workedMinutes = mapped.workedMinutes;
+      assignedShift = mapped.assignedShift;
     });
     await pull('team', () async {
       final mapped = mapTeam(await api.get('/attendance/team-attendance'));
-      if (mapped.isNotEmpty) {
-        team
-          ..clear()
-          ..addAll(mapped);
-      }
+      team
+        ..clear()
+        ..addAll(mapped);
     });
     await pull('live attendance', () async {
       final mapped = mapLive(await api.get('/attendance/live-stream'));
-      if (mapped.isNotEmpty) {
-        org
-          ..clear()
-          ..addAll(mapped);
-      }
+      org
+        ..clear()
+        ..addAll(mapped);
     });
     await pull('requests', () async {
       final mapped = mapRegularisations(await api.get('/exceptions/regularisations'));
-      if (mapped.isNotEmpty) {
-        requests
-          ..clear()
-          ..addAll(mapped);
-      }
+      requests
+        ..clear()
+        ..addAll(mapped);
     });
     await pull('exceptions', () async {
       final mapped = mapExceptions(await api.get('/exceptions'));
-      if (mapped.isNotEmpty) {
-        exceptions
-          ..clear()
-          ..addAll(mapped);
-      }
+      exceptions
+        ..clear()
+        ..addAll(mapped);
     });
     await pull('approvals', () async {
       final mapped = mapApprovals(await api.get('/approvals/inbox'));
@@ -278,38 +350,66 @@ class AppState extends ChangeNotifier {
     });
     await pull('approval history', () async {
       final mapped = mapHistory(await api.get('/approvals/history'));
-      if (mapped.isNotEmpty) {
-        approvalHistory
-          ..clear()
-          ..addAll(mapped);
-      }
+      approvalHistory
+        ..clear()
+        ..addAll(mapped);
     });
     await pull('shifts', () async {
       final mapped = mapShifts(await api.get('/shifts'));
-      if (mapped.isNotEmpty) {
-        shifts
-          ..clear()
-          ..addAll(mapped);
-      }
+      shifts
+        ..clear()
+        ..addAll(mapped);
     });
     await pull('shift groups', () async {
       final mapped = mapGroups(await api.get('/shifts/groups'));
-      if (mapped.isNotEmpty) {
-        groups
-          ..clear()
-          ..addAll(mapped);
-      }
+      groups
+        ..clear()
+        ..addAll(mapped);
     });
     await pull('shift swaps', () async {
       final mapped = mapSwaps(await api.get('/shifts/swaps'));
-      if (mapped.isNotEmpty) {
-        swaps
-          ..clear()
-          ..addAll(mapped);
-      }
+      swaps
+        ..clear()
+        ..addAll(mapped);
+    });
+    await pull('locations', () async {
+      final data = await api.get('/organization/locations');
+      sites
+        ..clear()
+        ..addAll(mapLocations(data));
+      fences
+        ..clear()
+        ..addAll(mapFences(data));
+    });
+    await pull('punches', () async {
+      final mapped = mapPunches(await api.get('/attendance/recent-punches'));
+      punches
+        ..clear()
+        ..addAll(mapped);
+    });
+    await pull('schedule', () async {
+      final data = await api.get('/shifts/schedule-matrix');
+      final mapped = mapSchedule(data);
+      final week = scheduleWeek(data);
+      roster
+        ..clear()
+        ..addAll(mapped);
+      if (week.isNotEmpty) scheduleNote = week;
+      schedulePublished = mapped.isNotEmpty;
     });
 
     syncing = false;
+    if (sessionRejected) {
+      signedIn = false;
+      api.token = null;
+      api.refreshToken = null;
+      workspaceLinked = false;
+      connectionError = 'Your workspace session expired. Sign in again.';
+      sessionNotice = connectionError;
+      await _persist();
+      notifyListeners();
+      return;
+    }
     workspaceLinked = loadedAny;
     connectionError = missed.isEmpty ? null : 'Could not load ${missed.join(', ')} from the workspace.';
     notifyListeners();
@@ -319,23 +419,23 @@ class AppState extends ChangeNotifier {
     locating = true;
     notifyListeners();
     try {
-      final geo = await capturePunchLocation();
+      final geo = await capturePunchLocation(fences);
       final result = await _sendPunch('IN', geo);
       locating = false;
       checkedIn = true;
       onBreak = false;
       clockOutLabel = null;
       clockInLabel = _clockLabel(TimeOfDay.now());
-      workedMinutes = 0;
       locationLabel = geo.label;
       locationMock = geo.mockFlag;
       insideFence = geo.insideFence;
       locationSource = geo.source;
       notifyListeners();
       await _persist();
+      await loadWorkspace();
       final serverMessage = result is Map ? result['message']?.toString() : null;
       if (serverMessage != null && serverMessage.isNotEmpty) return serverMessage;
-      return 'Clock-in recorded by the workspace at ${geo.label}.';
+      return 'Clock-in saved. It will show on the web for ${displayName}.';
     } on ApiException catch (error) {
       locating = false;
       notifyListeners();
@@ -362,7 +462,7 @@ class AppState extends ChangeNotifier {
     locating = true;
     notifyListeners();
     try {
-      await _sendPunch('OUT', await capturePunchLocation());
+      await _sendPunch('OUT', await capturePunchLocation(fences));
     } on ApiException catch (error) {
       connectionError = error.message;
       notifyListeners();
@@ -372,14 +472,18 @@ class AppState extends ChangeNotifier {
     onBreak = false;
     checkedIn = false;
     clockOutLabel = _clockLabel(TimeOfDay.now());
-    if (workedMinutes < 30) workedMinutes = 547;
     notifyListeners();
-    _persist();
+    await _persist();
+    await loadWorkspace();
+  }
+
+  void refreshClock() {
+    notifyListeners();
   }
 
   Future<void> startBreak() async {
     if (!checkedIn || onBreak) return;
-    await _sendPunch('BREAK_OUT', await capturePunchLocation());
+    await _sendPunch('BREAK_OUT', await capturePunchLocation(fences));
     onBreak = true;
     breakLabel = 'Started ${_clockLabel(TimeOfDay.now())}';
     notifyListeners();
@@ -388,11 +492,16 @@ class AppState extends ChangeNotifier {
 
   Future<void> endBreak() async {
     if (!onBreak) return;
-    await _sendPunch('BREAK_IN', await capturePunchLocation());
+    await _sendPunch('BREAK_IN', await capturePunchLocation(fences));
     onBreak = false;
     breakLabel = 'Ended ${_clockLabel(TimeOfDay.now())}';
     notifyListeners();
     _persist();
+  }
+
+  void addPushNotice(String title, String body) {
+    notifications.insert(0, AppNotification(title: title, body: body, timeLabel: 'Now'));
+    notifyListeners();
   }
 
   void markNotificationsRead() {
@@ -402,10 +511,17 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void markNotificationRead(int index) {
+    if (index < 0 || index >= notifications.length || notifications[index].read) return;
+    notifications[index].read = true;
+    notifyListeners();
+  }
+
   Future<RegularisationRequest> saveRequest({
     String? id,
     required String type,
     required String dateLabel,
+    String? attendanceDate,
     required String issue,
     required String actualTime,
     required String correctedTime,
@@ -416,7 +532,7 @@ class AppState extends ChangeNotifier {
   }) async {
     if (status == 'Pending') {
       final created = await api.post('/exceptions/regularisations', {
-        'attendanceDate': dateLabel,
+        'attendanceDate': attendanceDate ?? dateLabel,
         'requestType': requestTypeForApi(type),
         'requestedIn': correctedTime,
         'reasonCategory': issue,
@@ -533,11 +649,15 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void assignShift({
+  Future<void> assignShift({
     required List<String> employeeIds,
     required String shiftName,
-  }) {
+  }) async {
     for (final id in employeeIds) {
+      await api.post('/shifts/assignments', {
+        'employeeId': id,
+        'currentShift': shiftName,
+      });
       assignments[id] = shiftName;
     }
     notifyListeners();
@@ -559,9 +679,14 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void reviewException(String id) {
+  Future<void> reviewException(String id) async {
     final item = exceptions.where((e) => e.id == id).firstOrNull;
     if (item == null) return;
+    await api.post('/exceptions/resolve', {
+      'exceptionId': id,
+      'action': 'waive',
+      'reason': 'Reviewed from the mobile app',
+    });
     item.reviewed = true;
     notifyListeners();
   }

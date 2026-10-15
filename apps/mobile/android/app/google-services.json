@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "784333145889",
+    "project_id": "infitimepro",
+    "storage_bucket": "infitimepro.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:784333145889:android:cc2d30b0db06e3f1e8a060",
+        "android_client_info": {
+          "package_name": "com.infitimepro.infi_timepro_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9RUicB8Ohu0V6JP-Pf5UcIEfw5vig7nA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -9,6 +9,7 @@ void showAppToast(
   bool error = false,
   bool success = false,
   bool warning = false,
+  Duration? duration,
 }) {
   final tone = error
       ? AppColors.rose
@@ -28,7 +29,7 @@ void showAppToast(
   toast.removeQueuedCustomToasts();
   toast.showToast(
     gravity: ToastGravity.BOTTOM,
-    toastDuration: const Duration(seconds: 3),
+    toastDuration: duration ?? const Duration(seconds: 3),
     ignorePointer: true,
     positionedToastBuilder: (context, child, gravity) {
       final bottom = MediaQuery.paddingOf(context).bottom + 84;
@@ -86,7 +87,7 @@ class AppDialog extends StatelessWidget {
     final tone = accent ?? AppColors.primary;
     final textAlign = alignCenter ? TextAlign.center : TextAlign.start;
     return Dialog(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.white,
       surfaceTintColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       shape: RoundedRectangleBorder(
@@ -100,14 +101,18 @@ class AppDialog extends StatelessWidget {
           crossAxisAlignment: alignCenter ? CrossAxisAlignment.center : CrossAxisAlignment.stretch,
           children: [
             if (icon != null) ...[
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: tone.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
+              Align(
+                alignment: Alignment.center,
+                child: Container(
+                  width: 52,
+                  height: 52,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: tone.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(icon, color: tone, size: 26),
                 ),
-                child: Icon(icon, color: tone, size: 26),
               ),
               const SizedBox(height: 14),
             ],
@@ -186,7 +191,7 @@ Future<DateTime?> showAppDatePicker(
     context: context,
     builder: (context) {
       return Dialog(
-        backgroundColor: AppColors.surface,
+        backgroundColor: AppColors.white,
         surfaceTintColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         shape: RoundedRectangleBorder(

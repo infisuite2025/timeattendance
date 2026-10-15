@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../../app/theme.dart';
 import '../../core/app_state.dart';
-import '../../core/demo_data.dart';
 import '../../core/models.dart';
 import '../../shared/widgets.dart';
 
@@ -25,11 +24,14 @@ class _LocationsScreenState extends State<LocationsScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Locations')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
         children: [
+          const Text('Tap a pin or a site to see who is there.', style: TextStyle(fontSize: 13, height: 1.35, color: AppColors.slate500)),
+          const SizedBox(height: 12),
           SizedBox(
             height: 220,
             child: AppCard(
+              color: AppColors.white,
               padding: EdgeInsets.zero,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
@@ -51,17 +53,19 @@ class _LocationsScreenState extends State<LocationsScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          EqualGrid(
-            columns: 3,
-            rowHeight: 84,
-            children: [
-              MetricTile(value: '${sites.length}', label: 'Sites', color: AppColors.slate700),
-              MetricTile(value: '$checkedIn', label: 'Checked in', color: AppColors.emerald),
-              MetricTile(value: '$delayed', label: 'Needs attention', color: AppColors.amber),
-            ],
+          AppCard(
+            color: AppColors.white,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: Row(
+              children: [
+                _Count(value: '${sites.length}', label: 'Sites', color: AppColors.slate900),
+                _Count(value: '$checkedIn', label: 'Assigned', color: AppColors.emerald),
+                _Count(value: '$delayed', label: 'Attention', color: AppColors.amber),
+              ],
+            ),
           ),
-          const SizedBox(height: 14),
-          const SectionLabel('Sites'),
+          const SizedBox(height: 16),
+          const Text('Sites', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.slate500)),
           const SizedBox(height: 8),
           for (final site in sites) ...[
             _SiteTile(
@@ -71,25 +75,26 @@ class _LocationsScreenState extends State<LocationsScreen> {
             ),
             const SizedBox(height: 8),
           ],
-          const SizedBox(height: 8),
-          const SectionLabel('Location exceptions'),
-          const SizedBox(height: 8),
-          for (final row in DemoData.locationExceptions)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: AppCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(row.$1, style: const TextStyle(fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 4),
-                    StatusPill(label: row.$2, color: AppColors.rose, soft: AppColors.roseSoft),
-                    const SizedBox(height: 6),
-                    Text(row.$3, style: const TextStyle(fontSize: 13, color: AppColors.slate700)),
-                  ],
-                ),
-              ),
-            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Count extends StatelessWidget {
+  const _Count({required this.value, required this.label, required this.color});
+  final String value;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: color, height: 1)),
+          const SizedBox(height: 4),
+          Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate500)),
         ],
       ),
     );
@@ -111,9 +116,8 @@ class _MapBackdrop extends StatelessWidget {
 class _MapPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = const Color(0xFFE0F2FE);
-    canvas.drawRect(Offset.zero & size, paint);
-    final land = Paint()..color = const Color(0xFFBFDBFE);
+    canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFFF8FAFC));
+    final land = Paint()..color = const Color(0xFFDBEAFE);
     final path = Path()
       ..moveTo(size.width * 0.28, size.height * 0.18)
       ..quadraticBezierTo(size.width * 0.55, size.height * 0.08, size.width * 0.72, size.height * 0.28)
@@ -121,6 +125,12 @@ class _MapPainter extends CustomPainter {
       ..quadraticBezierTo(size.width * 0.4, size.height * 0.92, size.width * 0.32, size.height * 0.7)
       ..quadraticBezierTo(size.width * 0.18, size.height * 0.48, size.width * 0.28, size.height * 0.18);
     canvas.drawPath(path, land);
+    final road = Paint()
+      ..color = const Color(0xFFE2E8F0)
+      ..strokeWidth = 8
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(Offset(size.width * 0.1, size.height * 0.62), Offset(size.width * 0.9, size.height * 0.38), road);
   }
 
   @override
@@ -140,12 +150,13 @@ class _Pin extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.location_on, color: selected ? AppColors.primary : AppColors.rose, size: selected ? 28 : 22),
+          Icon(Icons.location_on, color: selected ? AppColors.primary : AppColors.rose, size: selected ? 30 : 22),
           if (selected)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(8)),
-              child: Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700)),
+              margin: const EdgeInsets.only(top: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: AppColors.line)),
+              child: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
             ),
         ],
       ),
@@ -162,30 +173,64 @@ class _SiteTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final healthy = site.health == 'On Track';
+    final color = healthy ? AppColors.emerald : AppColors.amber;
     return AppCard(
+      color: AppColors.white,
       onTap: onTap,
+      padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
+              Container(width: 4, height: 40, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4))),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(site.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    Text(site.name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 2),
                     Text(site.kind, style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
                   ],
                 ),
               ),
-              StatusPill(label: site.health, color: healthy ? AppColors.emerald : AppColors.amber),
+              StatusPill(label: site.health, color: color),
               Icon(open ? Icons.expand_less : Icons.expand_more, color: AppColors.slate400),
             ],
           ),
           if (open) ...[
-            const SizedBox(height: 8),
-            Text('Present ${site.present} · Absent ${site.absent} · Headcount ${site.headcount}', style: const TextStyle(fontSize: 13)),
+            const SizedBox(height: 12),
+            const Divider(height: 1, color: AppColors.line),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _Mini(value: '${site.present}', label: 'Assigned', color: AppColors.emerald),
+                _Mini(value: '${site.absent}', label: 'Absent', color: AppColors.rose),
+                _Mini(value: '${site.headcount}', label: 'Headcount', color: AppColors.slate900),
+              ],
+            ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _Mini extends StatelessWidget {
+  const _Mini({required this.value, required this.label, required this.color});
+  final String value;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: color)),
+          const SizedBox(height: 2),
+          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate500)),
         ],
       ),
     );

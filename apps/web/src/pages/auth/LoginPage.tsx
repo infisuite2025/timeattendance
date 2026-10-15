@@ -12,17 +12,31 @@ export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('naresh@company.com');
   const [password, setPassword] = useState('Admin@123');
   const [rememberMe, setRememberMe] = useState(true);
+  const [signingIn, setSigningIn] = useState(false);
+  const [loginError, setLoginError] = useState('');
+
+  const goToRole = (role: UserRole) => {
+    if (role === 'EMPLOYEE') navigate('/attendance/my');
+    else if (role === 'MANAGER') navigate('/approvals');
+    else navigate('/dashboard');
+  };
+
+  const signInAs = async (nextEmail: string, nextPassword: string, explicitRole?: UserRole) => {
+    setSigningIn(true);
+    setLoginError('');
+    try {
+      const role = await login(nextEmail, nextPassword, explicitRole);
+      goToRole(role);
+    } catch (error) {
+      setLoginError(error instanceof Error ? error.message : 'Sign in failed');
+    } finally {
+      setSigningIn(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const role = login(email, password);
-    if (role === 'EMPLOYEE') {
-      navigate('/attendance/my');
-    } else if (role === 'MANAGER') {
-      navigate('/approvals');
-    } else {
-      navigate('/dashboard');
-    }
+    void signInAs(email, password);
   };
 
   return (
@@ -163,11 +177,14 @@ export const LoginPage: React.FC = () => {
               </a>
             </div>
 
+            {loginError && <p className="rounded-lg bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">{loginError}</p>}
+
             <button
               type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 active:bg-blue-800 transition-colors"
+              disabled={signingIn}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 active:bg-blue-800 transition-colors disabled:opacity-60"
             >
-              <span>Sign In</span>
+              <span>{signingIn ? 'Signing in...' : 'Sign In'}</span>
               <ArrowRight className="h-4 w-4" />
             </button>
           </form>
@@ -190,10 +207,7 @@ export const LoginPage: React.FC = () => {
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
-                onClick={() => {
-                  login('naresh@company.com', 'Admin@123', 'ADMIN');
-                  navigate('/dashboard');
-                }}
+                onClick={() => void signInAs('naresh@company.com', 'Admin@123', 'ADMIN')}
                 className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-white border border-slate-200 hover:border-blue-500 hover:shadow-sm transition text-center group"
               >
                 <span className="text-lg">🏢</span>
@@ -203,10 +217,7 @@ export const LoginPage: React.FC = () => {
 
               <button
                 type="button"
-                onClick={() => {
-                  login('vikram.singh@company.com', 'Manager@123', 'MANAGER');
-                  navigate('/approvals');
-                }}
+                onClick={() => void signInAs('srinivas.reddy@company.com', 'Admin@123', 'MANAGER')}
                 className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-white border border-slate-200 hover:border-emerald-500 hover:shadow-sm transition text-center group"
               >
                 <span className="text-lg">👔</span>
@@ -216,10 +227,7 @@ export const LoginPage: React.FC = () => {
 
               <button
                 type="button"
-                onClick={() => {
-                  login('sarah.jenkins@company.com', 'Employee@123', 'EMPLOYEE');
-                  navigate('/attendance/my');
-                }}
+                onClick={() => void signInAs('priya.nair@company.com', 'Admin@123', 'EMPLOYEE')}
                 className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-white border border-slate-200 hover:border-indigo-500 hover:shadow-sm transition text-center group"
               >
                 <span className="text-lg">👷</span>

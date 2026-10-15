@@ -45,25 +45,34 @@ class _TeamAttendanceScreenState extends State<TeamAttendanceScreen> {
     }).toList();
 
     final content = ListView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      padding: EdgeInsets.fromLTRB(16, widget.embedded ? 8 : 12, 16, 28),
       children: [
-        const Text("View your team's attendance and status today.", style: TextStyle(color: AppColors.slate500, fontSize: 13)),
-        const SizedBox(height: 4),
-        const Text('12 Sep 2024 (Thu)', style: TextStyle(fontWeight: FontWeight.w700)),
-        const SizedBox(height: 12),
-        EqualGrid(
-          columns: 3,
-          rowHeight: 84,
-          children: [
-            MetricTile(value: '${count(AttendanceStatus.present)}', label: 'Present', color: AppColors.emerald),
-            MetricTile(value: '${count(AttendanceStatus.absent)}', label: 'Absent', color: AppColors.rose),
-            MetricTile(value: '${count(AttendanceStatus.late)}', label: 'Late', color: AppColors.amber),
-            MetricTile(value: '${count(AttendanceStatus.onLeave)}', label: 'On leave', color: AppColors.purple),
-            MetricTile(value: '${count(AttendanceStatus.wfh)}', label: 'WFH', color: AppColors.primary),
-            MetricTile(value: '${people.length}', label: 'Team size', color: AppColors.slate700),
-          ],
+        Text(formatToday(), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.slate500)),
+        const SizedBox(height: 8),
+        AppCard(
+          color: AppColors.white,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  _Count(value: '${count(AttendanceStatus.present)}', label: 'Present', color: AppColors.emerald),
+                  _Count(value: '${count(AttendanceStatus.absent)}', label: 'Absent', color: AppColors.rose),
+                  _Count(value: '${count(AttendanceStatus.late)}', label: 'Late', color: AppColors.amber),
+                ],
+              ),
+              const Divider(height: 22, color: AppColors.line),
+              Row(
+                children: [
+                  _Count(value: '${count(AttendanceStatus.onLeave)}', label: 'On leave', color: AppColors.purple),
+                  _Count(value: '${count(AttendanceStatus.wfh)}', label: 'WFH', color: AppColors.primary),
+                  _Count(value: '${people.length}', label: 'Team', color: AppColors.slate900),
+                ],
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         TextField(
           decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search name or ID'),
           onChanged: (value) => setState(() => _query = value),
@@ -91,24 +100,40 @@ class _TeamAttendanceScreenState extends State<TeamAttendanceScreen> {
         if (attention > 0) ...[
           const SizedBox(height: 12),
           AppCard(
-            color: AppColors.amberSoft,
-            child: Text(
-              '$attention members need attention. Review late arrivals and missing punches.',
-              style: const TextStyle(fontSize: 13, height: 1.35, color: AppColors.slate700),
+            color: AppColors.white,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(width: 4, height: 36, decoration: BoxDecoration(color: AppColors.amber, borderRadius: BorderRadius.circular(4))),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    '$attention ${attention == 1 ? 'person needs' : 'people need'} a look. Late arrivals and missing punches are in the list below.',
+                    style: const TextStyle(fontSize: 13, height: 1.4, color: AppColors.slate700),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
-        const SizedBox(height: 12),
-        for (final person in visible) ...[
-          _TeamCard(person: person, shift: state.shiftFor(person)),
-          const SizedBox(height: 8),
-        ],
-        if (visible.isEmpty) const AppCard(child: Text('Nobody matches this filter.')),
+        const SizedBox(height: 16),
+        Text(
+          visible.isEmpty ? 'No matches' : '${visible.length} ${visible.length == 1 ? 'person' : 'people'}',
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.slate500),
+        ),
+        const SizedBox(height: 8),
+        if (visible.isEmpty)
+          const AppCard(color: AppColors.white, child: Text('Nobody matches this filter.'))
+        else
+          for (final person in visible) ...[
+            _TeamCard(person: person, shift: state.shiftFor(person)),
+            const SizedBox(height: 8),
+          ],
       ],
     );
 
     if (widget.embedded) return content;
-    return Scaffold(appBar: AppBar(title: const Text('Team Attendance')), body: content);
+    return Scaffold(appBar: AppBar(title: const Text('My team')), body: content);
   }
 
   String _chip(int all, int Function(AttendanceStatus) count) {
@@ -137,51 +162,103 @@ class _TeamCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = colorForStatus(person.status);
     return AppCard(
+      color: AppColors.white,
+      onTap: () => _details(context),
+      padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(width: 4, height: 52, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4))),
+          const SizedBox(width: 12),
           AvatarBadge(initials: person.initials),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(person.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                Text(person.name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 2),
                 Text('${person.code} · ${person.department}', style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
-                Text('$shift · ${person.checkIn ?? 'No check-in'}', style: const TextStyle(fontSize: 12)),
-                if (person.delay != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: StatusPill(label: person.delay!, color: AppColors.amber, soft: AppColors.amberSoft),
-                  ),
+                const SizedBox(height: 2),
+                Text('$shift · ${person.checkIn ?? 'No check-in'}', style: const TextStyle(fontSize: 12, color: AppColors.slate700)),
+                if (person.delay != null) ...[
+                  const SizedBox(height: 6),
+                  StatusPill(label: person.delay!, color: AppColors.amber),
+                ],
               ],
             ),
           ),
+          const SizedBox(width: 8),
           Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              StatusPill(label: statusLabel(person.status), color: colorForStatus(person.status)),
-              IconButton(
-                onPressed: () {
-                  showInfoSheet(
-                    context,
-                    title: person.name,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('${person.code} · ${person.department}'),
-                        const SizedBox(height: 6),
-                        Text('Shift: $shift'),
-                        Text('Site: ${person.location}'),
-                        Text(person.note ?? 'No extra note.'),
-                      ],
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.more_horiz),
-              ),
+              StatusPill(label: statusLabel(person.status), color: color),
+              const Icon(Icons.chevron_right, color: AppColors.slate400),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  void _details(BuildContext context) {
+    showAppSheet<void>(
+      context,
+      title: person.name,
+      message: '${person.code} · ${person.department}',
+      builder: (_) => AppCard(
+        color: AppColors.white,
+        child: Column(
+          children: [
+            _Fact(label: 'Status', value: statusLabel(person.status)),
+            _Fact(label: 'Shift', value: shift),
+            _Fact(label: 'Site', value: person.location),
+            _Fact(label: 'Check-in', value: person.checkIn ?? 'Not recorded'),
+            _Fact(label: 'Note', value: person.note ?? person.delay ?? 'Nothing extra today', last: true),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Fact extends StatelessWidget {
+  const _Fact({required this.label, required this.value, this.last = false});
+  final String label;
+  final String value;
+  final bool last;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: last ? 0 : 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: 72, child: Text(label, style: const TextStyle(fontSize: 13, color: AppColors.slate500))),
+          Expanded(child: Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700))),
+        ],
+      ),
+    );
+  }
+}
+
+class _Count extends StatelessWidget {
+  const _Count({required this.value, required this.label, required this.color});
+  final String value;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: color, height: 1)),
+          const SizedBox(height: 4),
+          Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate500)),
         ],
       ),
     );

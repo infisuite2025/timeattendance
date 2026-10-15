@@ -17,12 +17,25 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _email = TextEditingController(text: 'priya.nair@company.com');
+  final _email = TextEditingController();
   final _password = TextEditingController();
   bool _obscure = true;
   bool _remember = true;
   bool _busy = false;
   String _organization = DemoData.organizations.first.name;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final state = context.read<AppState>();
+      final notice = state.sessionNotice;
+      if (notice == null || notice.isEmpty) return;
+      state.clearSessionNotice();
+      showAppToast(context, notice, duration: const Duration(seconds: 5));
+    });
+  }
 
   @override
   void dispose() {
@@ -90,18 +103,22 @@ class _LoginScreenState extends State<LoginScreen> {
       confirmLabel: 'Continue',
       icon: Icons.window_outlined,
     );
-    if (proceed == true && mounted) {
-      await context.read<AppState>().signIn(
-            nextEmail: _email.text.trim().isEmpty ? 'priya.nair@company.com' : _email.text,
-            nextOrganization: _organization,
-            remember: _remember,
-            password: _password.text.trim().isEmpty ? 'workspace' : _password.text,
-          );
+    if (proceed != true || !mounted) return;
+    if (_email.text.trim().isEmpty || _password.text.trim().isEmpty) {
+      showAppToast(context, 'Enter your work email and password first.', warning: true);
+      return;
     }
+    await context.read<AppState>().signIn(
+          nextEmail: _email.text,
+          nextOrganization: _organization,
+          remember: _remember,
+          password: _password.text,
+        );
   }
 
   @override
   Widget build(BuildContext context) {
+    final connectionError = context.watch<AppState>().connectionError;
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
@@ -112,14 +129,10 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 12),
               Center(
-                child: Container(
+                child: Image.asset(
+                  'assets/brand/app_logo.png',
                   width: 56,
                   height: 56,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(Icons.schedule, color: Colors.white, size: 30),
                 ),
               ),
               const SizedBox(height: 14),
@@ -134,7 +147,26 @@ class _LoginScreenState extends State<LoginScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, height: 1.4, color: AppColors.slate500),
               ),
+              const SizedBox(height: 10),
+              Text(
+                'Punches and requests from this phone are saved to\n${workspaceBaseUrl()}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 12, height: 1.35, color: AppColors.slate500),
+              ),
               const SizedBox(height: 28),
+              if (connectionError != null) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.roseSoft,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.rose.withValues(alpha: 0.35)),
+                  ),
+                  child: Text(connectionError, style: const TextStyle(fontSize: 13, height: 1.35, color: AppColors.rose)),
+                ),
+                const SizedBox(height: 14),
+              ],
               AppDropdown<String>(
                 value: _organization,
                 label: 'Organization / Company',

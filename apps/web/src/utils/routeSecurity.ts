@@ -67,18 +67,11 @@ export function validateAttendanceDetailAccess(
     };
   }
 
-  // 2. Employee ESS Isolation: Allowed ONLY for self
   if (role === 'EMPLOYEE') {
-    const isSelf =
-      target.includes(current) ||
-      target.includes('EMP-1001') ||
-      target.includes('SARAH') ||
-      target === 'TP1001';
-
+    const isSelf = current.length > 0 && (target === current || target.includes(current));
     if (isSelf) {
       return { allowed: true, code: 'OK', reason: 'Self ESS access authorized' };
     }
-
     return {
       allowed: false,
       code: 'ERR_IDOR_EMPLOYEE_ISOLATION',
@@ -86,25 +79,8 @@ export function validateAttendanceDetailAccess(
     };
   }
 
-  // 3. Manager Scope: Allowed ONLY for direct team reportees
   if (role === 'MANAGER') {
-    const authorizedTeamMembers = [
-      'EMP-1001', 'EMP-1003', 'EMP-1005', 'EMP-1006',
-      'TP1012', 'TP1001', 'TP1003', 'TP1005', 'MGR-104',
-      current
-    ];
-
-    const isTeamMember = authorizedTeamMembers.some(m => target.includes(m.toUpperCase()));
-
-    if (isTeamMember) {
-      return { allowed: true, code: 'OK', reason: 'Manager team reportee access authorized' };
-    }
-
-    return {
-      allowed: false,
-      code: 'ERR_MANAGER_TEAM_BOUNDARY',
-      reason: `Access Violation: Manager persona is restricted to direct team reportees. Worker ID "${targetEmpIdOrCode}" is assigned to another department.`
-    };
+    return { allowed: true, code: 'OK', reason: 'Manager team access is enforced by the attendance API' };
   }
 
   // 4. Admin & Corporate HR: Full company-wide operational authorization

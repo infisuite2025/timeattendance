@@ -42,26 +42,36 @@ class _ApprovalHistoryScreenState extends State<ApprovalHistoryScreen> {
           ),
           const SizedBox(height: 12),
           if (history.isEmpty)
-            const AppCard(child: Text('No history matches this filter.'))
+            const AppCard(color: AppColors.white, child: Text('No history matches this filter.'))
           else
             for (final item in history)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: AppCard(
-                  child: Column(
+                  color: AppColors.white,
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(child: Text('${item.id} · ${item.kind}', style: const TextStyle(fontWeight: FontWeight.w600))),
-                          StatusPill(label: item.status, color: colorForRequestStatus(item.status)),
-                        ],
+                      Container(
+                        width: 4,
+                        height: 48,
+                        decoration: BoxDecoration(color: colorForRequestStatus(item.status), borderRadius: BorderRadius.circular(4)),
                       ),
-                      const SizedBox(height: 4),
-                      Text(item.employee, style: const TextStyle(fontSize: 13)),
-                      Text(item.summary, style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
-                      const SizedBox(height: 4),
-                      Text('Turnaround ${item.turnaround} · You', style: const TextStyle(fontSize: 11, color: AppColors.slate400)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(item.employee, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                            const SizedBox(height: 2),
+                            Text('${item.kind} · ${item.summary}', style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
+                            const SizedBox(height: 2),
+                            Text('Turnaround ${item.turnaround}', style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      StatusPill(label: item.status, color: colorForRequestStatus(item.status)),
                     ],
                   ),
                 ),

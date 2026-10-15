@@ -42,78 +42,117 @@ class _RequestsScreenState extends State<RequestsScreen> {
     }
 
     final body = ListView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
       children: [
-        const Row(
-          children: [
-            Expanded(
-              child: PageIntro(
-                title: 'Requests',
-                subtitle: 'View and manage your attendance regularisation requests.',
+        if (widget.embedded) ...[
+          const PageIntro(title: 'Requests', subtitle: 'Correct a punch, then follow it until a manager decides.'),
+          const SizedBox(height: 16),
+        ],
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: FilledButton.icon(
+            onPressed: () => openPage(context, const RaiseRegularisationScreen()),
+            icon: const Icon(Icons.add_rounded),
+            label: const Text('Raise Request'),
+          ),
+        ),
+        const SizedBox(height: 16),
+        AppCard(
+          color: AppColors.white,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  _Count(value: '${count('Pending')}', label: 'Pending', color: AppColors.primary),
+                  _Count(value: '${count('Approved')}', label: 'Approved', color: AppColors.emerald),
+                  _Count(value: '${count('Sent Back')}', label: 'Sent back', color: AppColors.amber),
+                  _Count(value: '${requests.length}', label: 'Total', color: AppColors.slate900),
+                ],
               ),
-            ),
-          ],
+              if (count('Draft') > 0 || count('Rejected') > 0) ...[
+                const Divider(height: 22, color: AppColors.line),
+                Row(
+                  children: [
+                    _Count(value: '${count('Draft')}', label: 'Draft', color: AppColors.slate500),
+                    _Count(value: '${count('Rejected')}', label: 'Rejected', color: AppColors.rose),
+                    _Count(value: '${count('Withdrawn')}', label: 'Withdrawn', color: AppColors.slate500),
+                    const Expanded(child: SizedBox.shrink()),
+                  ],
+                ),
+              ],
+            ],
+          ),
         ),
-        const SizedBox(height: 12),
-        FilledButton.icon(
-          onPressed: () => openPage(context, const RaiseRegularisationScreen()),
-          icon: const Icon(Icons.add),
-          label: const Text('Raise Request'),
-        ),
-        const SizedBox(height: 12),
-        EqualGrid(
-          columns: 3,
-          rowHeight: 84,
-          children: [
-            MetricTile(value: '${count('Draft')}', label: 'Draft', color: AppColors.slate500),
-            MetricTile(value: '${count('Pending')}', label: 'Pending', color: AppColors.primary),
-            MetricTile(value: '${count('Approved')}', label: 'Approved', color: AppColors.emerald),
-            MetricTile(value: '${count('Rejected')}', label: 'Rejected', color: AppColors.rose),
-            MetricTile(value: '${count('Sent Back')}', label: 'Sent back', color: AppColors.amber),
-            MetricTile(value: '${requests.length}', label: 'Total', color: AppColors.slate700),
-          ],
-        ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         TextField(
           decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search type, reason, or ID'),
           onChanged: (value) => setState(() => _query = value),
         ),
         const SizedBox(height: 8),
-        EqualGrid(
-          columns: 2,
-          rowHeight: 84,
+        Row(
           children: [
-            AppDropdown<String>(
-              value: _status,
-              label: 'Status',
-              items: const [
-                DropdownMenuItem(value: 'All', child: Text('All')),
-                DropdownMenuItem(value: 'Draft', child: Text('Draft')),
-                DropdownMenuItem(value: 'Pending', child: Text('Pending')),
-                DropdownMenuItem(value: 'Approved', child: Text('Approved')),
-                DropdownMenuItem(value: 'Rejected', child: Text('Rejected')),
-                DropdownMenuItem(value: 'Sent Back', child: Text('Sent Back')),
-                DropdownMenuItem(value: 'Withdrawn', child: Text('Withdrawn')),
-              ],
-              onChanged: (value) => setState(() => _status = value ?? 'All'),
+            Expanded(
+              child: AppDropdown<String>(
+                value: _status,
+                label: 'Status',
+                items: const [
+                  DropdownMenuItem(value: 'All', child: Text('All')),
+                  DropdownMenuItem(value: 'Draft', child: Text('Draft')),
+                  DropdownMenuItem(value: 'Pending', child: Text('Pending')),
+                  DropdownMenuItem(value: 'Approved', child: Text('Approved')),
+                  DropdownMenuItem(value: 'Rejected', child: Text('Rejected')),
+                  DropdownMenuItem(value: 'Sent Back', child: Text('Sent Back')),
+                  DropdownMenuItem(value: 'Withdrawn', child: Text('Withdrawn')),
+                ],
+                onChanged: (value) => setState(() => _status = value ?? 'All'),
+              ),
             ),
-            AppDropdown<bool>(
-              value: _latestFirst,
-              label: 'Sort',
-              items: const [
-                DropdownMenuItem(value: true, child: Text('Latest first')),
-                DropdownMenuItem(value: false, child: Text('Oldest first')),
-              ],
-              onChanged: (value) => setState(() => _latestFirst = value ?? true),
+            const SizedBox(width: 8),
+            Expanded(
+              child: AppDropdown<bool>(
+                value: _latestFirst,
+                label: 'Sort',
+                items: const [
+                  DropdownMenuItem(value: true, child: Text('Latest first')),
+                  DropdownMenuItem(value: false, child: Text('Oldest first')),
+                ],
+                onChanged: (value) => setState(() => _latestFirst = value ?? true),
+              ),
             ),
           ],
         ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(onPressed: () => openPage(context, const RegularisationHistoryScreen()), child: const Text('History and trends')),
+        const SizedBox(height: 8),
+        AppCard(
+          color: AppColors.white,
+          onTap: () => openPage(context, const RegularisationHistoryScreen()),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: const Row(
+            children: [
+              Icon(Icons.insights_outlined, color: AppColors.primary, size: 20),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('History and trends', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                    Text('How many requests were approved over recent months', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: AppColors.slate400, size: 20),
+            ],
+          ),
         ),
+        const SizedBox(height: 16),
+        Text(
+          visible.isEmpty ? 'No matches' : '${visible.length} ${visible.length == 1 ? 'request' : 'requests'}',
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.slate500),
+        ),
+        const SizedBox(height: 8),
         if (visible.isEmpty)
-          const AppCard(child: Text('No requests match this filter.'))
+          const AppCard(color: AppColors.white, child: Text('Nothing matches this search or status.'))
         else
           for (final request in visible) ...[
             _RequestTile(request: request),
@@ -133,26 +172,35 @@ class _RequestTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = colorForRequestStatus(request.status);
     return AppCard(
+      color: AppColors.white,
       onTap: () => _actions(context),
+      padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(width: 4, height: 52, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4))),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(request.dateLabel, style: const TextStyle(fontSize: 12, color: AppColors.slate500, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
-                Text(request.type, style: const TextStyle(fontWeight: FontWeight.w600)),
-                Text('${request.location} · ${request.timings}', style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
-                Text(request.reason, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                Text(request.type, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 2),
+                Text('${request.location} · ${request.timings}', style: const TextStyle(fontSize: 12, color: AppColors.slate700)),
+                const SizedBox(height: 2),
+                Text(request.reason, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, height: 1.3, color: AppColors.slate500)),
               ],
             ),
           ),
           const SizedBox(width: 8),
           Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              StatusPill(label: request.status, color: colorForRequestStatus(request.status)),
+              StatusPill(label: request.status, color: color),
               const Icon(Icons.chevron_right, color: AppColors.slate400),
             ],
           ),
@@ -162,39 +210,63 @@ class _RequestTile extends StatelessWidget {
   }
 
   void _actions(BuildContext context) {
-    showInfoSheet(
+    final canEdit = request.status == 'Draft' || request.status == 'Sent Back';
+    showAppSheet<void>(
       context,
-      title: request.id,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      title: request.type,
+      message: '${request.id} · ${request.dateLabel}',
+      builder: (sheetContext) => OptionGroup(
         children: [
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
+          SheetChoiceTile(
+            icon: Icons.visibility_outlined,
+            title: 'View details',
+            subtitle: 'Reason, times, and where it sits in approval',
+            onTap: () {
+              Navigator.pop(sheetContext);
               openPage(context, RegularisationDetailScreen(requestId: request.id));
             },
-            child: const Text('View details'),
           ),
-          const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: () async {
+          SheetChoiceTile(
+            icon: Icons.copy_rounded,
+            title: 'Duplicate',
+            subtitle: 'Start a new request from this one',
+            onTap: () async {
               final copy = await context.read<AppState>().duplicateRequest(request.id);
-              if (!context.mounted) return;
-              Navigator.pop(context);
-              if (copy != null) openPage(context, RaiseRegularisationScreen(requestId: copy.id));
+              if (!sheetContext.mounted) return;
+              Navigator.pop(sheetContext);
+              if (copy != null && context.mounted) openPage(context, RaiseRegularisationScreen(requestId: copy.id));
             },
-            child: const Text('Duplicate'),
           ),
-          const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: request.status == 'Draft' || request.status == 'Sent Back'
-                ? () {
-                    Navigator.pop(context);
-                    openPage(context, RaiseRegularisationScreen(requestId: request.id));
-                  }
-                : null,
-            child: const Text('Edit request'),
-          ),
+          if (canEdit)
+            SheetChoiceTile(
+              icon: Icons.edit_outlined,
+              title: 'Edit request',
+              subtitle: 'Change it before a manager decides',
+              onTap: () {
+                Navigator.pop(sheetContext);
+                openPage(context, RaiseRegularisationScreen(requestId: request.id));
+              },
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Count extends StatelessWidget {
+  const _Count({required this.value, required this.label, required this.color});
+  final String value;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: color, height: 1)),
+          const SizedBox(height: 4),
+          Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate500)),
         ],
       ),
     );

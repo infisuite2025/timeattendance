@@ -4,11 +4,18 @@ import 'package:geolocator/geolocator.dart';
 
 import 'models.dart';
 
-class OfficeFence {
-  static const name = 'Bangalore HQ';
-  static const latitude = 12.9716;
-  static const longitude = 77.5946;
-  static const radiusMeters = 250.0;
+class PunchFence {
+  const PunchFence({
+    required this.name,
+    required this.latitude,
+    required this.longitude,
+    required this.radiusMeters,
+  });
+
+  final String name;
+  final double latitude;
+  final double longitude;
+  final double radiusMeters;
 }
 
 double haversineMeters(double lat1, double lon1, double lat2, double lon2) {
@@ -24,32 +31,40 @@ double _rad(double deg) => deg * math.pi / 180;
 
 /// Captures a punch location on device. If GPS is unavailable, the assigned
 /// office site is used so clock-in still works on desktop and simulators.
-Future<GeoCapture> capturePunchLocation() async {
+Future<GeoCapture> capturePunchLocation(List<PunchFence> fences) async {
   try {
     final serviceOn = await Geolocator.isLocationServiceEnabled();
-    if (!serviceOn) return _assignedSite();
+    if (!serviceOn) return _assignedSite(fences);
 
     var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
     if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
-      return _assignedSite();
+      return _assignedSite(fences);
     }
 
     final position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.medium,
       timeLimit: const Duration(seconds: 8),
     );
-    final distance = haversineMeters(
-      position.latitude,
-      position.longitude,
-      OfficeFence.latitude,
-      OfficeFence.longitude,
-    );
-    final inside = distance <= OfficeFence.radiusMeters;
+    PunchFence? nearest;
+    var nearestDistance = double.infinity;
+    for (final fence in fences) {
+      final distance = haversineMeters(position.latitude, position.longitude, fence.latitude, fence.longitude);
+      if (distance < nearestDistance) {
+        nearest = fence;
+        nearestDistance = distance;
+      }
+    }
+    final inside = nearest != null && nearestDistance <= nearest.radiusMeters;
+    final label = nearest == null
+        ? 'Current location'
+        : inside
+            ? nearest.name
+            : 'Outside ${nearest.name}';
     return GeoCapture(
-      label: inside ? OfficeFence.name : 'Outside ${OfficeFence.name}',
+      label: label,
       insideFence: inside,
       mockFlag: position.isMocked,
       source: 'gps',
@@ -58,14 +73,15 @@ Future<GeoCapture> capturePunchLocation() async {
       longitude: position.longitude,
     );
   } catch (_) {
-    return _assignedSite();
+    return _assignedSite(fences);
   }
 }
 
-GeoCapture _assignedSite() {
-  return const GeoCapture(
-    label: OfficeFence.name,
-    insideFence: true,
+GeoCapture _assignedSite(List<PunchFence> fences) {
+  final name = fences.isEmpty ? 'Location unavailable' : fences.first.name;
+  return GeoCapture(
+    label: name,
+    insideFence: fences.isNotEmpty,
     mockFlag: false,
     source: 'assigned_site',
   );

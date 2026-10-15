@@ -148,7 +148,7 @@ ThemeData buildAppTheme() {
       ),
     ),
     dialogTheme: DialogThemeData(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.white,
       surfaceTintColor: Colors.transparent,
       elevation: 8,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
@@ -156,9 +156,9 @@ ThemeData buildAppTheme() {
       contentTextStyle: GoogleFonts.sourceSans3(color: AppColors.slate500, fontSize: 14, height: 1.45, fontWeight: FontWeight.w400),
     ),
     datePickerTheme: DatePickerThemeData(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.white,
       surfaceTintColor: Colors.transparent,
-      headerBackgroundColor: AppColors.surface,
+      headerBackgroundColor: AppColors.white,
       headerForegroundColor: AppColors.slate900,
       weekdayStyle: GoogleFonts.sourceSans3(color: AppColors.slate500, fontWeight: FontWeight.w600, fontSize: 12),
       dayStyle: GoogleFonts.sourceSans3(color: AppColors.slate900, fontWeight: FontWeight.w500),
@@ -178,8 +178,11 @@ ThemeData buildAppTheme() {
       entryModeIconColor: AppColors.slate700,
     ),
     bottomSheetTheme: const BottomSheetThemeData(
-      backgroundColor: AppColors.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      backgroundColor: AppColors.white,
+      surfaceTintColor: Colors.transparent,
+      elevation: 12,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      dragHandleColor: Color(0xFFCBD5E1),
     ),
   );
 }

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../app/navigation.dart';
 import '../../app/theme.dart';
 import '../../core/app_state.dart';
+import '../../core/models.dart';
 import '../../shared/widgets.dart';
 import 'detail_screen.dart';
 
@@ -22,7 +23,6 @@ class _RegularisationHistoryScreenState extends State<RegularisationHistoryScree
   Widget build(BuildContext context) {
     final requests = context.watch<AppState>().requests.where((r) => r.status != 'Draft').toList();
     int count(String status) => requests.where((r) => r.status == status).length;
-    final total = requests.length;
     final visible = requests.where((request) {
       final query = _query.trim().toLowerCase();
       final queryOk = query.isEmpty || request.type.toLowerCase().contains(query) || request.reason.toLowerCase().contains(query);
@@ -35,43 +35,25 @@ class _RegularisationHistoryScreenState extends State<RegularisationHistoryScree
     }).toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Regularisation History')),
+      appBar: AppBar(title: const Text('History')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
         children: [
-          const Text('Q3 2024  ·  Jul – Sep', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.slate500)),
-          const SizedBox(height: 12),
-          EqualGrid(
-            columns: 2,
-            rowHeight: 84,
-            children: [
-              MetricTile(value: '$total', label: 'Total', color: AppColors.slate700),
-              MetricTile(value: '${count('Approved')}', label: 'Approved', color: AppColors.emerald),
-              MetricTile(value: '${count('Rejected')}', label: 'Rejected', color: AppColors.rose),
-              MetricTile(value: '${count('Pending')}', label: 'Pending', color: AppColors.primary),
-            ],
-          ),
-          const SizedBox(height: 14),
-          const AppCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          const Text('From your workspace requests', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.slate500)),
+          const SizedBox(height: 8),
+          AppCard(
+            color: AppColors.white,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: Row(
               children: [
-                Text('Request trend', style: TextStyle(fontWeight: FontWeight.w600)),
-                SizedBox(height: 4),
-                Text('Last 6 months', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
-                SizedBox(height: 12),
-                SizedBox(
-                  height: 110,
-                  child: MiniBars(
-                    values: [4, 6, 5, 8, 7, 9],
-                    labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-                    color: AppColors.indigo,
-                  ),
-                ),
+                _Count(value: '${requests.length}', label: 'Total', color: AppColors.slate900),
+                _Count(value: '${count('Approved')}', label: 'Approved', color: AppColors.emerald),
+                _Count(value: '${count('Rejected')}', label: 'Rejected', color: AppColors.rose),
+                _Count(value: '${count('Pending')}', label: 'Pending', color: AppColors.primary),
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           FilterChips(
             labels: const ['All', 'Missing Punch', 'Late In', 'Early Out', 'WFH'],
             selected: _filter,
@@ -79,35 +61,86 @@ class _RegularisationHistoryScreenState extends State<RegularisationHistoryScree
           ),
           const SizedBox(height: 10),
           TextField(
-            decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search history'),
+            decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search type or reason'),
             onChanged: (value) => setState(() => _query = value),
           ),
-          const SizedBox(height: 12),
-          for (final request in visible)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: AppCard(
-                onTap: () => openPage(context, RegularisationDetailScreen(requestId: request.id)),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(request.dateLabel, style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
-                          Text(request.type, style: const TextStyle(fontWeight: FontWeight.w600)),
-                          Text(request.reason, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
-                          const Text('Approver: Naresh Andukoori', style: TextStyle(fontSize: 11, color: AppColors.slate400)),
-                        ],
-                      ),
-                    ),
-                    StatusPill(label: request.status, color: colorForRequestStatus(request.status)),
-                    const Icon(Icons.chevron_right, color: AppColors.slate400),
-                  ],
-                ),
-              ),
+          const SizedBox(height: 16),
+          Text(
+            visible.isEmpty ? 'No matches' : '${visible.length} ${visible.length == 1 ? 'request' : 'requests'}',
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.slate500),
+          ),
+          const SizedBox(height: 8),
+          if (visible.isEmpty)
+            const AppCard(color: AppColors.white, child: Text('Nothing in history matches this filter.'))
+          else
+            for (final request in visible) ...[
+              _HistoryTile(request: request),
+              const SizedBox(height: 8),
+            ],
+        ],
+      ),
+    );
+  }
+}
+
+class _HistoryTile extends StatelessWidget {
+  const _HistoryTile({required this.request});
+  final RegularisationRequest request;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = colorForRequestStatus(request.status);
+    return AppCard(
+      color: AppColors.white,
+      onTap: () => openPage(context, RegularisationDetailScreen(requestId: request.id)),
+      padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(width: 4, height: 48, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4))),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(request.dateLabel, style: const TextStyle(fontSize: 12, color: AppColors.slate500, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text(request.type, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 2),
+                Text(request.reason, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
+                const SizedBox(height: 2),
+                Text(request.status, style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
+              ],
             ),
-          if (visible.isEmpty) const AppCard(child: Text('No history for this filter.')),
+          ),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              StatusPill(label: request.status, color: color),
+              const Icon(Icons.chevron_right, color: AppColors.slate400),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Count extends StatelessWidget {
+  const _Count({required this.value, required this.label, required this.color});
+  final String value;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: color, height: 1)),
+          const SizedBox(height: 4),
+          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate500)),
         ],
       ),
     );

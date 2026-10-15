@@ -50,30 +50,34 @@ class _LiveAttendanceScreenState extends State<LiveAttendanceScreen> {
     }).toList();
 
     final content = ListView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      padding: EdgeInsets.fromLTRB(16, widget.embedded ? 8 : 12, 16, 28),
       children: [
-        if (!widget.embedded)
-          const Padding(
-            padding: EdgeInsets.only(bottom: 8),
-            child: Text('Live Attendance', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+        Text(formatToday(), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.slate500)),
+        const SizedBox(height: 8),
+        AppCard(
+          color: AppColors.white,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  _Count(value: '$present', label: 'Present', color: AppColors.emerald),
+                  _Count(value: '$absent', label: 'Absent', color: AppColors.rose),
+                  _Count(value: '$late', label: 'Late', color: AppColors.amber),
+                ],
+              ),
+              const Divider(height: 22, color: AppColors.line),
+              Row(
+                children: [
+                  _Count(value: '$wfh', label: 'WFH', color: AppColors.primary),
+                  _Count(value: '$onLeave', label: 'On leave', color: AppColors.purple),
+                  _Count(value: '$missing', label: 'Missing', color: AppColors.missing),
+                ],
+              ),
+            ],
           ),
-        const Text("Who's in, who's out — a real-time view of your organisation.", style: TextStyle(color: AppColors.slate500, fontSize: 13)),
-        const SizedBox(height: 4),
-        const Text('Thu, 12 Sep 2024', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: AppColors.slate700)),
-        const SizedBox(height: 12),
-        EqualGrid(
-          columns: 3,
-          rowHeight: 84,
-          children: [
-            MetricTile(value: '$present', label: 'Present', color: AppColors.emerald),
-            MetricTile(value: '$absent', label: 'Absent', color: AppColors.rose),
-            MetricTile(value: '$late', label: 'Late', color: AppColors.amber),
-            MetricTile(value: '$wfh', label: 'WFH', color: AppColors.primary),
-            MetricTile(value: '$onLeave', label: 'On leave', color: AppColors.purple),
-            MetricTile(value: '$missing', label: 'Missing punch', color: AppColors.missing),
-          ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         FilterChips(
           labels: ['All ${people.length}', 'In $inCount', 'Out $outCount', 'Late $late'],
           selected: _selectedLabel(people.length, inCount, outCount, late),
@@ -83,32 +87,50 @@ class _LiveAttendanceScreenState extends State<LiveAttendanceScreen> {
         TextField(
           decoration: const InputDecoration(
             prefixIcon: Icon(Icons.search),
-            hintText: 'Search by name, department, or employee ID',
+            hintText: 'Search name, department, or ID',
           ),
           onChanged: (value) => setState(() => _query = value),
         ),
-        const SizedBox(height: 8),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton.icon(
-            onPressed: () => openPage(context, const LocationsScreen()),
-            icon: const Icon(Icons.map_outlined, size: 18),
-            label: const Text('Site map'),
+        const SizedBox(height: 10),
+        AppCard(
+          color: AppColors.white,
+          onTap: () => openPage(context, const LocationsScreen()),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: const Row(
+            children: [
+              Icon(Icons.map_outlined, color: AppColors.primary, size: 20),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Site map', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                    Text('Where people are checked in across offices', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: AppColors.slate400, size: 20),
+            ],
           ),
         ),
-        Text('${visible.length} people', style: const TextStyle(fontSize: 12, color: AppColors.slate500, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 16),
+        Text(
+          visible.isEmpty ? 'No matches' : '${visible.length} ${visible.length == 1 ? 'person' : 'people'}',
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.slate500),
+        ),
         const SizedBox(height: 8),
-        for (final person in visible) ...[
-          _PersonRow(person: person),
-          const SizedBox(height: 8),
-        ],
-        const SizedBox(height: 4),
-        const Text('Updated from the workspace sample on this device.', style: TextStyle(fontSize: 11, color: AppColors.slate400)),
+        if (visible.isEmpty)
+          const AppCard(color: AppColors.white, child: Text('Nobody matches this search or filter.'))
+        else
+          for (final person in visible) ...[
+            _PersonRow(person: person),
+            const SizedBox(height: 8),
+          ],
       ],
     );
 
     if (widget.embedded) return content;
-    return Scaffold(appBar: AppBar(title: const Text('Live Attendance')), body: content);
+    return Scaffold(appBar: AppBar(title: const Text('Live')), body: content);
   }
 
   String _selectedLabel(int all, int inCount, int outCount, int late) {
@@ -133,26 +155,50 @@ class _PersonRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = colorForStatus(person.status);
     return AppCard(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      color: AppColors.white,
+      padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
       child: Row(
         children: [
+          Container(width: 4, height: 48, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4))),
+          const SizedBox(width: 12),
           AvatarBadge(initials: person.initials),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(person.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                Text(
-                  '${person.checkIn ?? '—'} · ${person.location}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.slate500),
-                ),
-                if (person.note != null)
-                  Text(person.note!, style: const TextStyle(fontSize: 11, color: AppColors.slate400)),
+                Text(person.name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 2),
+                Text('${person.checkIn ?? 'No check-in'} · ${person.location}', style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
+                if (person.note != null) ...[
+                  const SizedBox(height: 2),
+                  Text(person.note!, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
+                ],
               ],
             ),
           ),
+          const SizedBox(width: 8),
           StatusPill(label: statusLabel(person.status), color: color),
+        ],
+      ),
+    );
+  }
+}
+
+class _Count extends StatelessWidget {
+  const _Count({required this.value, required this.label, required this.color});
+  final String value;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: color, height: 1)),
+          const SizedBox(height: 4),
+          Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate500)),
         ],
       ),
     );

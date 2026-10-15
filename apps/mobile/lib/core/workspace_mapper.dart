@@ -1,3 +1,4 @@
+import 'geofence.dart';
 import 'models.dart';
 
 class MappedWorkspace {
@@ -16,6 +17,13 @@ class MappedWorkspace {
     this.checkedIn,
     this.clockInLabel,
     this.clockOutLabel,
+    this.presentDays = 0,
+    this.absentDays = 0,
+    this.lateDays = 0,
+    this.leaveDays = 0,
+    this.attendancePercentage = 0,
+    this.workedMinutes = 0,
+    this.assignedShift = '',
   });
 
   final Map<int, DayAttendance> days;
@@ -32,6 +40,13 @@ class MappedWorkspace {
   final bool? checkedIn;
   final String? clockInLabel;
   final String? clockOutLabel;
+  final int presentDays;
+  final int absentDays;
+  final int lateDays;
+  final int leaveDays;
+  final int attendancePercentage;
+  final int workedMinutes;
+  final String assignedShift;
 }
 
 MappedWorkspace mapMyAttendance(dynamic data) {
@@ -43,6 +58,8 @@ MappedWorkspace mapMyAttendance(dynamic data) {
   bool? checkedIn;
   String? clockIn;
   String? clockOut;
+  var workedMinutes = 0;
+  var assignedShift = '';
   final today = _dateKey(DateTime.now());
 
   for (final item in rawDays) {
@@ -52,6 +69,7 @@ MappedWorkspace mapMyAttendance(dynamic data) {
     if (parsed == null) continue;
     month ??= DateTime(parsed.year, parsed.month, 1);
     final kind = _dayKind(item['status']?.toString() ?? '', item['isLate'] == true);
+    final minutes = item['netWorkDurationMinutes'] is num ? (item['netWorkDurationMinutes'] as num).toInt() : 0;
     final record = DayAttendance(
       day: parsed.day,
       kind: kind,
@@ -60,16 +78,34 @@ MappedWorkspace mapMyAttendance(dynamic data) {
       hours: _hours(item['netWorkDurationMinutes']),
       shift: '${item['shiftName'] ?? 'Shift'} ${item['shiftTiming'] ?? ''}'.trim(),
       displayDate: _pretty(parsed),
+      minutes: minutes,
     );
     days[parsed.day] = record;
     if (date == today) {
       checkedIn = kind == DayKind.present || kind == DayKind.late || kind == DayKind.wfh || kind == DayKind.halfDay;
       clockIn = record.inTime;
       clockOut = record.outTime;
+      workedMinutes = minutes;
+      assignedShift = record.shift;
       if (clockOut != null && clockOut != '--' && clockOut.isNotEmpty) checkedIn = false;
     }
   }
-  return MappedWorkspace(days: days, loadedMonth: month, checkedIn: checkedIn, clockInLabel: clockIn, clockOutLabel: clockOut);
+  final summary = data['summary'];
+  int countOf(String key) => summary is Map && summary[key] is num ? (summary[key] as num).toInt() : 0;
+  return MappedWorkspace(
+    days: days,
+    loadedMonth: month,
+    checkedIn: checkedIn,
+    clockInLabel: clockIn,
+    clockOutLabel: clockOut,
+    presentDays: countOf('presentDays'),
+    absentDays: countOf('absentDays'),
+    lateDays: countOf('lateDays'),
+    leaveDays: countOf('leaveDays'),
+    attendancePercentage: countOf('attendancePercentage'),
+    workedMinutes: workedMinutes,
+    assignedShift: assignedShift,
+  );
 }
 
 List<TeamMember> mapLive(dynamic data) {
@@ -219,6 +255,88 @@ List<ShiftGroup> mapGroups(dynamic data) {
   ];
 }
 
+List<SiteOffice> mapLocations(dynamic data) {
+  if (data is! List) return const [];
+  final sites = <SiteOffice>[];
+  for (var i = 0; i < data.length; i++) {
+    final item = data[i];
+    if (item is! Map) continue;
+    final status = item['status']?.toString() ?? '';
+    final count = item['employeeCount'] is num ? (item['employeeCount'] as num).toInt() : 0;
+    sites.add(SiteOffice(
+      name: item['name']?.toString() ?? 'Site',
+      kind: item['city']?.toString() ?? item['code']?.toString() ?? '',
+      present: count,
+      absent: 0,
+      health: status == 'operational' ? 'On Track' : 'Needs attention',
+      pinX: 0.22 + (i % 3) * 0.28,
+      pinY: 0.28 + (i ~/ 3) * 0.28,
+    ));
+  }
+  return sites;
+}
+
+List<PunchFence> mapFences(dynamic data) {
+  if (data is! List) return const [];
+  return [
+    for (final item in data)
+      if (item is Map && item['latitude'] is num && item['longitude'] is num)
+        PunchFence(
+          name: item['name']?.toString() ?? item['locationName']?.toString() ?? 'Site',
+          latitude: (item['latitude'] as num).toDouble(),
+          longitude: (item['longitude'] as num).toDouble(),
+          radiusMeters: item['geofenceRadiusMeters'] is num
+              ? (item['geofenceRadiusMeters'] as num).toDouble()
+              : item['radiusMeters'] is num
+                  ? (item['radiusMeters'] as num).toDouble()
+                  : 150,
+        ),
+  ];
+}
+
+List<PunchEvent> mapPunches(dynamic data) {
+  if (data is! List) return const [];
+  return [
+    for (final item in data)
+      if (item is Map)
+        PunchEvent(
+          timeLabel: item['timeDisplay']?.toString() ?? '',
+          type: _eventType(item['eventType']?.toString() ?? ''),
+          source: _sourceLabel(item['source']?.toString() ?? ''),
+          place: item['locationName']?.toString() ?? '',
+          validity: item['status']?.toString() == 'flagged' ? 'Flagged' : 'Valid',
+          flagged: item['status']?.toString() == 'flagged',
+        ),
+  ];
+}
+
+List<RosterPerson> mapSchedule(dynamic data) {
+  final rows = data is Map ? data['schedule'] : null;
+  if (rows is! List) return const [];
+  return [
+    for (final item in rows)
+      if (item is Map)
+        RosterPerson(
+          name: item['employeeName']?.toString() ?? 'Employee',
+          days: [
+            if (item['shifts'] is List)
+              for (final cell in item['shifts'] as List)
+                if (cell is Map && cell['isOff'] != true)
+                  RosterCell(
+                    dayName: cell['dayName']?.toString() ?? '',
+                    code: cell['shiftCode']?.toString() ?? '—',
+                    shiftName: cell['shiftName']?.toString() ?? cell['shiftCode']?.toString() ?? '',
+                  ),
+          ],
+        ),
+  ];
+}
+
+String scheduleWeek(dynamic data) {
+  if (data is! Map) return '';
+  return data['weekRange']?.toString() ?? '';
+}
+
 List<SwapRequest> mapSwaps(dynamic data) {
   if (data is! List) return const [];
   return [
@@ -237,16 +355,52 @@ List<SwapRequest> mapSwaps(dynamic data) {
   ];
 }
 
+String _eventType(String value) {
+  switch (value.toUpperCase()) {
+    case 'IN':
+      return 'Check-in';
+    case 'OUT':
+      return 'Check-out';
+    case 'BREAK_OUT':
+      return 'Break out';
+    case 'BREAK_IN':
+      return 'Break in';
+    default:
+      return value.isEmpty ? 'Punch' : value;
+  }
+}
+
+String _sourceLabel(String value) {
+  switch (value) {
+    case 'face_recognition':
+      return 'Face recognition';
+    case 'mobile_app':
+      return 'Mobile App';
+    case 'web_portal':
+      return 'Web';
+    case 'biometric':
+      return 'Biometric';
+    case 'geofence':
+      return 'Geofence';
+    default:
+      return value.isEmpty ? 'Unknown' : value;
+  }
+}
+
 String requestTypeForApi(String label) {
   switch (label) {
     case 'Work From Home':
       return 'wfh';
     case 'Missing Punch':
-      return 'missed_punch';
+      return 'missing_punch';
     case 'Shift Change':
-      return 'full_day';
+      return 'full_day_present';
+    case 'Late Coming':
+    case 'Short Working Hours':
+    case 'Attendance Correction':
+      return 'time_adjustment';
     default:
-      return 'check_in';
+      return 'time_adjustment';
   }
 }
 
@@ -355,6 +509,11 @@ String _exceptionType(String value) {
       return 'Early Departure';
     case 'unscheduled_shift':
       return 'Unscheduled Attendance';
+    case 'geofence_breach':
+      return 'Outside Office';
+    case 'missing_in':
+    case 'missing_out':
+      return 'Missing Punch';
     default:
       return 'Short Hours';
   }
@@ -363,6 +522,7 @@ String _exceptionType(String value) {
 String _severity(String value) {
   switch (value) {
     case 'critical':
+    case 'high':
       return 'High';
     case 'info':
       return 'Low';

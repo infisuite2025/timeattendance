@@ -1,18 +1,13 @@
 import { Router, Response } from 'express';
-import { ApprovalsService } from './approvals.service.js';
 import { AuthenticatedRequest, authGuard } from '../../middleware/auth-guard.js';
+import { approvalMetrics, decideRegularisation, listApprovalHistory, listApprovalInbox } from '../../database/core-repository.js';
 
 export const approvalsRouter = Router();
 
 // GET /api/v1/approvals/inbox
 approvalsRouter.get('/inbox', authGuard, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const filter = {
-      category: req.query.category as string,
-      status: req.query.status as string,
-      search: req.query.search as string
-    };
-    const data = await ApprovalsService.getInbox(filter);
+    const data = await listApprovalInbox(req.user?.tenantId || 'ten_acme_001', req.user?.role, req.user?.employeeId);
     res.json({
       success: true,
       data,
@@ -30,7 +25,7 @@ approvalsRouter.get('/inbox', authGuard, async (req: AuthenticatedRequest, res: 
 // GET /api/v1/approvals/metrics
 approvalsRouter.get('/metrics', authGuard, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const data = await ApprovalsService.getMetrics();
+    const data = await approvalMetrics(req.user?.tenantId || 'ten_acme_001', req.user?.role, req.user?.employeeId);
     res.json({
       success: true,
       data,
@@ -48,8 +43,17 @@ approvalsRouter.get('/metrics', authGuard, async (req: AuthenticatedRequest, res
 // POST /api/v1/approvals/decision
 approvalsRouter.post('/decision', authGuard, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const approverName = req.user?.email || 'Sarah Jenkins';
-    const data = await ApprovalsService.submitDecision(req.body, approverName);
+    if (req.user?.role === 'EMPLOYEE') {
+      return res.status(403).json({ success: false, error: { code: 'ERR_FORBIDDEN', message: 'Employees cannot approve requests.' } });
+    }
+    const data = await decideRegularisation(
+      req.user?.tenantId || 'ten_acme_001',
+      req.body.approvalId,
+      req.body.decision,
+      req.user?.id,
+      req.user?.role,
+      req.body.comments
+    );
     res.json({
       success: true,
       data,
@@ -57,9 +61,10 @@ approvalsRouter.post('/decision', authGuard, async (req: AuthenticatedRequest, r
       requestId: `req_${Date.now()}`
     });
   } catch (error: any) {
-    res.status(500).json({
+    const status = Number(error.statusCode) || 500;
+    res.status(status).json({
       success: false,
-      error: { code: 'DECISION_ERROR', message: error.message }
+      error: { code: status === 404 ? 'ERR_NOT_FOUND' : 'DECISION_ERROR', message: error.message }
     });
   }
 });
@@ -67,8 +72,16 @@ approvalsRouter.post('/decision', authGuard, async (req: AuthenticatedRequest, r
 // POST /api/v1/approvals/bulk-decision
 approvalsRouter.post('/bulk-decision', authGuard, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const approverName = req.user?.email || 'Sarah Jenkins';
-    const data = await ApprovalsService.bulkDecision(req.body, approverName);
+    if (req.user?.role === 'EMPLOYEE') {
+      return res.status(403).json({ success: false, error: { code: 'ERR_FORBIDDEN', message: 'Employees cannot approve requests.' } });
+    }
+    const ids: string[] = Array.isArray(req.body?.approvalIds) ? req.body.approvalIds : [];
+    let count = 0;
+    for (const id of ids) {
+      await decideRegularisation(req.user?.tenantId || 'ten_acme_001', id, req.body.decision, req.user?.id, req.user?.role, req.body.comments);
+      count += 1;
+    }
+    const data = { count };
     res.json({
       success: true,
       data,
@@ -86,7 +99,7 @@ approvalsRouter.post('/bulk-decision', authGuard, async (req: AuthenticatedReque
 // GET /api/v1/approvals/history
 approvalsRouter.get('/history', authGuard, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const data = await ApprovalsService.getHistory();
+    const data = await listApprovalHistory(req.user?.tenantId || 'ten_acme_001', req.user?.role, req.user?.employeeId);
     res.json({
       success: true,
       data,

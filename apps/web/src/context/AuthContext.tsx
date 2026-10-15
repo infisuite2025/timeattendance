@@ -98,21 +98,43 @@ export const PERSONA_PROFILES: Record<UserRole, AuthUser> = {
 interface AuthContextType {
   user: AuthUser;
   role: UserRole;
-  login: (email: string, password?: string, explicitRole?: UserRole) => UserRole;
+  login: (email: string, password?: string, explicitRole?: UserRole) => Promise<UserRole>;
   switchPersona: (role: UserRole) => void;
   logout: () => void;
+}
+
+const WORKSPACE_USERS: Record<string, AuthUser> = {
+  'naresh@company.com': { ...PERSONA_PROFILES.ADMIN, id: 'emp_naresh_001', email: 'naresh@company.com', employeeCode: 'TP0001', designation: 'Chief Administrator' },
+  'srinivas.reddy@company.com': { ...PERSONA_PROFILES.MANAGER, id: 'emp_srinivas_002', name: 'Srinivas Reddy', email: 'srinivas.reddy@company.com', employeeCode: 'TP1012', designation: 'Reporting Manager' },
+  'priya.nair@company.com': { ...PERSONA_PROFILES.EMPLOYEE, id: 'emp_priya_003', name: 'Priya Nair', email: 'priya.nair@company.com', employeeCode: 'TP00234', designation: 'Employee' },
+  'rohan.mehta@company.com': { ...PERSONA_PROFILES.EMPLOYEE, id: 'emp_rohan_004', name: 'Rohan Mehta', email: 'rohan.mehta@company.com', employeeCode: 'EMP-0026', designation: 'Employee' },
+  'aarav.sharma@company.com': { ...PERSONA_PROFILES.EMPLOYEE, id: 'emp_aarav_005', name: 'Aarav Sharma', email: 'aarav.sharma@company.com', employeeCode: 'EMP-001', designation: 'Employee' },
+};
+
+function rememberUser(next: AuthUser) {
+  localStorage.setItem('infi_timepro_user', JSON.stringify(next));
+  localStorage.setItem('infi_timepro_user_role', next.role);
+}
+
+function readStoredUser(): AuthUser {
+  try {
+    const raw = localStorage.getItem('infi_timepro_user');
+    if (raw) {
+      const parsed = JSON.parse(raw) as AuthUser;
+      if (parsed?.email && parsed?.role) return parsed;
+    }
+  } catch {
+    /* use the role profile below */
+  }
+  const savedRole = localStorage.getItem('infi_timepro_user_role') as UserRole;
+  if (savedRole && PERSONA_PROFILES[savedRole]) return PERSONA_PROFILES[savedRole];
+  return PERSONA_PROFILES.ADMIN;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser>(() => {
-    const savedRole = localStorage.getItem('infi_timepro_user_role') as UserRole;
-    if (savedRole && PERSONA_PROFILES[savedRole]) {
-      return PERSONA_PROFILES[savedRole];
-    }
-    return PERSONA_PROFILES.ADMIN;
-  });
+  const [user, setUser] = useState<AuthUser>(() => readStoredUser());
 
   useEffect(() => {
     localStorage.setItem('infi_timepro_user_role', user.role);
@@ -130,11 +152,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const login = (email: string, password?: string, explicitRole?: UserRole): UserRole => {
+  const login = async (email: string, password?: string, explicitRole?: UserRole): Promise<UserRole> => {
     let resolvedRole: UserRole = 'ADMIN';
+
+    const knownRoles: Record<string, UserRole> = {
+      'naresh@company.com': 'ADMIN',
+      'srinivas.reddy@company.com': 'MANAGER',
+      'priya.nair@company.com': 'EMPLOYEE',
+      'rohan.mehta@company.com': 'EMPLOYEE',
+      'aarav.sharma@company.com': 'EMPLOYEE',
+    };
+    const knownRole = knownRoles[email.trim().toLowerCase()];
 
     if (explicitRole) {
       resolvedRole = explicitRole;
+    } else if (knownRole) {
+      resolvedRole = knownRole;
     } else if (email.includes('super') || email.includes('owner') || email.includes('master')) {
       resolvedRole = 'SUPER_ADMIN';
     } else if (email.includes('sarah') || email.includes('priya') || email.includes('emp') || email.includes('employee')) {
@@ -145,25 +178,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       resolvedRole = 'ADMIN';
     }
 
-    const newUser = PERSONA_PROFILES[resolvedRole];
-    setUser(newUser);
-    localStorage.setItem('infi_timepro_user_role', resolvedRole);
-
-    // Reset stale tokens immediately to prevent ERR_TOKEN_EXPIRED loops
     apiClient.clearAuth();
 
-    // Asynchronously authenticate against backend to establish fresh JWT & Refresh tokens
-    apiClient
-      .post('/auth/login', { email, password: password || 'Admin@123' })
-      .then((res) => {
-        if (res.success && res.data?.token) {
-          apiClient.setAuth(res.data.token, res.data.refreshToken, res.data.user?.tenantId);
-        }
-      })
-      .catch((err) => {
-        console.warn('[AuthContext.login] Backend login fallback to demo token:', err);
-      });
-
+    const res = await apiClient.post('/auth/login', { email, password: password || 'Admin@123' });
+    if (!res.success || !res.data?.token) {
+      throw new Error(res.error?.message || 'Sign in failed. Check the email and password.');
+    }
+    apiClient.setAuth(res.data.token, res.data.refreshToken, res.data.user?.tenantId);
+    const apiUser = res.data.user;
+    if (apiUser?.email) {
+      const role = (PERSONA_PROFILES[apiUser.role as UserRole] ? apiUser.role : resolvedRole) as UserRole;
+      const nextUser: AuthUser = {
+        id: apiUser.id,
+        name: `${apiUser.firstName || ''} ${apiUser.lastName || ''}`.trim() || apiUser.email,
+        email: apiUser.email,
+        role,
+        designation: apiUser.role || role,
+        department: apiUser.departmentName || '',
+        employeeCode: apiUser.employeeCode || apiUser.employeeId || '',
+        avatar: apiUser.avatarUrl || '',
+        companyName: 'ACME Corporation Global',
+      };
+      setUser(nextUser);
+      rememberUser(nextUser);
+      return role;
+    }
     return resolvedRole;
   };
 
@@ -179,6 +218,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     apiClient.post('/auth/logout').catch(() => {});
     apiClient.clearAuth();
     localStorage.removeItem('infi_timepro_user_role');
+    localStorage.removeItem('infi_timepro_user');
     setUser(PERSONA_PROFILES.ADMIN);
   };
 

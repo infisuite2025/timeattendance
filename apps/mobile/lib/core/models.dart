@@ -51,8 +51,9 @@ class DayAttendance {
     this.outTime,
     this.hours,
     this.reason,
-    this.shift = 'General Shift 09:00 AM - 06:00 PM',
+    this.shift = '',
     this.displayDate,
+    this.minutes = 0,
   });
 
   final int day;
@@ -63,6 +64,7 @@ class DayAttendance {
   final String? reason;
   final String shift;
   final String? displayDate;
+  final int minutes;
 }
 
 class PunchEvent {
@@ -96,9 +98,9 @@ class RegularisationRequest {
     required this.status,
     required this.createdLabel,
     this.attachment,
-    this.employeeName = 'Priya Nair',
-    this.employeeCode = 'EMP-00234',
-    this.department = 'HR Bangalore',
+    this.employeeName = '',
+    this.employeeCode = '',
+    this.department = '',
   });
 
   final String id;
@@ -215,6 +217,21 @@ class SwapRequest {
   final String dateLabel;
   String status;
   final String reason;
+}
+
+class RosterCell {
+  const RosterCell({required this.dayName, required this.code, required this.shiftName});
+
+  final String dayName;
+  final String code;
+  final String shiftName;
+}
+
+class RosterPerson {
+  const RosterPerson({required this.name, required this.days});
+
+  final String name;
+  final List<RosterCell> days;
 }
 
 class SiteOffice {

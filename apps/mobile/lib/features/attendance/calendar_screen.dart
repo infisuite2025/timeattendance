@@ -26,19 +26,24 @@ class CalendarScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          const Text('View your daily attendance and schedule.', style: TextStyle(color: AppColors.slate500)),
+          const Text('Each colour is a kind of day. Tap a date to read it.', style: TextStyle(fontSize: 13, height: 1.35, color: AppColors.slate500)),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              IconButton(onPressed: () => context.read<AppState>().shiftMonth(-1), icon: const Icon(Icons.chevron_left)),
-              Expanded(
-                child: Text(monthTitle(month), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-              ),
-              IconButton(onPressed: () => context.read<AppState>().shiftMonth(1), icon: const Icon(Icons.chevron_right)),
-            ],
-          ),
-          const SizedBox(height: 8),
           AppCard(
+            color: AppColors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            child: Row(
+              children: [
+                IconButton(onPressed: () => context.read<AppState>().shiftMonth(-1), icon: const Icon(Icons.chevron_left)),
+                Expanded(
+                  child: Text(monthTitle(month), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                ),
+                IconButton(onPressed: () => context.read<AppState>().shiftMonth(1), icon: const Icon(Icons.chevron_right)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          AppCard(
+            color: AppColors.white,
             child: Column(
               children: [
                 Row(
@@ -57,38 +62,45 @@ class CalendarScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          const Wrap(
-            spacing: 10,
-            runSpacing: 8,
-            children: [
-              _Legend(DayKind.present, 'Present'),
-              _Legend(DayKind.late, 'Late'),
-              _Legend(DayKind.leave, 'Leave'),
-              _Legend(DayKind.wfh, 'WFH'),
-              _Legend(DayKind.holiday, 'Holiday'),
-              _Legend(DayKind.weeklyOff, 'Weekly Off'),
-              _Legend(DayKind.halfDay, 'Half Day'),
-            ],
-          ),
-          const SizedBox(height: 14),
-          if (_sameMonth(month, state.loadedMonth))
-            Row(
+          const AppCard(
+            color: AppColors.white,
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            child: Wrap(
+              spacing: 12,
+              runSpacing: 8,
               children: [
-                for (final entry in counts.entries)
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 3),
-                      child: MetricTile(
-                        value: '${entry.value}',
-                        label: dayKindLabel(entry.key),
-                        color: colorForKind(entry.key),
+                _Legend(DayKind.present, 'Present'),
+                _Legend(DayKind.late, 'Late'),
+                _Legend(DayKind.leave, 'Leave'),
+                _Legend(DayKind.wfh, 'WFH'),
+                _Legend(DayKind.holiday, 'Holiday'),
+                _Legend(DayKind.weeklyOff, 'Off'),
+                _Legend(DayKind.halfDay, 'Half day'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (_sameMonth(month, state.loadedMonth))
+            AppCard(
+              color: AppColors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Row(
+                children: [
+                  for (final entry in counts.entries)
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text('${entry.value}', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: colorForKind(entry.key), height: 1)),
+                          const SizedBox(height: 4),
+                          Text(dayKindLabel(entry.key), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate500)),
+                        ],
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             )
           else
-            const AppCard(child: Text('No attendance has been recorded for this month on this device.')),
+            const AppCard(color: AppColors.white, child: Text('No attendance has been recorded for this month on this device.')),
           const SizedBox(height: 14),
           if (selected != null) _SelectedDay(day: selected),
         ],
@@ -141,23 +153,45 @@ class _MonthGrid extends StatelessWidget {
           onTap: known
               ? () => context.read<AppState>().selectDay(dayNumber)
               : null,
-          child: Container(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
+              color: selected ? color : AppColors.white,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: selected ? color : AppColors.line, width: selected ? 1.5 : 1),
+              border: Border.all(color: selected ? color : AppColors.line),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('$dayNumber', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: color)),
-                Container(width: 5, height: 5, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+                Text('$dayNumber', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: selected ? AppColors.white : AppColors.slate900)),
+                const SizedBox(height: 3),
+                Container(width: 5, height: 5, decoration: BoxDecoration(color: selected ? AppColors.white : color, shape: BoxShape.circle)),
               ],
             ),
           ),
         );
       },
+    );
+  }
+}
+
+class _TimeBit extends StatelessWidget {
+  const _TimeBit({required this.label, required this.value});
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.slate500)),
+          const SizedBox(height: 2),
+          Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+        ],
+      ),
     );
   }
 }
@@ -179,32 +213,36 @@ class _SelectedDay extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = colorForKind(day.kind);
     return AppCard(
+      color: AppColors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Expanded(child: Text(prettyDay(day.day), style: const TextStyle(fontWeight: FontWeight.w600))),
+              Expanded(child: Text(day.displayDate ?? prettyDay(day.day, month: context.watch<AppState>().loadedMonth), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700))),
               StatusPill(label: dayKindLabel(day.kind), color: color),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(day.shift, style: const TextStyle(fontSize: 13, color: AppColors.slate700)),
           const SizedBox(height: 6),
-          Text(
-            'In ${day.inTime ?? '—'}  ·  Out ${day.outTime ?? '—'}  ·  ${day.hours ?? '—'}',
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          Text(day.shift, style: const TextStyle(fontSize: 13, color: AppColors.slate500)),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _TimeBit(label: 'In', value: day.inTime ?? '—'),
+              _TimeBit(label: 'Out', value: day.outTime ?? '—'),
+              _TimeBit(label: 'Hours', value: day.hours ?? '—'),
+            ],
           ),
           if (day.reason != null) ...[
-            const SizedBox(height: 6),
-            Text(day.reason!, style: const TextStyle(fontSize: 13, color: AppColors.slate500, height: 1.35)),
+            const SizedBox(height: 10),
+            Text(day.reason!, style: const TextStyle(fontSize: 13, height: 1.35, color: AppColors.slate700)),
           ],
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
               onPressed: () => openPage(context, DayDetailScreen(day: day.day)),
-              child: const Text('Open day detail'),
+              child: const Text('Open this day'),
             ),
           ),
         ],

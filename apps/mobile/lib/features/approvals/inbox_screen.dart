@@ -35,25 +35,36 @@ class _ApprovalsInboxScreenState extends State<ApprovalsInboxScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          const Text('Review and take action on attendance requests from your team.', style: TextStyle(color: AppColors.slate500)),
+          const Text('Decide the attendance requests waiting from your team.', style: TextStyle(fontSize: 13, height: 1.4, color: AppColors.slate500)),
           const SizedBox(height: 12),
-          EqualGrid(
-            columns: 2,
-            rowHeight: 84,
-            children: [
-              MetricTile(value: '${pending.length}', label: 'Pending', color: AppColors.primary),
-              MetricTile(value: '$high', label: 'High priority', color: AppColors.rose),
-              MetricTile(value: '$approvedToday', label: 'Approved today', color: AppColors.emerald),
-              MetricTile(value: '$sentBack', label: 'Sent back', color: AppColors.amber),
-            ],
+          AppCard(
+            color: AppColors.white,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: Row(
+              children: [
+                _Count(value: '${pending.length}', label: 'Pending', color: AppColors.primary),
+                _Count(value: '$high', label: 'High', color: AppColors.rose),
+                _Count(value: '$approvedToday', label: 'Today', color: AppColors.emerald),
+                _Count(value: '$sentBack', label: 'Sent back', color: AppColors.amber),
+              ],
+            ),
           ),
           if (pending.isNotEmpty) ...[
             const SizedBox(height: 12),
             AppCard(
-              color: const Color(0xFFEFF6FF),
-              child: Text(
-                '${pending.length} approvals need your action. $high high priority requests are waiting.',
-                style: const TextStyle(fontSize: 13, height: 1.35),
+              color: AppColors.white,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(width: 4, height: 36, decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(4))),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      '${pending.length} ${pending.length == 1 ? 'request needs' : 'requests need'} a decision. $high ${high == 1 ? 'is' : 'are'} high priority.',
+                      style: const TextStyle(fontSize: 13, height: 1.4, color: AppColors.slate700),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -73,10 +84,18 @@ class _ApprovalsInboxScreenState extends State<ApprovalsInboxScreen> {
           if (_tab == 'History')
             ...[
               for (final item in state.approvalHistory) _HistoryPeek(item: item),
-              TextButton(onPressed: () => openPage(context, const ApprovalHistoryScreen()), child: const Text('Open full history')),
+              const SizedBox(height: 4),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: OutlinedButton(
+                  onPressed: () => openPage(context, const ApprovalHistoryScreen()),
+                  child: const Text('Open full history'),
+                ),
+              ),
             ]
           else if (visible.isEmpty)
-            const AppCard(child: Text('Nothing is waiting in this tab.'))
+            const AppCard(color: AppColors.white, child: Text('Nothing is waiting in this tab.'))
           else
             for (final item in visible) ...[
               _ApprovalCard(item: item),
@@ -100,22 +119,33 @@ class _ApprovalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accent = item.priority == 'High' ? AppColors.rose : AppColors.primary;
     return AppCard(
+      color: AppColors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(item.id, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.indigo, fontSize: 12)),
+              Container(width: 4, height: 42, decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(4))),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(item.dateLabel, style: const TextStyle(fontSize: 12, color: AppColors.slate500, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 2),
+                    Text(item.employee, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 2),
+                    Text('${item.kind} · ${item.summary}', style: const TextStyle(fontSize: 12, height: 1.3, color: AppColors.slate500)),
+                  ],
+                ),
+              ),
               const SizedBox(width: 8),
-              StatusPill(label: item.priority, color: item.priority == 'High' ? AppColors.rose : AppColors.slate500),
-              const Spacer(),
-              Text(item.dateLabel, style: const TextStyle(fontSize: 11, color: AppColors.slate500)),
+              StatusPill(label: item.priority, color: accent),
             ],
           ),
-          const SizedBox(height: 6),
-          Text(item.employee, style: const TextStyle(fontWeight: FontWeight.w600)),
-          Text('${item.kind} · ${item.summary}', style: const TextStyle(fontSize: 13, color: AppColors.slate700)),
           const SizedBox(height: 10),
           Row(
             children: [
@@ -185,6 +215,26 @@ class _ApprovalCard extends StatelessWidget {
   }
 }
 
+class _Count extends StatelessWidget {
+  const _Count({required this.value, required this.label, required this.color});
+  final String value;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: color, height: 1)),
+          const SizedBox(height: 4),
+          Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate500)),
+        ],
+      ),
+    );
+  }
+}
+
 class _HistoryPeek extends StatelessWidget {
   const _HistoryPeek({required this.item});
   final ApprovalItem item;
@@ -194,9 +244,19 @@ class _HistoryPeek extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: AppCard(
+        color: AppColors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
           children: [
-            Expanded(child: Text('${item.id} · ${item.employee}', style: const TextStyle(fontWeight: FontWeight.w700))),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(item.employee, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                  Text('${item.kind} · ${item.id}', style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
+                ],
+              ),
+            ),
             StatusPill(label: item.status, color: colorForRequestStatus(item.status)),
           ],
         ),

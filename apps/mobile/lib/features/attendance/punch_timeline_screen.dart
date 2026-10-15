@@ -4,14 +4,35 @@ import 'package:provider/provider.dart';
 import '../../app/navigation.dart';
 import '../../app/theme.dart';
 import '../../core/app_state.dart';
-import '../../core/demo_data.dart';
 import '../../shared/widgets.dart';
 import 'day_detail_screen.dart';
 
-class PunchTimelineScreen extends StatefulWidget {
-  const PunchTimelineScreen({super.key, this.day = 12});
+class _Count extends StatelessWidget {
+  const _Count({required this.value, required this.label, required this.color});
+  final String value;
+  final String label;
+  final Color color;
 
-  final int day;
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: color, height: 1)),
+          const SizedBox(height: 4),
+          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate500)),
+        ],
+      ),
+    );
+  }
+}
+
+class PunchTimelineScreen extends StatefulWidget {
+  const PunchTimelineScreen({super.key, this.day});
+
+  final int? day;
+
+  int get shownDay => day ?? DateTime.now().day;
 
   @override
   State<PunchTimelineScreen> createState() => _PunchTimelineScreenState();
@@ -23,8 +44,8 @@ class _PunchTimelineScreenState extends State<PunchTimelineScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final record = context.watch<AppState>().day(widget.day);
-    final all = DemoData.punchesFor(record);
+    final state = context.watch<AppState>();
+    final all = state.punches;
     final visible = all.where((event) {
       final filterOk = switch (_filter) {
         'Valid' => !event.flagged,
@@ -42,17 +63,21 @@ class _PunchTimelineScreenState extends State<PunchTimelineScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          Text(prettyDay(widget.day), style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.slate500)),
+          Text(prettyDay(widget.shownDay, month: state.loadedMonth), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.slate500)),
+          const SizedBox(height: 4),
+          const Text('Raw punches before they are turned into a day record.', style: TextStyle(fontSize: 13, height: 1.35, color: AppColors.slate500)),
           const SizedBox(height: 12),
-          EqualGrid(
-            columns: 2,
-            rowHeight: 88,
-            children: [
-              MetricTile(value: '${all.length}', label: 'Total punches', color: AppColors.slate700),
-              MetricTile(value: '${all.length - flagged}', label: 'Valid punches', color: AppColors.emerald),
-              MetricTile(value: '$flagged', label: 'Unprocessed', color: AppColors.amber),
-              MetricTile(value: '$biometric', label: 'Biometric', color: AppColors.primary),
-            ],
+          AppCard(
+            color: AppColors.white,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: Row(
+              children: [
+                _Count(value: '${all.length}', label: 'Total', color: AppColors.slate900),
+                _Count(value: '${all.length - flagged}', label: 'Valid', color: AppColors.emerald),
+                _Count(value: '$flagged', label: 'Flagged', color: AppColors.amber),
+                _Count(value: '$biometric', label: 'Biometric', color: AppColors.primary),
+              ],
+            ),
           ),
           const SizedBox(height: 12),
           FilterChips(
@@ -73,18 +98,21 @@ class _PunchTimelineScreenState extends State<PunchTimelineScreen> {
           ),
           const SizedBox(height: 12),
           if (visible.isEmpty)
-            const AppCard(child: Text('No punches match this filter.'))
+            const AppCard(color: AppColors.white, child: Text('No punches match this filter.'))
           else
             for (final event in visible) ...[
               AppCard(
+                color: AppColors.white,
                 child: Row(
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${event.timeLabel}  ${event.type}', style: const TextStyle(fontWeight: FontWeight.w600)),
-                          const SizedBox(height: 4),
+                          Text(event.timeLabel, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                          const SizedBox(height: 2),
+                          Text(event.type, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 2),
                           Text('${event.source} · ${event.place}', style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
                         ],
                       ),
@@ -99,19 +127,19 @@ class _PunchTimelineScreenState extends State<PunchTimelineScreen> {
               ),
               const SizedBox(height: 8),
             ],
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           AppCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            color: AppColors.white,
+            onTap: () => openPage(context, DayDetailScreen(day: widget.shownDay)),
+            child: Row(
               children: [
-                Text(
-                  all.isEmpty ? 'Nothing to summarise.' : '${all.length} raw events · ${all.length - flagged} processed successfully.',
-                  style: const TextStyle(fontSize: 13),
+                Expanded(
+                  child: Text(
+                    all.isEmpty ? 'Nothing to summarise yet.' : '${all.length} raw events · ${all.length - flagged} processed.',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
                 ),
-                TextButton(
-                  onPressed: () => openPage(context, DayDetailScreen(day: widget.day)),
-                  child: const Text('View processed attendance'),
-                ),
+                const Text('Day detail', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primary)),
               ],
             ),
           ),

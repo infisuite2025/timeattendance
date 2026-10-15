@@ -35,6 +35,7 @@ import { globalPayrollRouter } from './modules/global-payroll/global-payroll.con
 import { billingRouter } from './modules/billing/billing.controller.js';
 import { helpBotRouter } from './modules/help-bot/help-bot.controller.js';
 import { dpdpaRouter } from './modules/dpdpa/dpdpa.controller.js';
+import { databaseReachable } from './database/core-repository.js';
 
 const app = express();
 
@@ -57,9 +58,11 @@ app.use(limiter);
 app.use('/api/v1/auth', authRouter);
 
 // Health Check
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
+  const database = (await databaseReachable()) ? 'connected' : 'unavailable';
   res.json({
-    status: 'healthy',
+    status: database === 'connected' ? 'healthy' : 'degraded',
+    database,
     service: 'InfiTimePro API Gateway',
     timestamp: new Date().toISOString(),
     version: '1.0.0',

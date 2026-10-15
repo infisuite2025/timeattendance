@@ -4,11 +4,13 @@ import 'package:provider/provider.dart';
 import 'app/theme.dart';
 import 'core/api_client.dart';
 import 'core/app_state.dart';
+import 'core/push_messaging.dart';
 import 'features/auth/login_screen.dart';
 import 'features/shell/shell_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await PushMessaging.start();
   runApp(const InfiTimeProApp());
 }
 
@@ -31,8 +33,33 @@ class InfiTimeProApp extends StatelessWidget {
   }
 }
 
-class _RootGate extends StatelessWidget {
+class _RootGate extends StatefulWidget {
   const _RootGate();
+
+  @override
+  State<_RootGate> createState() => _RootGateState();
+}
+
+class _RootGateState extends State<_RootGate> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    final app = context.read<AppState>();
+    app.refreshClock();
+    if (app.signedIn) app.loadWorkspace();
+  }
 
   @override
   Widget build(BuildContext context) {

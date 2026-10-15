@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme.dart';
+import '../../shared/widgets.dart';
 import 'live_attendance_screen.dart';
 import 'team_attendance_screen.dart';
 
@@ -19,18 +19,21 @@ class _TeamScreenState extends State<TeamScreen> {
     return SafeArea(
       child: Column(
         children: [
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: PageIntro(title: 'Team', subtitle: 'Who is in right now, and how your own team looks today.'),
+          ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: SegmentedButton<int>(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
+            child: AppSegmentedControl(
+              index: _segment,
+              onChanged: (value) => setState(() => _segment = value),
               segments: const [
-                ButtonSegment(value: 0, label: Text('Live'), icon: Icon(Icons.podcasts_outlined)),
-                ButtonSegment(value: 1, label: Text('My team'), icon: Icon(Icons.groups_outlined)),
+                AppSegment('Live', icon: Icons.podcasts_outlined),
+                AppSegment('My team', icon: Icons.groups_outlined),
               ],
-              selected: {_segment},
-              onSelectionChanged: (value) => setState(() => _segment = value.first),
             ),
           ),
-          const Divider(height: 1, color: AppColors.slate200),
           Expanded(child: _segment == 0 ? const LiveAttendanceScreen(embedded: true) : const TeamAttendanceScreen(embedded: true)),
         ],
       ),

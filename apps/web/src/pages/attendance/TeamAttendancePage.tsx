@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   Users,
@@ -34,18 +34,30 @@ import { useAuth } from '../../context/AuthContext.tsx';
 import { useNotification } from '../../context/NotificationContext.tsx';
 import { useI18n } from '../../context/I18nContext.tsx';
 import { encodeSecureToken } from '../../utils/routeSecurity.ts';
+import { apiClient } from '../../services/apiClient.ts';
 
 export const TeamAttendancePage: React.FC = () => {
   const { t } = useI18n();
   const { user, role } = useAuth();
   const { toast } = useNotification();
-  const [selectedDate, setSelectedDate] = useState('2026-09-14');
+  const [selectedDate, setSelectedDate] = useState(() => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()));
   const [selectedDept, setSelectedDept] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeMember, setActiveMember] = useState<TeamAttendanceMemberDTO | null>(null);
+  const [teamMembers, setTeamMembers] = useState<TeamAttendanceMemberDTO[]>([]);
+  const [summary, setSummary] = useState<TeamAttendanceSummaryDTO | null>(null);
 
-  const teamMembers: TeamAttendanceMemberDTO[] = [
+  useEffect(() => {
+    apiClient.get<TeamAttendanceSummaryDTO>('/attendance/team-attendance', { date: selectedDate }).then((res) => {
+      if (res.success && res.data) {
+        setSummary(res.data);
+        setTeamMembers(Array.isArray(res.data.members) ? res.data.members : []);
+      }
+    }).catch(() => undefined);
+  }, [selectedDate]);
+
+  const _retiredTeam: TeamAttendanceMemberDTO[] = [
     {
       employeeId: 'emp-001',
       employeeCode: 'EMP-1001',
@@ -161,16 +173,9 @@ export const TeamAttendancePage: React.FC = () => {
     }
   ];
 
-  const filteredMembers = teamMembers.filter(m => {
-    // Role-based scoping
-    if (role === 'EMPLOYEE') {
-      if (m.employeeCode !== user.employeeCode) return false;
-    } else if (role === 'MANAGER') {
-      // Manager Vikram Singh oversees direct team: EMP-1001, EMP-1003, EMP-1005, EMP-1006
-      const isMyStaff = m.department === 'Operations' || m.department === 'Engineering' || m.employeeCode === 'EMP-1001' || m.employeeCode === 'EMP-1003' || m.employeeCode === 'EMP-1005';
-      if (!isMyStaff) return false;
-    }
+  void _retiredTeam;
 
+  const filteredMembers = teamMembers.filter(m => {
     const matchesSearch =
       m.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       m.employeeCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -267,7 +272,7 @@ export const TeamAttendancePage: React.FC = () => {
             {role === 'ADMIN' && (
               <>
                 <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                <span>Enterprise Administrator Scope: Company-wide view across all 6 departments</span>
+                <span>Enterprise Administrator Scope: Company-wide view for {selectedDate}</span>
               </>
             )}</div>
         </div>
@@ -275,7 +280,12 @@ export const TeamAttendancePage: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-700">
             <Calendar className="w-4 h-4 text-slate-400" />
-            <span>Today, 14 Sep 2026</span>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(event) => setSelectedDate(event.target.value)}
+              className="bg-transparent text-xs font-medium text-slate-700 outline-none"
+            />
           </div>
 
           <button
@@ -299,38 +309,38 @@ export const TeamAttendancePage: React.FC = () => {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="text-xs font-medium text-slate-500">Team Size</div>
-          <div className="text-2xl font-bold text-slate-900 mt-1">6</div>
+          <div className="text-2xl font-bold text-slate-900 mt-1">{summary?.totalTeamSize ?? teamMembers.length}</div>
           <div className="text-[11px] text-slate-400 mt-0.5">Direct Reportees</div>
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="text-xs font-medium text-slate-500">Present Today</div>
-          <div className="text-2xl font-bold text-emerald-600 mt-1">4</div>
-          <div className="text-[11px] text-emerald-700 font-medium mt-0.5">67% On Time</div>
+          <div className="text-2xl font-bold text-emerald-600 mt-1">{summary?.presentCount ?? 0}</div>
+          <div className="text-[11px] text-emerald-700 font-medium mt-0.5">{summary?.teamCompliancePercentage ?? 0}% recorded</div>
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="text-xs font-medium text-slate-500">Late Marks</div>
-          <div className="text-2xl font-bold text-amber-600 mt-1">1</div>
-          <div className="text-[11px] text-amber-700 font-medium mt-0.5">Avg Late: 35m</div>
+          <div className="text-2xl font-bold text-amber-600 mt-1">{summary?.lateCount ?? 0}</div>
+          <div className="text-[11px] text-amber-700 font-medium mt-0.5">Late arrivals today</div>
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="text-xs font-medium text-slate-500">On Leave</div>
-          <div className="text-2xl font-bold text-blue-600 mt-1">1</div>
-          <div className="text-[11px] text-blue-700 font-medium mt-0.5">Approved Annual</div>
+          <div className="text-2xl font-bold text-blue-600 mt-1">{summary?.onLeaveCount ?? 0}</div>
+          <div className="text-[11px] text-blue-700 font-medium mt-0.5">Approved leave</div>
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="text-xs font-medium text-slate-500">Missing Punch</div>
-          <div className="text-2xl font-bold text-rose-600 mt-1">1</div>
-          <div className="text-[11px] text-rose-700 font-medium mt-0.5">Requires Sign-off</div>
+          <div className="text-2xl font-bold text-rose-600 mt-1">{summary?.missingPunchCount ?? 0}</div>
+          <div className="text-[11px] text-rose-700 font-medium mt-0.5">Needs a punch or request</div>
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="text-xs font-medium text-slate-500">Pending Approvals</div>
-          <div className="text-2xl font-bold text-purple-600 mt-1">3</div>
-          <div className="text-[11px] text-purple-700 font-medium mt-0.5">Regularisations</div>
+          <div className="text-xs font-medium text-slate-500">Absent</div>
+          <div className="text-2xl font-bold text-purple-600 mt-1">{summary?.absentCount ?? 0}</div>
+          <div className="text-[11px] text-purple-700 font-medium mt-0.5">Not punched in</div>
         </div>
       </div>
 

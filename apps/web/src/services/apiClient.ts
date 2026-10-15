@@ -26,11 +26,11 @@ class ApiClient {
     this.baseUrl = baseUrl;
   }
 
-  private getToken(): string {
-    if (typeof localStorage === 'undefined') return 'demo-jwt-token-active';
+  private getToken(): string | null {
+    if (typeof localStorage === 'undefined') return null;
     const stored = localStorage.getItem('infi_timepro_auth_token');
-    if (!stored || stored === 'undefined' || stored === 'null' || stored.trim() === '') {
-      return 'demo-jwt-token-active';
+    if (!stored || stored === 'undefined' || stored === 'null' || stored.trim() === '' || stored.startsWith('demo-jwt-token')) {
+      return null;
     }
     return stored;
   }
@@ -43,13 +43,13 @@ class ApiClient {
 
   private getHeaders(customHeaders: Record<string, string> = {}): Record<string, string> {
     const token = this.getToken();
-    const tenantId = (typeof localStorage !== 'undefined' && localStorage.getItem('infi_timepro_tenant_id')) || 'tenant-demo-001';
+    const tenantId = (typeof localStorage !== 'undefined' && localStorage.getItem('infi_timepro_tenant_id')) || 'ten_acme_001';
 
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'x-tenant-id': tenantId,
-      'Authorization': `Bearer ${token}`,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...customHeaders,
     };
   }

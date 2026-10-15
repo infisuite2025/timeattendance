@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../app/navigation.dart';
 import '../../app/theme.dart';
 import '../../core/app_state.dart';
-import '../../core/demo_data.dart';
+import '../../core/models.dart';
 import '../../shared/feedback.dart';
 import '../../shared/widgets.dart';
 import '../approvals/inbox_screen.dart';
@@ -13,6 +13,7 @@ import '../attendance/exceptions_screen.dart';
 import '../regularisation/raise_screen.dart';
 import '../regularisation/requests_screen.dart';
 import '../team/live_attendance_screen.dart';
+import 'notifications_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -23,163 +24,212 @@ class HomeScreen extends StatelessWidget {
     final worked = formatDuration(state.workedMinutes);
     return SafeArea(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
         children: [
+          _Header(state: state),
+          if (state.connectionError != null) ...[
+            const SizedBox(height: 12),
+            AppCard(
+              color: AppColors.amberSoft,
+              child: Text(state.connectionError!, style: const TextStyle(fontSize: 13, height: 1.35)),
+            ),
+          ],
+          if (state.syncing) ...[
+            const SizedBox(height: 12),
+            const LinearProgressIndicator(minHeight: 3),
+          ],
+          const SizedBox(height: 16),
+          _PunchCard(state: state, worked: worked),
+          const SizedBox(height: 20),
+          const _SectionTitle('Today'),
+          const SizedBox(height: 8),
+          _TodayCard(state: state, worked: worked),
+          const SizedBox(height: 20),
+          const _SectionTitle('This month'),
+          const SizedBox(height: 8),
+          const _MonthCard(),
+          const SizedBox(height: 20),
+          const _SectionTitle('Needs attention'),
+          const SizedBox(height: 8),
+          const _AttentionCard(),
+          if (state.canManageTeam) ...[
+            const SizedBox(height: 20),
+            const _SectionTitle('My team today'),
+            const SizedBox(height: 8),
+            const _TeamCard(),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _Header extends StatelessWidget {
+  const _Header({required this.state});
+  final AppState state;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${greetingForNow()}, ${state.firstName}',
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, letterSpacing: -0.3, color: AppColors.slate900),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                formatToday(),
+                style: const TextStyle(fontSize: 13, color: AppColors.slate500, fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+        ),
+        _Bell(count: state.unreadNotifications),
+        const SizedBox(width: 4),
+        AvatarBadge(initials: state.initials, size: 40),
+      ],
+    );
+  }
+}
+
+class _PunchCard extends StatelessWidget {
+  const _PunchCard({required this.state, required this.worked});
+  final AppState state;
+  final String worked;
+
+  @override
+  Widget build(BuildContext context) {
+    final checked = state.checkedIn;
+    final onBreak = state.onBreak;
+    final outside = !state.insideFence || state.locationLabel.toLowerCase().startsWith('outside');
+    final accent = !checked ? AppColors.emerald : (onBreak ? AppColors.amber : AppColors.primary);
+    final status = !checked ? 'Not clocked in' : (onBreak ? 'On a break' : 'Clocked in');
+    final detail = !checked
+        ? 'You have not started yet. Clock in to begin today.'
+        : onBreak
+            ? 'Paused since your break. End the break when you are back.'
+            : 'Started at ${state.clockInLabel}. Clock out when the day is done.';
+
+    return AppCard(
+      color: AppColors.white,
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(height: 5, decoration: BoxDecoration(color: accent, borderRadius: const BorderRadius.vertical(top: Radius.circular(16)))),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+          Row(
+            children: [
+              Flexible(
+                child: StatusPill(
+                  label: status,
+                  color: !checked ? AppColors.slate700 : (onBreak ? AppColors.amber : AppColors.emerald),
+                  soft: !checked ? AppColors.slate100 : (onBreak ? AppColors.amberSoft : AppColors.emeraldSoft),
+                ),
+              ),
+              TextButton(
+                onPressed: () => openPage(context, const MyAttendanceScreen(showBack: true)),
+                style: TextButton.styleFrom(visualDensity: VisualDensity.compact, padding: const EdgeInsets.symmetric(horizontal: 8)),
+                child: const Text('Attendance'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Text('WORKED TODAY', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: AppColors.slate500)),
+          const SizedBox(height: 4),
+          Text(worked, style: const TextStyle(fontSize: 40, fontWeight: FontWeight.w700, height: 1, letterSpacing: -1, color: AppColors.slate900)),
+          const SizedBox(height: 8),
+          Text(detail, style: const TextStyle(fontSize: 13, height: 1.35, color: AppColors.slate700)),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (state.assignedShift.isNotEmpty)
+                _MetaChip(
+                  icon: Icons.schedule_rounded,
+                  label: state.assignedShift,
+                  color: AppColors.primary,
+                  soft: const Color(0xFFEFF6FF),
+                ),
+              if (state.locationLabel.isNotEmpty)
+              _MetaChip(
+                icon: Icons.place_outlined,
+                label: state.locationLabel,
+                color: outside ? AppColors.amber : AppColors.emerald,
+                soft: outside ? AppColors.amberSoft : AppColors.emeraldSoft,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: FilledButton.icon(
+              onPressed: state.locating
+                  ? null
+                  : () {
+                      if (checked) {
+                        _clockOut(context);
+                      } else {
+                        _clockIn(context);
+                      }
+                    },
+              style: FilledButton.styleFrom(
+                backgroundColor: checked ? AppColors.slate900 : AppColors.emerald,
+                disabledBackgroundColor: AppColors.slate200,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              ),
+              icon: Icon(checked ? Icons.logout_rounded : Icons.login_rounded, size: 20),
+              label: Text(state.locating ? 'Finding location…' : (checked ? 'Clock out' : 'Clock in')),
+            ),
+          ),
+          const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '${DemoData.demoDateLabel} · ${DemoData.demoLocation}',
-                      style: TextStyle(fontSize: 12, color: AppColors.slate500, fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${greetingForNow()}, ${state.firstName}',
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600, letterSpacing: -0.3),
-                    ),
-                  ],
+                child: OutlinedButton.icon(
+                  onPressed: !checked
+                      ? null
+                      : () {
+                          final app = context.read<AppState>();
+                          if (app.onBreak) {
+                            app.endBreak();
+                          } else {
+                            app.startBreak();
+                          }
+                        },
+                  icon: Icon(onBreak ? Icons.play_arrow_rounded : Icons.free_breakfast_outlined, size: 18),
+                  label: Text(onBreak ? 'End break' : 'Break'),
                 ),
               ),
-              _Bell(count: state.unreadNotifications),
-              const SizedBox(width: 8),
-              AvatarBadge(initials: state.initials, size: 40),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (state.connectionError != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: AppCard(
-                color: AppColors.amberSoft,
-                child: Text(state.connectionError!, style: const TextStyle(fontSize: 13, height: 1.35)),
-              ),
-            )
-          else if (!state.syncing && state.workspaceLinked)
-            const Padding(
-              padding: EdgeInsets.only(bottom: 12),
-              child: Text('Connected to the workspace', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.emerald)),
-            ),
-          if (state.syncing) const LinearProgressIndicator(minHeight: 3),
-          _StatusBanner(state: state, worked: worked),
-          const SizedBox(height: 14),
-          EqualGrid(
-            columns: 3,
-            rowHeight: 104,
-            children: [
-              _InfoBox(title: 'Clock-in', value: state.checkedIn ? state.clockInLabel : 'Not yet', hint: 'Today'),
-              const _InfoBox(title: 'Shift', value: 'General', hint: '09:00 AM – 06:00 PM'),
-              _InfoBox(title: 'Worked', value: worked, hint: 'of 8h 00m'),
-            ],
-          ),
-          const SizedBox(height: 14),
-          EqualGrid(
-            columns: 4,
-            rowHeight: 118,
-            spacing: 6,
-            children: [
-              _action(
-                context,
-                icon: state.checkedIn ? Icons.check_circle : Icons.login,
-                tint: AppColors.emerald,
-                label: 'Clock In',
-                caption: state.checkedIn ? 'Done' : 'Start work',
-                onTap: state.checkedIn || state.locating ? null : () => _clockIn(context),
-              ),
-              _action(
-                context,
-                icon: Icons.logout,
-                tint: AppColors.primary,
-                label: 'Clock Out',
-                caption: 'End your work',
-                onTap: state.checkedIn ? () => _clockOut(context) : null,
-              ),
-              _action(
-                context,
-                icon: Icons.free_breakfast_outlined,
-                tint: AppColors.amber,
-                label: state.onBreak ? 'End Break' : 'Break',
-                caption: state.onBreak ? 'On break' : 'Start break',
-                onTap: !state.checkedIn
-                    ? null
-                    : () {
-                        final app = context.read<AppState>();
-                        if (app.onBreak) {
-                          app.endBreak();
-                        } else {
-                          app.startBreak();
-                        }
-                      },
-              ),
-              _action(
-                context,
-                icon: Icons.edit_note_outlined,
-                tint: AppColors.indigo,
-                label: 'Regularise',
-                caption: 'Request change',
-                onTap: () => openPage(context, const RaiseRegularisationScreen()),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => openPage(context, const RaiseRegularisationScreen()),
+                  icon: const Icon(Icons.edit_note_rounded, size: 18),
+                  label: const Text('Regularise'),
+                ),
               ),
             ],
           ),
+          if (!checked) ...[
+            const SizedBox(height: 8),
+            const Text('Break opens after clock in. Regularise fixes a missing or wrong punch.', style: TextStyle(fontSize: 12, height: 1.35, color: AppColors.slate500)),
+          ],
           if (state.locating) ...[
             const SizedBox(height: 10),
             const LinearProgressIndicator(minHeight: 3),
           ],
-          const SizedBox(height: 16),
-          const _SummaryCard(),
-          const SizedBox(height: 12),
-          AppCard(
-            onTap: () => openPage(context, const RequestsScreen(embedded: false)),
-            child: const _AlertRow(
-              icon: Icons.pending_actions_outlined,
-              color: AppColors.primary,
-              title: 'Pending requests',
-              body: 'Regularisation drafts and items waiting on a manager.',
-            ),
-          ),
-          const SizedBox(height: 8),
-          AppCard(
-            onTap: () => openPage(context, const ExceptionsScreen()),
-            child: const _AlertRow(
-              icon: Icons.warning_amber_rounded,
-              color: AppColors.amber,
-              title: 'Attendance exceptions',
-              body: '8 exceptions need a look today.',
-            ),
-          ),
-          const SizedBox(height: 8),
-          AppCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Expanded(child: Text('My Team Today', style: TextStyle(fontWeight: FontWeight.w600))),
-                    TextButton(
-                      onPressed: () => openPage(context, const LiveAttendanceScreen()),
-                      child: const Text('View team'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                const Row(
-                  children: [
-                    Expanded(child: _TinyStat('12', 'Present')),
-                    Expanded(child: _TinyStat('2', 'Absent')),
-                    Expanded(child: _TinyStat('3', 'Late')),
-                    Expanded(child: _TinyStat('4', 'Pending approval')),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    onPressed: () => openPage(context, const ApprovalsInboxScreen()),
-                    child: const Text('Open approvals'),
-                  ),
-                ),
               ],
             ),
           ),
@@ -197,7 +247,261 @@ class HomeScreen extends StatelessWidget {
 
   void _clockOut(BuildContext context) {
     context.read<AppState>().clockOut();
-    showAppToast(context, 'Checked out. The punch is saved on this device.', success: true);
+    showAppToast(context, 'Checked out. The punch is saved for this employee.', success: true);
+  }
+}
+
+class _TodayCard extends StatelessWidget {
+  const _TodayCard({required this.state, required this.worked});
+  final AppState state;
+  final String worked;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      color: AppColors.white,
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+      child: Row(
+        children: [
+          _Fact(label: 'Clock-in', value: state.clockInLabel == '—' || state.clockInLabel.isEmpty ? 'Not yet' : state.clockInLabel),
+          _rule(),
+          _Fact(label: 'Shift', value: state.assignedShift.isEmpty ? '—' : state.assignedShift),
+          _rule(),
+          _Fact(label: 'Worked', value: worked),
+        ],
+      ),
+    );
+  }
+
+  Widget _rule() => Container(width: 1, height: 36, color: AppColors.line);
+}
+
+class _MonthCard extends StatelessWidget {
+  const _MonthCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    return AppCard(
+      color: AppColors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('Attendance', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+              const Spacer(),
+              Text('${state.monthRate}%', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.emerald)),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              _Count(value: '${state.monthPresent}', label: 'Present', color: AppColors.emerald),
+              _Count(value: '${state.monthAbsent}', label: 'Absent', color: AppColors.rose),
+              _Count(value: '${state.monthLate}', label: 'Late', color: AppColors.amber),
+              _Count(value: '${state.monthLeave}', label: 'Leave', color: AppColors.primary),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AttentionCard extends StatelessWidget {
+  const _AttentionCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    return AppCard(
+      color: AppColors.white,
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          _LinkRow(
+            icon: Icons.pending_actions_outlined,
+            color: AppColors.primary,
+            title: 'Pending requests',
+            body: state.canManageTeam ? 'Requests waiting for your decision' : 'Your own corrections, waiting on a manager',
+            onTap: () => openPage(context, const RequestsScreen(embedded: false)),
+          ),
+          if (state.canManageTeam) ...[
+            const Divider(height: 1, thickness: 1, color: AppColors.line),
+            _LinkRow(
+              icon: Icons.warning_amber_rounded,
+              color: AppColors.amber,
+              title: 'Exceptions',
+              body: state.exceptions.isEmpty ? 'No open exceptions' : '${state.exceptions.length} need a look',
+              onTap: () => openPage(context, const ExceptionsScreen()),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _TeamCard extends StatelessWidget {
+  const _TeamCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    final people = state.team.isNotEmpty ? state.team : state.org;
+    final present = people.where((person) => person.status == AttendanceStatus.present || person.status == AttendanceStatus.wfh).length;
+    final absent = people.where((person) => person.status == AttendanceStatus.absent).length;
+    final late = people.where((person) => person.status == AttendanceStatus.late).length;
+    final waiting = state.approvals.length;
+    return AppCard(
+      color: AppColors.white,
+      padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              const Expanded(child: Text('Who is in', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700))),
+              TextButton(
+                onPressed: () => openPage(context, const LiveAttendanceScreen()),
+                child: const Text('See all'),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Row(
+              children: [
+                _Count(value: '$present', label: 'Present', color: AppColors.emerald),
+                _Count(value: '$absent', label: 'Absent', color: AppColors.rose),
+                _Count(value: '$late', label: 'Late', color: AppColors.amber),
+              ],
+            ),
+          ),
+          const Divider(height: 16, thickness: 1, color: AppColors.line),
+          _LinkRow(
+            icon: Icons.fact_check_outlined,
+            color: AppColors.primary,
+            title: waiting == 0 ? 'No approvals waiting' : '$waiting approvals waiting',
+            body: 'Open the inbox to review them',
+            onTap: () => openPage(context, const ApprovalsInboxScreen()),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetaChip extends StatelessWidget {
+  const _MetaChip({required this.icon, required this.label, required this.color, required this.soft});
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final Color soft;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(color: soft, borderRadius: BorderRadius.circular(999)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 240),
+            child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: color)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(text, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.slate500, letterSpacing: 0.2));
+  }
+}
+
+class _Fact extends StatelessWidget {
+  const _Fact({required this.label, required this.value});
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.slate900)),
+          const SizedBox(height: 2),
+          Text(label, style: const TextStyle(fontSize: 12, color: AppColors.slate500, fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+}
+
+class _Count extends StatelessWidget {
+  const _Count({required this.value, required this.label, required this.color});
+  final String value;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: color, height: 1)),
+          const SizedBox(height: 4),
+          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate500)),
+        ],
+      ),
+    );
+  }
+}
+
+class _LinkRow extends StatelessWidget {
+  const _LinkRow({required this.icon, required this.color, required this.title, required this.body, required this.onTap});
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String body;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.slate900)),
+                  const SizedBox(height: 1),
+                  Text(body, style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: AppColors.slate400, size: 20),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -208,28 +512,7 @@ class _Bell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      onPressed: () {
-        context.read<AppState>().markNotificationsRead();
-        showInfoSheet(
-          context,
-          title: 'Notifications',
-          child: Consumer<AppState>(
-            builder: (context, state, _) {
-              return Column(
-                children: [
-                  for (final note in state.notifications)
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(note.title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                      subtitle: Text(note.body),
-                      trailing: Text(note.timeLabel, style: const TextStyle(fontSize: 11, color: AppColors.slate500)),
-                    ),
-                ],
-              );
-            },
-          ),
-        );
-      },
+      onPressed: () => openPage(context, const NotificationsScreen()),
       icon: Badge(
         isLabelVisible: count > 0,
         label: Text('$count'),
@@ -237,198 +520,4 @@ class _Bell extends StatelessWidget {
       ),
     );
   }
-}
-
-class _StatusBanner extends StatelessWidget {
-  const _StatusBanner({required this.state, required this.worked});
-  final AppState state;
-  final String worked;
-
-  @override
-  Widget build(BuildContext context) {
-    final checked = state.checkedIn;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        gradient: const LinearGradient(colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)]),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Flexible(
-                child: StatusPill(
-                  label: checked ? (state.onBreak ? 'On break' : 'Checked in') : 'Not checked in',
-                  color: AppColors.white,
-                  soft: Colors.white.withValues(alpha: 0.18),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  checked && state.insideFence ? 'On time' : (checked ? 'Needs review' : 'Start of day'),
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12),
-                ),
-              ),
-            ],
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: () => openPage(context, const MyAttendanceScreen(showBack: true)),
-              style: TextButton.styleFrom(foregroundColor: Colors.white, visualDensity: VisualDensity.compact, padding: EdgeInsets.zero),
-              child: const Text('View attendance'),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            checked ? "You're all set for today!" : 'Clock in when you are ready to start.',
-            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '$worked worked · ${state.locationLabel}',
-            style: const TextStyle(color: Color(0xFFDBEAFE), fontSize: 12),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SummaryCard extends StatelessWidget {
-  const _SummaryCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return const AppCard(
-      child: Row(
-        children: [
-          DonutChart(progress: 18 / 22, center: '18/22', caption: 'Days'),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Attendance rate 82%', style: TextStyle(fontWeight: FontWeight.w600)),
-                SizedBox(height: 2),
-                Text('↑ 6% vs last month', style: TextStyle(color: AppColors.emerald, fontSize: 12, fontWeight: FontWeight.w700)),
-                SizedBox(height: 10),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    StatusPill(label: 'Present 18', color: AppColors.emerald, soft: AppColors.emeraldSoft),
-                    StatusPill(label: 'Absent 2', color: AppColors.rose, soft: AppColors.roseSoft),
-                    StatusPill(label: 'Late 1', color: AppColors.amber, soft: AppColors.amberSoft),
-                    StatusPill(label: 'On leave 1', color: AppColors.primary, soft: Color(0xFFEFF6FF)),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AlertRow extends StatelessWidget {
-  const _AlertRow({required this.icon, required this.color, required this.title, required this.body});
-  final IconData icon;
-  final Color color;
-  final String title;
-  final String body;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, color: color),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-              const SizedBox(height: 2),
-              Text(body, style: const TextStyle(fontSize: 12, color: AppColors.slate500, height: 1.3)),
-            ],
-          ),
-        ),
-        const Icon(Icons.chevron_right, color: AppColors.slate400),
-      ],
-    );
-  }
-}
-
-class _TinyStat extends StatelessWidget {
-  const _TinyStat(this.value, this.label);
-  final String value;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(value, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-        Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, color: AppColors.slate500)),
-      ],
-    );
-  }
-}
-
-class _InfoBox extends StatelessWidget {
-  const _InfoBox({required this.title, required this.value, required this.hint});
-
-  final String title;
-  final String value;
-  final String hint;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.slate500, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 4),
-          Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-          Text(hint, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, color: AppColors.slate500)),
-        ],
-      ),
-    );
-  }
-}
-
-Widget _action(
-  BuildContext context, {
-  required IconData icon,
-  required Color tint,
-  required String label,
-  required String caption,
-  required VoidCallback? onTap,
-}) {
-  final enabled = onTap != null;
-    return Opacity(
-      opacity: enabled ? 1 : 0.45,
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-        onTap: onTap,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: tint, size: 22),
-            const SizedBox(height: 6),
-            Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-            Text(caption, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, color: AppColors.slate500)),
-          ],
-        ),
-      ),
-    );
 }

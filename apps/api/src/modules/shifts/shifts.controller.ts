@@ -1,18 +1,25 @@
 import { Router, Response } from 'express';
 import { shiftsService } from './shifts.service.js';
 import { AuthenticatedRequest, authGuard } from '../../middleware/auth-guard.js';
+import { getLiveSchedule, listShifts, sendDatabaseError } from '../../database/core-repository.js';
 
 export const shiftsRouter = Router();
 
-shiftsRouter.get('/', authGuard, (req: AuthenticatedRequest, res: Response) => {
-  const data = shiftsService.getShifts();
-  res.json({
-    success: true,
-    data,
-    meta: { total: data.length },
-    timestamp: new Date().toISOString(),
-    requestId: `req_${Date.now()}`,
-  });
+shiftsRouter.get('/', authGuard, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const data = await listShifts(req.user?.tenantId || 'ten_acme_001');
+    res.json({
+      success: true,
+      data,
+      meta: { total: data.length },
+      timestamp: new Date().toISOString(),
+      requestId: `req_${Date.now()}`,
+    });
+  } catch (err) {
+    if (!sendDatabaseError(res, err)) {
+      res.status(500).json({ success: false, error: { code: 'ERR_INTERNAL', message: (err as Error).message } });
+    }
+  }
 });
 
 shiftsRouter.post('/', authGuard, (req: AuthenticatedRequest, res: Response) => {
@@ -140,14 +147,19 @@ shiftsRouter.patch('/swaps/:id/reject', authGuard, (req: AuthenticatedRequest, r
   });
 });
 
-shiftsRouter.get('/schedule-matrix', authGuard, (req: AuthenticatedRequest, res: Response) => {
-  const data = shiftsService.getScheduleMatrix();
-  res.json({
-    success: true,
-    data,
-    timestamp: new Date().toISOString(),
-    requestId: `req_${Date.now()}`,
-  });
+shiftsRouter.get('/schedule-matrix', authGuard, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const data = await getLiveSchedule(req.user?.tenantId || 'ten_acme_001', req.user?.role, req.user?.employeeId);
+    res.json({
+      success: true,
+      data,
+      timestamp: new Date().toISOString(),
+      requestId: `req_${Date.now()}`,
+    });
+  } catch (error: any) {
+    if (sendDatabaseError(res, error)) return;
+    res.status(500).json({ success: false, error: { message: error.message } });
+  }
 });
 
 shiftsRouter.put('/schedule-matrix/cell', authGuard, (req: AuthenticatedRequest, res: Response) => {

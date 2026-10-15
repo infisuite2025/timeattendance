@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../app/navigation.dart';
 import '../../app/theme.dart';
 import '../../core/app_state.dart';
-import '../../core/demo_data.dart';
 import '../../core/models.dart';
 import '../../shared/widgets.dart';
 import '../regularisation/raise_screen.dart';
@@ -17,103 +16,122 @@ class DayDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final record = context.watch<AppState>().day(day.clamp(1, 30));
-    final punches = DemoData.punchesFor(record);
+    final state = context.watch<AppState>();
+    final record = state.day(day.clamp(1, 30));
+    final punches = [
+      if ((record.inTime ?? '').isNotEmpty && record.inTime != '—')
+        PunchEvent(timeLabel: record.inTime!, type: 'Check-in', source: 'Workspace', place: record.shift, validity: 'Valid'),
+      if ((record.outTime ?? '').isNotEmpty && record.outTime != '—' && record.outTime != '--')
+        PunchEvent(timeLabel: record.outTime!, type: 'Check-out', source: 'Workspace', place: record.shift, validity: 'Valid'),
+    ];
     final color = colorForKind(record.kind);
+    final problem = record.kind == DayKind.late || record.kind == DayKind.missing || record.kind == DayKind.halfDay;
     return Scaffold(
-      appBar: AppBar(title: const Text('Attendance Day Detail')),
+      appBar: AppBar(title: const Text('Day detail')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          const Text('View your attendance, shift and timeline for the selected date.', style: TextStyle(color: AppColors.slate500)),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                onPressed: day > 1 ? () => _go(context, day - 1) : null,
-                icon: const Icon(Icons.chevron_left),
-              ),
-              Text(prettyDay(day), style: const TextStyle(fontWeight: FontWeight.w600)),
-              IconButton(
-                onPressed: day < 30 ? () => _go(context, day + 1) : null,
-                icon: const Icon(Icons.chevron_right),
-              ),
-            ],
-          ),
           AppCard(
+            color: AppColors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
             child: Row(
               children: [
-                const AvatarBadge(initials: 'PN', size: 42),
+                IconButton(onPressed: day > 1 ? () => _go(context, day - 1) : null, icon: const Icon(Icons.chevron_left)),
+                Expanded(child: Text(record.displayDate ?? prettyDay(day, month: state.loadedMonth), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16))),
+                IconButton(onPressed: day < 30 ? () => _go(context, day + 1) : null, icon: const Icon(Icons.chevron_right)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          AppCard(
+            color: AppColors.white,
+            child: Row(
+              children: [
+                AvatarBadge(initials: state.initials, size: 42),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(DemoData.currentUserName, style: TextStyle(fontWeight: FontWeight.w600)),
-                      Text('${DemoData.currentUserCode} · HR Bangalore', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
+                      Text(state.displayName, style: const TextStyle(fontWeight: FontWeight.w700)),
+                      Text(state.employeeId, style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
                     ],
                   ),
                 ),
-                StatusPill(label: dayKindLabel(record.kind), color: color),
+                StatusPill(label: kindLabel(record.kind), color: color),
               ],
             ),
           ),
           const SizedBox(height: 10),
           AppCard(
+            color: AppColors.white,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Shift information', style: TextStyle(fontWeight: FontWeight.w600)),
-                const SizedBox(height: 6),
-                Text(record.shift, style: const TextStyle(fontSize: 13)),
-                const Text('Break 01h 00m · Late grace 15 mins · Early exit grace 15 mins', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
-                TextButton(onPressed: () => openPage(context, const ShiftLibraryScreen()), child: const Text('View shift')),
+                Row(
+                  children: [
+                    _Bit(label: 'In', value: record.inTime ?? '—', color: AppColors.primary),
+                    _Bit(label: 'Out', value: record.outTime ?? '—', color: AppColors.indigo),
+                    _Bit(label: 'Hours', value: record.hours ?? '—', color: AppColors.emerald),
+                  ],
+                ),
               ],
             ),
           ),
           const SizedBox(height: 10),
-          EqualGrid(
-            columns: 3,
-            rowHeight: 88,
-            children: [
-              MetricTile(value: record.inTime ?? '—', label: 'In time', color: AppColors.primary),
-              MetricTile(value: record.outTime ?? '—', label: 'Out time', color: AppColors.indigo),
-              MetricTile(value: record.hours ?? '—', label: 'Total hours', color: AppColors.emerald),
-              const MetricTile(value: '8h 00m', label: 'Regular hours', color: AppColors.slate700),
-              MetricTile(value: record.kind == DayKind.present ? '1h 07m' : '0h 00m', label: 'Overtime', color: AppColors.amber),
-              const MetricTile(value: '1h 00m', label: 'Break', color: AppColors.purple),
-            ],
+          AppCard(
+            color: AppColors.white,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Shift', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.slate500)),
+                const SizedBox(height: 4),
+                Text(record.shift, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(onPressed: () => openPage(context, const ShiftLibraryScreen()), child: const Text('View shift library')),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 14),
-          const SectionLabel('Day timeline'),
+          const SizedBox(height: 16),
+          const Text('Timeline', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.slate500)),
           const SizedBox(height: 8),
           if (punches.isEmpty)
-            const AppCard(child: Text('No punches were recorded for this day.'))
+            const AppCard(color: AppColors.white, child: Text('No punches were recorded for this day.'))
           else
             AppCard(
+              color: AppColors.white,
               child: Column(
                 children: [
                   for (var i = 0; i < punches.length; i++)
-                    _Step(title: '${punches[i].timeLabel}  ${punches[i].type}', subtitle: '${punches[i].place} · ${punches[i].source}', last: i == punches.length - 1),
+                    _Step(time: punches[i].timeLabel, title: punches[i].type, subtitle: '${punches[i].place} · ${punches[i].source}', last: i == punches.length - 1),
                 ],
               ),
             ),
           const SizedBox(height: 10),
           AppCard(
-            color: AppColors.emeraldSoft,
-            child: Text(
-              record.kind == DayKind.late || record.kind == DayKind.missing || record.kind == DayKind.halfDay
-                  ? 'Policy note: ${record.reason ?? 'This day is outside the grace window.'}'
-                  : 'No policy violation detected. Attendance is marked ${dayKindLabel(record.kind).toLowerCase()}${record.hours == null ? '' : '. You worked ${record.hours}'}.' ,
-              style: const TextStyle(fontSize: 13, height: 1.4, color: AppColors.slate700),
+            color: AppColors.white,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(width: 4, height: 36, decoration: BoxDecoration(color: problem ? AppColors.amber : AppColors.emerald, borderRadius: BorderRadius.circular(4))),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    problem
+                        ? (record.reason ?? 'This day is outside the grace window.')
+                        : 'No policy issue. Marked ${kindLabel(record.kind).toLowerCase()}${record.hours == null ? '' : ' · ${record.hours} worked'}.',
+                    style: const TextStyle(fontSize: 13, height: 1.4, color: AppColors.slate700),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
-            onPressed: () => openPage(context, RaiseRegularisationScreen(dateLabel: prettyDay(day).replaceAll(',', ''))),
-            icon: const Icon(Icons.add),
-            label: const Text('Raise Regularisation'),
+            onPressed: () => openPage(context, RaiseRegularisationScreen(dateLabel: (record.displayDate ?? prettyDay(day, month: state.loadedMonth)).replaceAll(',', ''))),
+            icon: const Icon(Icons.edit_note_rounded),
+            label: const Text('Regularise this day'),
           ),
         ],
       ),
@@ -125,8 +143,29 @@ class DayDetailScreen extends StatelessWidget {
   }
 }
 
+class _Bit extends StatelessWidget {
+  const _Bit({required this.label, required this.value, required this.color});
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: color)),
+          const SizedBox(height: 2),
+          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate500)),
+        ],
+      ),
+    );
+  }
+}
+
 class _Step extends StatelessWidget {
-  const _Step({required this.title, required this.subtitle, required this.last});
+  const _Step({required this.time, required this.title, required this.subtitle, required this.last});
+  final String time;
   final String title;
   final String subtitle;
   final bool last;
@@ -150,7 +189,8 @@ class _Step extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                  Text(time, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
                   Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
                 ],
               ),

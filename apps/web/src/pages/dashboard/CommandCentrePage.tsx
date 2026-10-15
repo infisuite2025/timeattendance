@@ -28,40 +28,24 @@ export const CommandCentrePage: React.FC = () => {
   const { toast } = useNotification();
   const { t } = useI18n();
   const [selectedLocation, setSelectedLocation] = useState('All Locations');
-  const [selectedDate, setSelectedDate] = useState('2026-09-18');
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Live Metric State with resilient defaults
   const [kpis, setKpis] = useState<DashboardKPISummaryDTO>({
-    totalEmployees: { count: 1248, changeVsLastMonth: '+2.4%' },
-    present: { count: 892, percentage: 71.5 },
-    notArrived: { count: 156, percentage: 12.5 },
-    late: { count: 62, percentage: 5.0 },
-    onLeave: { count: 58, percentage: 4.6 },
-    wfh: { count: 44, percentage: 3.5 },
-    fieldDuty: { count: 26, percentage: 2.1 },
-    missingPunch: { count: 10, percentage: 0.8 },
+    totalEmployees: { count: 0, changeVsLastMonth: '—' },
+    present: { count: 0, percentage: 0 },
+    notArrived: { count: 0, percentage: 0 },
+    late: { count: 0, percentage: 0 },
+    onLeave: { count: 0, percentage: 0 },
+    wfh: { count: 0, percentage: 0 },
+    fieldDuty: { count: 0, percentage: 0 },
+    missingPunch: { count: 0, percentage: 0 },
   });
 
-  const [hourlyTrend, setHourlyTrend] = useState<HourlyAttendanceTrendItem[]>([
-    { hour: '6 AM', present: 50, expected: 80 },
-    { hour: '8 AM', present: 480, expected: 550 },
-    { hour: '10 AM', present: 892, expected: 920 },
-    { hour: '12 PM', present: 885, expected: 920 },
-    { hour: '2 PM', present: 870, expected: 920 },
-    { hour: '4 PM', present: 860, expected: 920 },
-    { hour: '6 PM', present: 720, expected: 850 },
-    { hour: '8 PM', present: 310, expected: 400 },
-  ]);
-
-  const [locationDist, setLocationDist] = useState<LocationDistributionItem[]>([
-    { location: 'Hyderabad Main Office', count: 650, percentage: 52, color: '#3B82F6' },
-    { location: 'Bengaluru Tech Park', count: 302, percentage: 24, color: '#10B981' },
-    { location: 'Mumbai Financial Centre', count: 146, percentage: 12, color: '#F59E0B' },
-    { location: 'Delhi Cyber Hub', count: 100, percentage: 8, color: '#8B5CF6' },
-    { location: 'Remote / Field Locations', count: 50, percentage: 4, color: '#64748B' },
-  ]);
+  const [hourlyTrend, setHourlyTrend] = useState<HourlyAttendanceTrendItem[]>([]);
+  const [locationDist, setLocationDist] = useState<LocationDistributionItem[]>([]);
 
   const fetchLiveAnalytics = async (showToast = false) => {
     setIsRefreshing(true);
@@ -134,11 +118,12 @@ export const CommandCentrePage: React.FC = () => {
               onChange={(e) => setSelectedLocation(e.target.value)}
               className="bg-transparent border-0 text-xs font-semibold text-slate-900 focus:outline-none cursor-pointer"
             >
-              <option value="All Locations">{t('dashboard.allLocations', 'All Locations')} (1,248 Staff)</option>
-              <option value="Hyderabad Main Office">Hyderabad Main Office</option>
-              <option value="Bengaluru Tech Park">Bengaluru Tech Park</option>
-              <option value="Mumbai Financial Centre">Mumbai Financial Centre</option>
-              <option value="Delhi Cyber Hub">Delhi Cyber Hub</option>
+              <option value="All Locations">{t('dashboard.allLocations', 'All Locations')} ({kpis.totalEmployees.count} Staff)</option>
+              <option value="Hyderabad">Hyderabad Main Office</option>
+              <option value="Bengaluru">Bengaluru HQ</option>
+              <option value="Mumbai">Mumbai Office</option>
+              <option value="Delhi">Delhi Office</option>
+              <option value="Chennai">Chennai Plant</option>
             </select>
           </div>
 

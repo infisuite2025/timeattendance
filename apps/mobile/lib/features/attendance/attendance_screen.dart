@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import '../../app/navigation.dart';
 import '../../app/theme.dart';
 import '../../core/app_state.dart';
-import '../../core/demo_data.dart';
 import '../../core/models.dart';
+import '../../shared/feedback.dart';
 import '../../shared/widgets.dart';
 import '../regularisation/raise_screen.dart';
 import 'calendar_screen.dart';
@@ -20,115 +20,201 @@ class MyAttendanceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    final recent = [16, 13, 12, 11, 10];
+    final recent = state.september.values.toList()..sort((a, b) => b.day.compareTo(a.day));
+    final worked = formatDuration(state.workedMinutes);
     final body = ListView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
       children: [
-        PageIntro(
-          title: 'My Attendance',
-          subtitle: prettyDay(17),
-        ),
-        const SizedBox(height: 14),
-        AppCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Text("Today's status", style: TextStyle(fontWeight: FontWeight.w600)),
-                  const Spacer(),
-                  StatusPill(
-                    label: state.checkedIn ? 'Present' : (state.clockOutLabel != null ? 'Checked out' : 'Not in'),
-                    color: state.checkedIn ? AppColors.emerald : AppColors.slate500,
-                    soft: state.checkedIn ? AppColors.emeraldSoft : AppColors.slate100,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                state.checkedIn ? 'You are checked in' : 'You are not checked in',
-                style: const TextStyle(color: AppColors.slate500, fontSize: 13),
-              ),
-              const SizedBox(height: 4),
-              const Text('General Shift  09:00 AM – 06:00 PM', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-        EqualGrid(
-          columns: 2,
-          rowHeight: 104,
-          children: [
-            _InfoBox(title: 'Check-in', value: state.checkedIn || state.clockOutLabel != null ? state.clockInLabel : '—', hint: 'Today'),
-            _InfoBox(title: 'Check-out', value: state.clockOutLabel ?? 'Yet to check out', hint: 'Today'),
-            _InfoBox(title: 'Working hours', value: formatDuration(state.workedMinutes), hint: 'As of now'),
-            _InfoBox(title: 'Break', value: state.breakLabel, hint: state.onBreak ? 'In progress' : 'Logged'),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: FilledButton(
-                onPressed: state.checkedIn ? () => context.read<AppState>().clockOut() : (state.locating ? null : () => context.read<AppState>().clockIn()),
-                child: Text(state.checkedIn ? 'Check Out' : 'Check In'),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: OutlinedButton(
-                onPressed: state.onBreak ? () => context.read<AppState>().endBreak() : null,
-                child: const Text('End Break'),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        const SectionLabel('Quick hub'),
+        if (!showBack) ...[
+          const PageIntro(title: 'My Attendance', subtitle: 'Your days, hours, and punches.'),
+          const SizedBox(height: 16),
+        ],
+        _TodayRecord(state: state, worked: worked),
+        const SizedBox(height: 20),
+        const _Section('Look closer'),
         const SizedBox(height: 8),
-        EqualGrid(
-          columns: 2,
-          rowHeight: 96,
-          children: [
-            _hub(context, Icons.calendar_month_outlined, 'My Calendar', 'View calendar', const CalendarScreen()),
-            _hub(context, Icons.timeline, 'Day Detail', 'In, out, hours, breaks', const DayDetailScreen(day: 12)),
-            _hub(context, Icons.list_alt, 'Punch Timeline', 'All punch activity', const PunchTimelineScreen(day: 12)),
-            _hub(context, Icons.edit_note_outlined, 'Raise Regularisation', 'Missed punch or correction', const RaiseRegularisationScreen()),
-          ],
-        ),
-        const SizedBox(height: 16),
-        const AppCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Weekly summary', style: TextStyle(fontWeight: FontWeight.w600)),
-              SizedBox(height: 4),
-              Text('Hours recorded this week', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
-              SizedBox(height: 12),
-              SizedBox(
-                height: 110,
-                child: MiniBars(
-                  values: [8.1, 9.0, 8.2, 7.5, 2.6],
-                  labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        const SectionLabel('Recent attendance'),
+        const _Hub(),
+        const SizedBox(height: 20),
+        const _Section('This week'),
         const SizedBox(height: 8),
-        for (final day in recent) ...[
-          _RecentRow(day: state.day(day)),
+        const _WeekCard(),
+        const SizedBox(height: 20),
+        const _Section('Recent days'),
+        const SizedBox(height: 8),
+        for (final day in recent.take(5)) ...[
+          _RecentRow(day: day),
           const SizedBox(height: 8),
         ],
       ],
     );
 
     if (!showBack) return SafeArea(child: body);
-    return Scaffold(
-      appBar: AppBar(title: const Text('My Attendance')),
-      body: body,
+    return Scaffold(appBar: AppBar(title: const Text('My Attendance')), body: body);
+  }
+}
+
+class _TodayRecord extends StatelessWidget {
+  const _TodayRecord({required this.state, required this.worked});
+
+  final AppState state;
+  final String worked;
+
+  @override
+  Widget build(BuildContext context) {
+    final checked = state.checkedIn;
+    final status = !checked ? (state.clockOutLabel != null ? 'Checked out' : 'Not in') : (state.onBreak ? 'On a break' : 'Present');
+    final statusColor = !checked ? AppColors.slate700 : (state.onBreak ? AppColors.amber : AppColors.emerald);
+    final statusSoft = !checked ? AppColors.slate100 : (state.onBreak ? AppColors.amberSoft : AppColors.emeraldSoft);
+    return AppCard(
+      color: AppColors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('Today', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+              const Spacer(),
+              StatusPill(label: status, color: statusColor, soft: statusSoft),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            checked ? 'You are on the clock.' : 'You are not clocked in right now.',
+            style: const TextStyle(fontSize: 13, color: AppColors.slate500),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              _Fact(label: 'In', value: checked || state.clockOutLabel != null ? state.clockInLabel : '—'),
+              _rule(),
+              _Fact(label: 'Out', value: state.clockOutLabel ?? '—'),
+              _rule(),
+              _Fact(label: 'Worked', value: worked),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text('Break  ·  ${state.breakLabel}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate700)),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: FilledButton.icon(
+              onPressed: state.locating
+                  ? null
+                  : () {
+                      if (checked) {
+                        context.read<AppState>().clockOut();
+                        showAppToast(context, 'Checked out. The punch is saved for this employee.', success: true);
+                      } else {
+                        _clockIn(context);
+                      }
+                    },
+              style: FilledButton.styleFrom(
+                backgroundColor: checked ? AppColors.slate900 : AppColors.emerald,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              icon: Icon(checked ? Icons.logout_rounded : Icons.login_rounded, size: 18),
+              label: Text(checked ? 'Clock out' : 'Clock in'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _clockIn(BuildContext context) async {
+    final message = await context.read<AppState>().clockIn();
+    if (!context.mounted) return;
+    final checkedIn = context.read<AppState>().checkedIn;
+    showAppToast(context, message, success: checkedIn, error: !checkedIn);
+  }
+
+  Widget _rule() => Container(width: 1, height: 32, color: AppColors.line);
+}
+
+class _Hub extends StatelessWidget {
+  const _Hub();
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      color: AppColors.white,
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          _NavRow(
+            icon: Icons.calendar_month_outlined,
+            color: AppColors.primary,
+            title: 'Calendar',
+            body: 'See present, late, leave, and weekly offs',
+            onTap: () => openPage(context, const CalendarScreen()),
+          ),
+          const Divider(height: 1, color: AppColors.line),
+          _NavRow(
+            icon: Icons.today_outlined,
+            color: AppColors.indigo,
+            title: 'Day detail',
+            body: 'Hours, shift, and the punch story for one day',
+            onTap: () => openPage(context, DayDetailScreen(day: DateTime.now().day)),
+          ),
+          const Divider(height: 1, color: AppColors.line),
+          _NavRow(
+            icon: Icons.timeline,
+            color: AppColors.emerald,
+            title: 'Punch timeline',
+            body: 'Every raw punch, including flagged ones',
+            onTap: () => openPage(context, PunchTimelineScreen(day: DateTime.now().day)),
+          ),
+          const Divider(height: 1, color: AppColors.line),
+          _NavRow(
+            icon: Icons.edit_note_rounded,
+            color: AppColors.amber,
+            title: 'Regularise',
+            body: 'Ask a manager to correct a missing or wrong punch',
+            onTap: () => openPage(context, const RaiseRegularisationScreen()),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WeekCard extends StatelessWidget {
+  const _WeekCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<AppState>();
+    final now = DateTime.now();
+    final monday = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1));
+    final values = <double>[];
+    for (var i = 0; i < 5; i++) {
+      final day = monday.add(Duration(days: i));
+      final sameMonth = state.loadedMonth.year == day.year && state.loadedMonth.month == day.month;
+      values.add(sameMonth ? state.day(day.day).minutes / 60 : 0);
+    }
+    final totalMinutes = values.fold<double>(0, (sum, hours) => sum + hours * 60).round();
+    return AppCard(
+      color: AppColors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('Hours recorded', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+              const Spacer(),
+              Text(formatDuration(totalMinutes), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary)),
+            ],
+          ),
+          const SizedBox(height: 4),
+          const Text('Monday to Friday from saved punches', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 110,
+            child: MiniBars(values: values, labels: const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -141,75 +227,105 @@ class _RecentRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = colorForKind(day.kind);
     return AppCard(
+      color: AppColors.white,
       onTap: () => openPage(context, DayDetailScreen(day: day.day)),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(
         children: [
-          Icon(Icons.schedule, color: color, size: 20),
-          const SizedBox(width: 10),
+          Container(
+            width: 46,
+            height: 46,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
+            child: Text('${day.day}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: color)),
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(prettyDay(day.day), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                Text(
-                  day.hours ?? day.reason ?? day.shift,
-                  style: const TextStyle(fontSize: 12, color: AppColors.slate500),
-                ),
+                Text(day.displayDate ?? prettyDay(day.day, month: context.watch<AppState>().loadedMonth), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                const SizedBox(height: 2),
+                Text(day.hours ?? day.reason ?? day.shift, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
               ],
             ),
           ),
-          StatusPill(label: dayKindLabel(day.kind), color: color),
+          const SizedBox(width: 8),
+          StatusPill(label: kindLabel(day.kind), color: color),
         ],
       ),
     );
   }
 }
 
-class _InfoBox extends StatelessWidget {
-  const _InfoBox({required this.title, required this.value, required this.hint});
+class _NavRow extends StatelessWidget {
+  const _NavRow({required this.icon, required this.color, required this.title, required this.body, required this.onTap});
 
+  final IconData icon;
+  final Color color;
   final String title;
-  final String value;
-  final String hint;
+  final String body;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      padding: const EdgeInsets.all(12),
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
+              child: Icon(icon, color: color, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 1),
+                  Text(body, style: const TextStyle(fontSize: 12, height: 1.3, color: AppColors.slate500)),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: AppColors.slate400, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Fact extends StatelessWidget {
+  const _Fact({required this.label, required this.value});
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.slate500, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 4),
-          Text(value, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-          Text(hint, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.slate500)),
+          Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 2),
+          Text(label, style: const TextStyle(fontSize: 12, color: AppColors.slate500, fontWeight: FontWeight.w600)),
         ],
       ),
     );
   }
 }
 
-Widget _hub(BuildContext context, IconData icon, String title, String subtitle, Widget page) {
-  return AppCard(
-    onTap: () => openPage(context, page),
-    padding: const EdgeInsets.all(12),
-    child: Row(
-      children: [
-        Icon(icon, color: AppColors.primary, size: 20),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-              Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.slate500)),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
+class _Section extends StatelessWidget {
+  const _Section(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(text, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.slate500, letterSpacing: 0.2));
+  }
 }

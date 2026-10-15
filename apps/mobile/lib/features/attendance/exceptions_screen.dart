@@ -20,19 +20,19 @@ class _ExceptionsScreenState extends State<ExceptionsScreen> {
   String _query = '';
   String _type = 'All types';
   String _status = 'Open';
-  String _month = 'Sep 2024';
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     final openCount = state.exceptions.where((e) => !e.reviewed).length;
+    final reviewedCount = state.exceptions.where((e) => e.reviewed).length;
+    final highCount = state.exceptions.where((e) => e.priority == 'High' && !e.reviewed).length;
     final items = state.exceptions.where((item) {
-      final monthOk = _month == 'Sep 2024';
       final query = _query.trim().toLowerCase();
       final queryOk = query.isEmpty || item.employee.toLowerCase().contains(query) || item.code.toLowerCase().contains(query);
       final typeOk = _type == 'All types' || item.type == _type;
       final statusOk = _status == 'All' || (_status == 'Open' ? !item.reviewed : item.reviewed);
-      return monthOk && queryOk && typeOk && statusOk;
+      return queryOk && typeOk && statusOk;
     }).toList()
       ..sort((a, b) => _rank(a.priority).compareTo(_rank(b.priority)));
 
@@ -41,60 +41,56 @@ class _ExceptionsScreenState extends State<ExceptionsScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Exceptions')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
         children: [
-          const Text('Identify and resolve attendance anomalies.', style: TextStyle(color: AppColors.slate500)),
+          const Text('Attendance problems that still need a decision.', style: TextStyle(fontSize: 13, height: 1.35, color: AppColors.slate500)),
           const SizedBox(height: 12),
           AppCard(
-            color: AppColors.amberSoft,
-            child: Text(
-              '$openCount exceptions require action today',
-              style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.amber),
+            color: AppColors.white,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: Row(
+              children: [
+                _Count(value: '$openCount', label: 'Open', color: AppColors.amber),
+                _Count(value: '$highCount', label: 'High', color: AppColors.rose),
+                _Count(value: '$reviewedCount', label: 'Reviewed', color: AppColors.emerald),
+                _Count(value: '${state.exceptions.length}', label: 'Total', color: AppColors.slate900),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          EqualGrid(
-            columns: 2,
-            rowHeight: 84,
-            children: [
-              for (final type in ['Missing Punch', 'Late Arrival', 'Early Departure', 'Short Hours', 'Unscheduled Attendance'])
-                MetricTile(
-                  value: '${state.exceptions.where((e) => e.type == type).length}',
-                  label: type,
-                  color: AppColors.slate700,
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
+          if (openCount > 0) ...[
+            const SizedBox(height: 12),
+            AppCard(
+              color: AppColors.white,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(width: 4, height: 36, decoration: BoxDecoration(color: AppColors.amber, borderRadius: BorderRadius.circular(4))),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      '$openCount ${openCount == 1 ? 'exception still needs' : 'exceptions still need'} a review. High priority items are listed first.',
+                      style: const TextStyle(fontSize: 13, height: 1.4, color: AppColors.slate700),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
           TextField(
             decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search employee or ID'),
             onChanged: (value) => setState(() => _query = value),
           ),
           const SizedBox(height: 8),
-          EqualGrid(
-            columns: 2,
-            rowHeight: 84,
-            children: [
-              AppDropdown<String>(
-                value: _month,
-                label: 'Month',
-                items: const [
-                  DropdownMenuItem(value: 'Sep 2024', child: Text('Sep 2024')),
-                  DropdownMenuItem(value: 'Oct 2024', child: Text('Oct 2024')),
-                ],
-                onChanged: (value) => setState(() => _month = value ?? _month),
-              ),
-              AppDropdown<String>(
-                value: _status,
-                label: 'Status',
-                items: const [
-                  DropdownMenuItem(value: 'Open', child: Text('Open')),
-                  DropdownMenuItem(value: 'Reviewed', child: Text('Reviewed')),
-                  DropdownMenuItem(value: 'All', child: Text('All')),
-                ],
-                onChanged: (value) => setState(() => _status = value ?? _status),
-              ),
+          AppDropdown<String>(
+            value: _status,
+            label: 'Status',
+            items: const [
+              DropdownMenuItem(value: 'Open', child: Text('Open')),
+              DropdownMenuItem(value: 'Reviewed', child: Text('Reviewed')),
+              DropdownMenuItem(value: 'All', child: Text('All')),
             ],
+            onChanged: (value) => setState(() => _status = value ?? _status),
           ),
           const SizedBox(height: 8),
           AppDropdown<String>(
@@ -103,9 +99,14 @@ class _ExceptionsScreenState extends State<ExceptionsScreen> {
             items: [for (final type in types) DropdownMenuItem(value: type, child: Text(type))],
             onChanged: (value) => setState(() => _type = value ?? 'All types'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          Text(
+            items.isEmpty ? 'No matches' : '${items.length} ${items.length == 1 ? 'exception' : 'exceptions'}',
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.slate500),
+          ),
+          const SizedBox(height: 8),
           if (items.isEmpty)
-            const AppCard(child: Text('No exceptions match these filters.'))
+            const AppCard(color: AppColors.white, child: Text('Nothing matches this month or filter.'))
           else
             for (final item in items) ...[
               _ExceptionCard(item: item),
@@ -140,28 +141,33 @@ class _ExceptionCard extends StatelessWidget {
             ? AppColors.amber
             : AppColors.slate500;
     return AppCard(
-      child: Column(
+      color: AppColors.white,
+      onTap: item.reviewed ? null : () => _review(context),
+      padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(child: Text(item.employee, style: const TextStyle(fontWeight: FontWeight.w600))),
-              StatusPill(label: item.priority, color: color),
-            ],
+          Container(width: 4, height: 52, decoration: BoxDecoration(color: item.reviewed ? AppColors.emerald : color, borderRadius: BorderRadius.circular(4))),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(item.employee, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 2),
+                Text('${item.code} · ${item.type}', style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
+                const SizedBox(height: 4),
+                Text(item.detail, style: const TextStyle(fontSize: 13, height: 1.35, color: AppColors.slate700)),
+              ],
+            ),
           ),
-          const SizedBox(height: 4),
-          Text('${item.code} · ${item.type}', style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
-          const SizedBox(height: 4),
-          Text(item.detail, style: const TextStyle(fontSize: 13)),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: item.reviewed
-                ? const Text('Reviewed', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.emerald))
-                : FilledButton(
-                    onPressed: () => _review(context),
-                    child: const Text('Review'),
-                  ),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              StatusPill(label: item.reviewed ? 'Reviewed' : item.priority, color: item.reviewed ? AppColors.emerald : color),
+              if (!item.reviewed) const Icon(Icons.chevron_right, color: AppColors.slate400),
+            ],
           ),
         ],
       ),
@@ -169,40 +175,70 @@ class _ExceptionCard extends StatelessWidget {
   }
 
   void _review(BuildContext context) {
-    showInfoSheet(
+    showAppSheet<void>(
       context,
       title: item.employee,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      message: '${item.type} · ${item.priority} priority',
+      builder: (sheetContext) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('${item.type} · ${item.priority} priority', style: const TextStyle(fontWeight: FontWeight.w700)),
-          const SizedBox(height: 6),
-          Text(item.detail),
+          AppCard(
+            color: AppColors.white,
+            child: Text(item.detail, style: const TextStyle(fontSize: 14, height: 1.4, color: AppColors.slate700)),
+          ),
           const SizedBox(height: 12),
-          FilledButton(
-            onPressed: () {
-              context.read<AppState>().reviewException(item.id);
-              Navigator.pop(context);
-              openPage(context, const RaiseRegularisationScreen());
-            },
-            child: const Text('Raise regularisation'),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: () async {
-              final confirmed = await showAppConfirm(
-                context,
-                title: 'Mark as reviewed?',
-                message: 'This closes ${item.code} without raising a regularisation.',
-                confirmLabel: 'Mark reviewed',
+          OptionGroup(
+            children: [
+              SheetChoiceTile(
+                icon: Icons.edit_outlined,
+                title: 'Raise regularisation',
+                subtitle: 'Turn this exception into a request',
+                onTap: () async {
+                  await context.read<AppState>().reviewException(item.id);
+                  if (!sheetContext.mounted || !context.mounted) return;
+                  Navigator.pop(sheetContext);
+                  openPage(context, const RaiseRegularisationScreen());
+                },
+              ),
+              SheetChoiceTile(
                 icon: Icons.task_alt_rounded,
-              );
-              if (!confirmed || !context.mounted) return;
-              context.read<AppState>().reviewException(item.id);
-              Navigator.pop(context);
-            },
-            child: const Text('Mark reviewed'),
+                title: 'Mark reviewed',
+                subtitle: 'Close it without a new request',
+                onTap: () async {
+                  final confirmed = await showAppConfirm(
+                    sheetContext,
+                    title: 'Mark as reviewed?',
+                    message: 'This closes ${item.code} without raising a regularisation.',
+                    confirmLabel: 'Mark reviewed',
+                    icon: Icons.task_alt_rounded,
+                  );
+                  if (!confirmed || !context.mounted) return;
+                  await context.read<AppState>().reviewException(item.id);
+                  if (sheetContext.mounted) Navigator.pop(sheetContext);
+                },
+              ),
+            ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Count extends StatelessWidget {
+  const _Count({required this.value, required this.label, required this.color});
+  final String value;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: color, height: 1)),
+          const SizedBox(height: 4),
+          Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate500)),
         ],
       ),
     );

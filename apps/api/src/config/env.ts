@@ -1,4 +1,9 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+
+const rootEnv = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../.env');
+dotenv.config({ path: rootEnv });
 dotenv.config();
 
 export const config = {
@@ -8,7 +13,7 @@ export const config = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '15m',
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   db: {
-    host: process.env.DB_HOST || 'localhost',
+    host: process.env.DB_HOST || '127.0.0.1',
     port: parseInt(process.env.DB_PORT || '3306', 10),
     user: process.env.DB_USER || 'infi_timepro_user',
     password: process.env.DB_PASSWORD || 'infi_timepro_secret_pass!',

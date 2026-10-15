@@ -48,7 +48,7 @@ class StatusPill extends StatelessWidget {
         color: soft ?? color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w700)),
+      child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w700)),
     );
   }
 }
@@ -160,47 +160,19 @@ class AppDropdown<T> extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: () async {
-        final picked = await showModalBottomSheet<T>(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: AppColors.surface,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-          builder: (context) {
-            final bottom = MediaQuery.viewPaddingOf(context).bottom;
-            return SafeArea(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(8, 8, 8, 8 + bottom),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(width: 36, height: 4, decoration: BoxDecoration(color: AppColors.slate200, borderRadius: BorderRadius.circular(4))),
-                    const SizedBox(height: 12),
-                    Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
-                    Flexible(
-                      child: ListView(
-                        shrinkWrap: true,
-                        children: [
-                          for (final item in items)
-                            ListTile(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              selected: item.value == value,
-                              selectedTileColor: const Color(0xFFEFF6FF),
-                              title: DefaultTextStyle(
-                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.slate900),
-                                child: item.child,
-                              ),
-                              trailing: item.value == value ? const Icon(Icons.check_rounded, color: AppColors.primary) : null,
-                              onTap: () => Navigator.pop(context, item.value),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
+        final picked = await showAppSheet<T>(
+          context,
+          title: label,
+          builder: (sheetContext) => OptionGroup(
+            children: [
+              for (final item in items)
+                SheetChoiceTile(
+                  selected: item.value == value,
+                  onTap: () => Navigator.pop(sheetContext, item.value),
+                  child: item.child,
                 ),
-              ),
-            );
-          },
+            ],
+          ),
         );
         if (picked != null) onChanged(picked);
       },
@@ -469,11 +441,14 @@ String monthTitle(DateTime date) {
   return '${months[date.month - 1]} ${date.year}';
 }
 
-String prettyDay(int day, [int month = 9, int year = 2024]) {
-  final date = DateTime(year, month, day);
+String prettyDay(int day, {DateTime? month}) {
+  final base = month ?? DateTime.now();
+  final date = DateTime(base.year, base.month, day);
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return '${weekdayShort(date)}, $day ${months[month - 1]} $year';
+  return '${weekdayShort(date)}, $day ${months[date.month - 1]} ${date.year}';
 }
+
+String formatToday() => prettyDay(DateTime.now().day, month: DateTime.now());
 
 class AppTabBar extends StatelessWidget {
   const AppTabBar({super.key, required this.labels, required this.index, required this.onChanged});
@@ -520,35 +495,229 @@ class AppTabBar extends StatelessWidget {
   }
 }
 
-void showInfoSheet(BuildContext context, {required String title, required Widget child}) {
-  showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: AppColors.surface,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-    builder: (context) {
-      final bottom = MediaQuery.viewPaddingOf(context).bottom + MediaQuery.viewInsetsOf(context).bottom;
-      return ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * 0.72),
+class AppSegment {
+  const AppSegment(this.label, {this.icon});
+
+  final String label;
+  final IconData? icon;
+}
+
+class AppSegmentedControl extends StatelessWidget {
+  const AppSegmentedControl({
+    super.key,
+    required this.segments,
+    required this.index,
+    required this.onChanged,
+  });
+
+  final List<AppSegment> segments;
+  final int index;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.line),
+      ),
+      child: Row(
+        children: [
+          for (var i = 0; i < segments.length; i++)
+            Expanded(
+              child: _AppSegmentButton(
+                segment: segments[i],
+                selected: i == index,
+                onTap: () => onChanged(i),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AppSegmentButton extends StatelessWidget {
+  const _AppSegmentButton({required this.segment, required this.selected, required this.onTap});
+
+  final AppSegment segment;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = selected ? AppColors.white : AppColors.slate700;
+    return Material(
+      color: selected ? AppColors.primary : Colors.transparent,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
         child: Padding(
-          padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottom),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Center(child: Container(width: 36, height: 4, decoration: BoxDecoration(color: AppColors.slate200, borderRadius: BorderRadius.circular(4)))),
-              const SizedBox(height: 14),
-              Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 10),
-              const Divider(height: 1, color: AppColors.slate200),
-              const SizedBox(height: 12),
-              Flexible(child: SingleChildScrollView(child: child)),
+              if (segment.icon != null) ...[
+                Icon(segment.icon, size: 16, color: color),
+                const SizedBox(width: 6),
+              ],
+              Flexible(
+                child: Text(
+                  segment.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: color),
+                ),
+              ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class OptionGroup extends StatelessWidget {
+  const OptionGroup({super.key, required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.line),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0) const Divider(height: 1, thickness: 1, color: AppColors.line),
+            children[i],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class SheetChoiceTile extends StatelessWidget {
+  const SheetChoiceTile({
+    super.key,
+    required this.onTap,
+    this.icon,
+    this.title,
+    this.subtitle,
+    this.child,
+    this.selected = false,
+    this.destructive = false,
+  });
+
+  final VoidCallback onTap;
+  final IconData? icon;
+  final String? title;
+  final String? subtitle;
+  final Widget? child;
+  final bool selected;
+  final bool destructive;
+
+  @override
+  Widget build(BuildContext context) {
+    final labelColor = destructive ? AppColors.rose : (selected ? AppColors.primaryDark : AppColors.slate900);
+    return Material(
+      color: selected ? const Color(0xFFE8F0FE) : AppColors.white,
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 52),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 20, color: destructive ? AppColors.rose : (selected ? AppColors.primary : AppColors.slate500)),
+                  const SizedBox(width: 12),
+                ],
+                Expanded(
+                  child: child == null
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(title ?? '', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: labelColor)),
+                            if (subtitle != null) ...[
+                              const SizedBox(height: 2),
+                              Text(subtitle!, style: const TextStyle(fontSize: 12, height: 1.3, color: AppColors.slate500)),
+                            ],
+                          ],
+                        )
+                      : DefaultTextStyle(
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: labelColor, height: 1.25),
+                          child: child!,
+                        ),
+                ),
+                if (selected) const Icon(Icons.check_rounded, color: AppColors.primary, size: 20),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Future<T?> showAppSheet<T>(
+  BuildContext context, {
+  required String title,
+  String? message,
+  required Widget Function(BuildContext sheetContext) builder,
+}) {
+  return showModalBottomSheet<T>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: AppColors.white,
+    barrierColor: const Color(0x990F172A),
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+    builder: (sheetContext) {
+      final bottom = MediaQuery.viewPaddingOf(sheetContext).bottom + MediaQuery.viewInsetsOf(sheetContext).bottom;
+      return Padding(
+        padding: EdgeInsets.fromLTRB(16, 10, 16, 16 + bottom),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(color: const Color(0xFFCBD5E1), borderRadius: BorderRadius.circular(4)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.slate900)),
+            if (message != null) ...[
+              const SizedBox(height: 4),
+              Text(message, style: const TextStyle(fontSize: 13, height: 1.35, color: AppColors.slate500)),
+            ],
+            const SizedBox(height: 12),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(sheetContext).height * 0.55),
+              child: SingleChildScrollView(child: builder(sheetContext)),
+            ),
+          ],
         ),
       );
     },
   );
+}
+
+void showInfoSheet(BuildContext context, {required String title, required Widget child}) {
+  showAppSheet<void>(context, title: title, builder: (_) => child);
 }
 
 Widget legendDot(Color color, String label) {
