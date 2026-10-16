@@ -38,6 +38,14 @@ import { useI18n } from '../context/I18nContext.tsx';
 import { useAuth, UserRole } from '../context/AuthContext.tsx';
 import { LanguageSwitcher } from '../components/LanguageSwitcher.tsx';
 import { HelpBotWidget } from '../components/help/HelpBotWidget.tsx';
+import type { LucideIcon } from 'lucide-react';
+
+type NavItem = {
+  label: string;
+  path: string;
+  icon: LucideIcon;
+  badge?: string;
+};
 
 export const AppLayout: React.FC = () => {
   const { t, isRtl } = useI18n();
@@ -45,7 +53,7 @@ export const AppLayout: React.FC = () => {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const location = useLocation();
 
-  const getNavItems = () => {
+  const getNavItems = (): NavItem[] => {
     if (role === 'SUPER_ADMIN') {
       return [
         { label: 'Tenant Registry & Partitions', path: '/admin/tenants', icon: Building2 },

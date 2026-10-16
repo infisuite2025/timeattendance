@@ -193,7 +193,7 @@ export const RegularisationRequestsPage: React.FC = () => {
       case 'full_day_present':
         return <span className="px-2 py-0.5 rounded text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">Full Day Present</span>;
       default:
-        return <span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-50 text-slate-700 border border-slate-200">{type.replaceAll('_', ' ')}</span>;
+        return <span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-50 text-slate-700 border border-slate-200">{type.split('_').join(' ')}</span>;
     }
   };
 
