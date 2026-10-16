@@ -1,25 +1,40 @@
 import { Router, Response, Request } from 'express';
 import { organizationService } from './organization.service.js';
 import { AuthenticatedRequest, authGuard } from '../../middleware/auth-guard.js';
+import { listDepartments, listLocations, sendDatabaseError } from '../../database/core-repository.js';
 
 export const organizationRouter = Router();
 
-organizationRouter.get('/locations', (req: Request, res: Response) => {
-  const data = organizationService.getLocations();
-  res.json({
-    success: true,
-    data,
-    timestamp: new Date().toISOString(),
-  });
+organizationRouter.get('/locations', async (req: Request, res: Response) => {
+  try {
+    const tenantId = (req as AuthenticatedRequest).user?.tenantId || 'ten_acme_001';
+    const data = await listLocations(tenantId);
+    res.json({
+      success: true,
+      data,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err) {
+    if (!sendDatabaseError(res, err)) {
+      res.status(500).json({ success: false, error: { code: 'ERR_INTERNAL', message: (err as Error).message } });
+    }
+  }
 });
 
-organizationRouter.get('/departments', (req: Request, res: Response) => {
-  const data = organizationService.getDepartments();
-  res.json({
-    success: true,
-    data,
-    timestamp: new Date().toISOString(),
-  });
+organizationRouter.get('/departments', async (req: Request, res: Response) => {
+  try {
+    const tenantId = (req as AuthenticatedRequest).user?.tenantId || 'ten_acme_001';
+    const data = await listDepartments(tenantId);
+    res.json({
+      success: true,
+      data,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err) {
+    if (!sendDatabaseError(res, err)) {
+      res.status(500).json({ success: false, error: { code: 'ERR_INTERNAL', message: (err as Error).message } });
+    }
+  }
 });
 
 organizationRouter.get('/settings', (req: Request, res: Response) => {

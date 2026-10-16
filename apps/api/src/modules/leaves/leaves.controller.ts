@@ -1,109 +1,66 @@
-import { Router, Request, Response } from 'express';
-import { LeavesService } from './leaves.service.js';
+import { Router, Response } from 'express';
+import { AuthenticatedRequest } from '../../middleware/auth-guard.js';
+import { listRecords, removeRecord, replaceRecord, saveRecord } from '../../database/live-records.js';
 
 export const leavesRouter = Router();
 
-leavesRouter.get('/types', async (req: Request, res: Response) => {
-  try {
-    const tenantId = (req.headers['x-tenant-id'] as string) || 'tenant-demo-001';
-    const data = await LeavesService.getLeaveTypes(tenantId);
-    res.json({ success: true, data });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
-  }
+function tenant(req: AuthenticatedRequest) {
+  return req.user?.tenantId || 'ten_acme_001';
+}
+
+leavesRouter.get('/types', async (req: AuthenticatedRequest, res: Response) => {
+  res.json({ success: true, data: await listRecords(tenant(req), 'leave_type') });
 });
 
-leavesRouter.post('/types', async (req: Request, res: Response) => {
-  try {
-    const data = await LeavesService.createLeaveType(req.body);
-    res.json({ success: true, data, message: 'Leave policy type created successfully' });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
-  }
+leavesRouter.post('/types', async (req: AuthenticatedRequest, res: Response) => {
+  const data = await saveRecord(tenant(req), 'leave_type', req.body);
+  res.json({ success: true, data, message: 'Leave type saved' });
 });
 
-leavesRouter.put('/types/:id', async (req: Request, res: Response) => {
-  try {
-    const data = await LeavesService.updateLeaveType(req.params.id, req.body);
-    if (!data) {
-      return res.status(404).json({ success: false, error: { message: 'Leave type not found' } });
-    }
-    res.json({ success: true, data, message: 'Leave policy type updated successfully' });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
-  }
+leavesRouter.put('/types/:id', async (req: AuthenticatedRequest, res: Response) => {
+  const existing = (await listRecords<any>(tenant(req), 'leave_type')).find((item) => item.id === req.params.id);
+  if (!existing) return res.status(404).json({ success: false, error: { message: 'Leave type not found' } });
+  const data = await replaceRecord(tenant(req), 'leave_type', req.params.id, { ...existing, ...req.body });
+  res.json({ success: true, data });
 });
 
-leavesRouter.delete('/types/:id', async (req: Request, res: Response) => {
-  try {
-    const ok = await LeavesService.deleteLeaveType(req.params.id);
-    if (!ok) {
-      return res.status(404).json({ success: false, error: { message: 'Leave type not found' } });
-    }
-    res.json({ success: true, message: 'Leave policy type deleted successfully' });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
-  }
+leavesRouter.delete('/types/:id', async (req: AuthenticatedRequest, res: Response) => {
+  const ok = await removeRecord(tenant(req), 'leave_type', req.params.id);
+  if (!ok) return res.status(404).json({ success: false, error: { message: 'Leave type not found' } });
+  res.json({ success: true });
 });
 
-leavesRouter.get('/exemption-profiles', async (req: Request, res: Response) => {
-  try {
-    const tenantId = (req.headers['x-tenant-id'] as string) || 'tenant-demo-001';
-    const data = await LeavesService.getExemptionProfiles(tenantId);
-    res.json({ success: true, data });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
-  }
+leavesRouter.get('/exemption-profiles', async (req: AuthenticatedRequest, res: Response) => {
+  res.json({ success: true, data: await listRecords(tenant(req), 'leave_exemption') });
 });
 
-leavesRouter.post('/exemption-profiles', async (req: Request, res: Response) => {
-  try {
-    const data = await LeavesService.createExemptionProfile(req.body);
-    res.json({ success: true, data, message: 'Executive attendance exemption profile created successfully' });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
-  }
+leavesRouter.post('/exemption-profiles', async (req: AuthenticatedRequest, res: Response) => {
+  const data = await saveRecord(tenant(req), 'leave_exemption', req.body);
+  res.json({ success: true, data });
 });
 
-leavesRouter.put('/exemption-profiles/:id', async (req: Request, res: Response) => {
-  try {
-    const data = await LeavesService.updateExemptionProfile(req.params.id, req.body);
-    if (!data) {
-      return res.status(404).json({ success: false, error: { message: 'Exemption profile not found' } });
-    }
-    res.json({ success: true, data, message: 'Executive exemption profile updated successfully' });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
-  }
+leavesRouter.put('/exemption-profiles/:id', async (req: AuthenticatedRequest, res: Response) => {
+  const existing = (await listRecords<any>(tenant(req), 'leave_exemption')).find((item) => item.id === req.params.id);
+  if (!existing) return res.status(404).json({ success: false, error: { message: 'Profile not found' } });
+  res.json({ success: true, data: await replaceRecord(tenant(req), 'leave_exemption', req.params.id, { ...existing, ...req.body }) });
 });
 
-leavesRouter.delete('/exemption-profiles/:id', async (req: Request, res: Response) => {
-  try {
-    const ok = await LeavesService.deleteExemptionProfile(req.params.id);
-    if (!ok) {
-      return res.status(404).json({ success: false, error: { message: 'Exemption profile not found' } });
-    }
-    res.json({ success: true, message: 'Executive exemption profile deleted successfully' });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
-  }
+leavesRouter.delete('/exemption-profiles/:id', async (req: AuthenticatedRequest, res: Response) => {
+  const ok = await removeRecord(tenant(req), 'leave_exemption', req.params.id);
+  if (!ok) return res.status(404).json({ success: false, error: { message: 'Profile not found' } });
+  res.json({ success: true });
 });
 
-leavesRouter.get('/balances', async (req: Request, res: Response) => {
-  try {
-    const tenantId = (req.headers['x-tenant-id'] as string) || 'tenant-demo-001';
-    const data = await LeavesService.getBalances(tenantId);
-    res.json({ success: true, data });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
-  }
+leavesRouter.get('/balances', async (req: AuthenticatedRequest, res: Response) => {
+  res.json({ success: true, data: await listRecords(tenant(req), 'leave_balance') });
 });
 
-leavesRouter.post('/encashment/calculate', async (req: Request, res: Response) => {
-  try {
-    const calculation = LeavesService.calculateEncashment(req.body);
-    res.json({ success: true, data: calculation });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
-  }
+leavesRouter.post('/encashment/calculate', async (_req: AuthenticatedRequest, res: Response) => {
+  res.json({
+    success: true,
+    data: {
+      amount: 0,
+      message: 'Leave encashment needs a salary rate for each employee. No salary rates are stored yet, so the cash value is 0.',
+    },
+  });
 });

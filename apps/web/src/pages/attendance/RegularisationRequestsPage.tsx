@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { apiClient } from '../../services/apiClient.ts';
 import {
   FileEdit,
   Clock,
@@ -35,7 +36,7 @@ export const RegularisationRequestsPage: React.FC = () => {
   const [selectedRequest, setSelectedRequest] = useState<RegularisationDetailDTO | null>(null);
 
   // Form State
-  const [formDate, setFormDate] = useState('2026-09-14');
+  const [formDate, setFormDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [formType, setFormType] = useState<RegularisationType>('check_in');
   const [formReqIn, setFormReqIn] = useState('09:00 AM');
   const [formReqOut, setFormReqOut] = useState('06:00 PM');
@@ -44,7 +45,8 @@ export const RegularisationRequestsPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Mock Regularisations
-  const [requests, setRequests] = useState<RegularisationDetailDTO[]>([
+  const [requests, setRequests] = useState<RegularisationDetailDTO[]>([]);
+  const _retiredSeed: RegularisationDetailDTO[] = [
     {
       id: 'reg-001',
       requestCode: 'REG-8092',
@@ -128,60 +130,40 @@ export const RegularisationRequestsPage: React.FC = () => {
       ],
       submittedAt: '2026-09-11T18:00:00.000Z'
     }
-  ]);
+  ];
+  void _retiredSeed;
 
-  const handleCreateSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    apiClient.get<RegularisationDetailDTO[]>('/exceptions/regularisations').then((res) => {
+      if (res.success && Array.isArray(res.data)) setRequests(res.data);
+    }).catch(() => undefined);
+  }, [user.email]);
+
+  const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    setTimeout(() => {
-      const newReq: RegularisationDetailDTO = {
-        id: `reg-${Date.now()}`,
-        requestCode: `REG-${Math.floor(1000 + Math.random() * 9000)}`,
-        tenantId: 'tenant-demo-001',
-        employeeId: 'emp-001',
-        employeeCode: 'EMP-1001',
-        employeeName: 'Sarah Jenkins',
-        department: 'Engineering',
-        avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+    try {
+      const res = await apiClient.post<RegularisationDetailDTO>('/exceptions/regularisations', {
         attendanceDate: formDate,
-        shiftName: 'General Shift',
-        shiftTiming: '09:00 AM - 06:00 PM',
         requestType: formType,
-        originalIn: '--',
-        originalOut: '--',
         requestedIn: formReqIn,
         requestedOut: formReqOut,
         reasonCategory: formCategory,
         reasonText: formReason,
-        status: 'pending',
-        currentTier: 1,
-        maxTiers: 2,
-        approvers: [
-          { tier: 1, approverName: 'David Rodriguez', role: 'Reporting Manager', status: 'pending' },
-          { tier: 2, approverName: 'Anita Desai', role: 'Head of HR', status: 'pending' }
-        ],
-        submittedAt: new Date().toISOString()
-      };
-
-      setRequests(prev => [newReq, ...prev]);
-      setIsSubmitting(false);
+      });
+      if (!res.success || !res.data) throw new Error(res.error?.message || 'The request was not saved');
+      setRequests((prev) => [res.data as RegularisationDetailDTO, ...prev.filter((item) => item.id !== res.data?.id)]);
       setShowCreateModal(false);
       setFormReason('');
-      toast.success('Request Submitted', `Regularisation request #${newReq.requestCode} submitted for manager review.`);
-    }, 500);
+      toast.success('Request Submitted', `Regularisation ${res.data.requestCode} is waiting for the manager.`);
+    } catch (error) {
+      toast.error('Request Failed', error instanceof Error ? error.message : 'Could not save the request');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const filteredRequests = requests.filter(r => {
-    // Role-based data scoping
-    if (role === 'EMPLOYEE') {
-      if (r.employeeCode !== user.employeeCode) return false;
-    } else if (role === 'MANAGER') {
-      // Manager sees direct team (e.g. Operations & Assembly staff: EMP-1001, EMP-1003, EMP-1004)
-      const isTeamMember = r.department === 'Operations' || r.department === 'Operations & Assembly' || r.employeeCode === 'EMP-1001' || r.employeeCode === 'EMP-1003';
-      if (!isTeamMember) return false;
-    }
-
     const matchesTab = activeTab === 'all' || r.status === activeTab;
     const matchesSearch =
       r.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -192,7 +174,7 @@ export const RegularisationRequestsPage: React.FC = () => {
     return matchesTab && matchesSearch;
   });
 
-  const getRequestTypeBadge = (type: RegularisationType) => {
+  const getRequestTypeBadge = (type: string) => {
     switch (type) {
       case 'check_in':
         return <span className="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Check-In Correction</span>;
@@ -202,8 +184,16 @@ export const RegularisationRequestsPage: React.FC = () => {
         return <span className="px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">On-Duty Client Visit</span>;
       case 'wfh':
         return <span className="px-2 py-0.5 rounded text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">Work From Home</span>;
-      default:
+      case 'missing_punch':
+        return <span className="px-2 py-0.5 rounded text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">Missing Punch</span>;
+      case 'time_adjustment':
+        return <span className="px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">Time Adjustment</span>;
+      case 'half_day_present':
+        return <span className="px-2 py-0.5 rounded text-xs font-semibold bg-orange-50 text-orange-700 border border-orange-200">Half Day Present</span>;
+      case 'full_day_present':
         return <span className="px-2 py-0.5 rounded text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">Full Day Present</span>;
+      default:
+        return <span className="px-2 py-0.5 rounded text-xs font-semibold bg-slate-50 text-slate-700 border border-slate-200">{type.replaceAll('_', ' ')}</span>;
     }
   };
 

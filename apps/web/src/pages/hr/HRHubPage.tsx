@@ -82,11 +82,12 @@ export const HRHubPage: React.FC = () => {
 
   // Form Inputs
   const [newDocTitle, setNewDocTitle] = useState('');
+  const [newDocFile, setNewDocFile] = useState<File | null>(null);
   const [newDocCategory, setNewDocCategory] = useState<DocumentCategory>('certification');
-  const [newDocEmployeeName, setNewDocEmployeeName] = useState('Sarah Jenkins (EMP-1001)');
+  const [newDocEmployeeName, setNewDocEmployeeName] = useState('');
   const [newDocExpiry, setNewDocExpiry] = useState('');
 
-  const [allocationEmployee, setAllocationEmployee] = useState('EMP-1001');
+  const [allocationEmployee, setAllocationEmployee] = useState('');
 
   const [newTicketCategory, setNewTicketCategory] = useState<TicketCategory>('letter_request');
   const [newTicketSubject, setNewTicketSubject] = useState('');
@@ -159,25 +160,38 @@ export const HRHubPage: React.FC = () => {
 
   const handleUploadDocument = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newDocTitle) return;
+    if (!newDocTitle || !newDocFile) {
+      toast.error('Choose a file', 'The file is saved in the server uploads folder.');
+      return;
+    }
 
     try {
+      const fileBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+        reader.onerror = () => reject(new Error('The file could not be read.'));
+        reader.readAsDataURL(newDocFile);
+      });
       const res = await apiClient.post<EmployeeDocumentDTO>('/hr/documents', {
         title: newDocTitle,
         category: newDocCategory,
-        employeeName: newDocEmployeeName.split(' (')[0],
-        employeeCode: newDocEmployeeName.includes('(') ? newDocEmployeeName.split('(')[1].replace(')', '') : 'EMP-1001',
-        employeeId: 'EMP-1001',
-        fileName: `${newDocTitle.replace(/\s+/g, '_')}.pdf`,
+        employeeName: newDocEmployeeName,
+        employeeCode: newDocEmployeeName,
+        employeeId: newDocEmployeeName,
+        fileName: newDocFile.name,
+        fileBase64,
         expiryDate: newDocExpiry || undefined
       });
 
       if (res.success && res.data) {
         setDocuments(prev => [res.data!, ...prev]);
-        toast.success(`Document "${newDocTitle}" uploaded & verified in vault!`);
+        toast.success(`Document "${newDocTitle}" saved on the server.`);
         setShowUploadDocModal(false);
         setNewDocTitle('');
+        setNewDocFile(null);
         setNewDocExpiry('');
+      } else {
+        toast.error('Upload failed', res.error?.message || 'The file was not saved.');
       }
     } catch (err: any) {
       toast.error(err.message || 'Document upload failed');
@@ -191,7 +205,7 @@ export const HRHubPage: React.FC = () => {
     try {
       const res = await apiClient.post<CompanyAssetDTO>(`/hr/assets/${selectedAssetForAllocation.id}/allocate`, {
         employeeId: allocationEmployee,
-        employeeName: allocationEmployee === 'EMP-1001' ? 'Sarah Jenkins' : 'Marcus Vance',
+        employeeName: allocationEmployee,
         employeeCode: allocationEmployee
       });
 
@@ -736,7 +750,7 @@ export const HRHubPage: React.FC = () => {
                         )}</td>
                       <td className="py-3.5 px-4 text-right">
                         <button
-                          onClick={() => toast.success(`Downloaded ${doc.fileName}`)}
+                          onClick={() => void apiClient.download(`/hr/documents/${doc.id}/file`, doc.fileName || 'document').catch((err) => toast.error(err.message))}
                           className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-indigo-600"
                         >
                           <Download className="w-4 h-4" />
@@ -1070,6 +1084,17 @@ export const HRHubPage: React.FC = () => {
               </div>
 
               <div>
+                <label className="font-bold text-slate-700 block mb-1">File</label>
+                <input
+                  type="file"
+                  required
+                  accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                  onChange={e => setNewDocFile(e.target.files?.[0] || null)}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 outline-none"
+                />
+              </div>
+
+              <div>
                 <label className="font-bold text-slate-700 block mb-1">{t('hr.expiry_date_optional', 'Expiry Date (Optional)')}</label>
                 <input
                   type="date"
@@ -1113,15 +1138,12 @@ export const HRHubPage: React.FC = () => {
 
               <div>
                 <label className="font-bold text-slate-700 block mb-1">{t('hr.assign_to_employee', 'Assign to Employee')}</label>
-                <select
+                <input
                   value={allocationEmployee}
                   onChange={e => setAllocationEmployee(e.target.value)}
+                  placeholder="Employee code"
                   className="w-full p-2.5 rounded-xl border border-slate-200 outline-none font-semibold"
-                >
-                  <option value="EMP-1001">Sarah Jenkins (EMP-1001 - Engineering)</option>
-                  <option value="EMP-1003">Marcus Vance (EMP-1003 - Operations)</option>
-                  <option value="EMP-1005">Elena Rostova (EMP-1005 - Operations)</option>
-                </select>
+                />
               </div>
 
               <div className="pt-2 flex justify-end gap-2">

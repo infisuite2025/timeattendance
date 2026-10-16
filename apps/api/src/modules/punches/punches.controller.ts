@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { PunchesService } from './punches.service.js';
+import { ingestPunch } from '../../database/core-repository.js';
 import {
   IngestPunchRequestDTO,
   BatchIngestPunchRequestDTO,
@@ -66,17 +67,19 @@ punchesRouter.get('/metrics', async (req: Request, res: Response) => {
 // POST /api/v1/punches/ingest
 punchesRouter.post('/ingest', async (req: Request, res: Response) => {
   try {
-    const tenantId = (req as any).tenantId || 'tenant-demo-001';
-    const payload: IngestPunchRequestDTO = req.body;
-
-    if (!payload.employeeId || !payload.timestamp || !payload.eventType || !payload.source) {
+    const tenantId = (req as any).user?.tenantId || 'ten_acme_001';
+    const signedInEmployeeId = (req as any).user?.employeeId as string | undefined;
+    const payload: IngestPunchRequestDTO = {
+      ...req.body,
+      employeeId: signedInEmployeeId || req.body?.employeeId,
+    };
+    if (!payload.employeeId) {
       return res.status(400).json({
         success: false,
-        error: { code: 'VALIDATION_ERROR', message: 'employeeId, timestamp, eventType and source are required' }
+        error: { code: 'ERR_NO_EMPLOYEE', message: 'This login is not linked to an employee record.' },
       });
     }
-
-    const result = await PunchesService.ingestPunch(tenantId, payload);
+    const result = await ingestPunch(tenantId, payload);
     const status = result.status === 'duplicate' ? 409 : (result.status === 'flagged' ? 202 : 201);
 
     res.status(status).json({
@@ -86,9 +89,9 @@ punchesRouter.post('/ingest', async (req: Request, res: Response) => {
       requestId: req.headers['x-request-id'] || 'req-punch-ingest'
     });
   } catch (error: any) {
-    res.status(500).json({
+    res.status(error.statusCode || 500).json({
       success: false,
-      error: { code: 'INGEST_ERROR', message: error.message }
+      error: { code: error.statusCode === 404 ? 'ERR_NOT_FOUND' : 'INGEST_ERROR', message: error.message }
     });
   }
 });

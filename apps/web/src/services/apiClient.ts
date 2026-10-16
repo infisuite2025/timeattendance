@@ -26,11 +26,11 @@ class ApiClient {
     this.baseUrl = baseUrl;
   }
 
-  private getToken(): string {
-    if (typeof localStorage === 'undefined') return 'demo-jwt-token-active';
+  private getToken(): string | null {
+    if (typeof localStorage === 'undefined') return null;
     const stored = localStorage.getItem('infi_timepro_auth_token');
-    if (!stored || stored === 'undefined' || stored === 'null' || stored.trim() === '') {
-      return 'demo-jwt-token-active';
+    if (!stored || stored === 'undefined' || stored === 'null' || stored.trim() === '' || stored.startsWith('demo-jwt-token')) {
+      return null;
     }
     return stored;
   }
@@ -43,13 +43,13 @@ class ApiClient {
 
   private getHeaders(customHeaders: Record<string, string> = {}): Record<string, string> {
     const token = this.getToken();
-    const tenantId = (typeof localStorage !== 'undefined' && localStorage.getItem('infi_timepro_tenant_id')) || 'tenant-demo-001';
+    const tenantId = (typeof localStorage !== 'undefined' && localStorage.getItem('infi_timepro_tenant_id')) || 'ten_acme_001';
 
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'x-tenant-id': tenantId,
-      'Authorization': `Bearer ${token}`,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...customHeaders,
     };
   }
@@ -200,6 +200,19 @@ class ApiClient {
 
   async patch<T = any>(endpoint: string, body?: any): Promise<ApiResponse<T>> {
     return this.executeFetch<T>(endpoint, { method: 'PATCH', body });
+  }
+
+  async download(endpoint: string, fileName: string): Promise<void> {
+    const url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    const response = await fetch(url, { headers: this.getHeaders() });
+    if (!response.ok) throw new Error('The file could not be downloaded.');
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(objectUrl);
   }
 }
 

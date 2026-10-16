@@ -163,6 +163,7 @@ export const App: React.FC = () => {
                 {/* ========================================================== */}
                 <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'MANAGER', 'DATA_PROTECTION_OFFICER']} />}>
                   <Route path="/attendance/team" element={<TeamAttendancePage />} />
+                  <Route path="/shifts/swaps" element={<ShiftSwapsPage />} />
                   <Route path="/approvals" element={<ApprovalsHubPage />} />
                   <Route path="/approvals/history" element={<ApprovalsHubPage />} />
                   <Route path="/employees" element={<EmployeeListPage />} />
@@ -185,7 +186,6 @@ export const App: React.FC = () => {
                   <Route path="/attendance/overtime" element={<OvertimeRequestsPage />} />
 
                   <Route path="/shifts/schedule" element={<TeamSchedulePage />} />
-                  <Route path="/shifts/swaps" element={<ShiftSwapsPage />} />
 
                   <Route path="/policies/leaves" element={<LeavePoliciesPage />} />
                   <Route path="/leaves/policies" element={<LeavePoliciesPage />} />

@@ -21,9 +21,10 @@ authRouter.post('/login', async (req: Request, res: Response) => {
       requestId: `req_${Date.now()}`,
     });
   } catch (err: any) {
-    return res.status(500).json({
+    const status = err.statusCode || 500;
+    return res.status(status).json({
       success: false,
-      error: { code: 'ERR_AUTH_FAILED', message: err.message },
+      error: { code: err.code || 'ERR_AUTH_FAILED', message: err.message },
     });
   }
 });

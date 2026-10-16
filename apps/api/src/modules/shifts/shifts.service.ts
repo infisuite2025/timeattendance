@@ -339,46 +339,7 @@ export class ShiftsService {
     },
   ];
 
-  private shiftSwaps: ShiftSwapRequestDTO[] = [
-    {
-      id: 'swp_1',
-      requestCode: 'SSW-2024-001',
-      requesterId: 'emp_aarav_005',
-      requesterName: 'Aarav Sharma',
-      requesterDept: 'Technology',
-      requesterAvatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=120&auto=format&fit=crop',
-      swapWithId: 'emp_priya_003',
-      swapWithName: 'Priya Nair',
-      swapWithDept: 'Technology',
-      swapWithAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop',
-      date: '12 Sep 2024 (Thu)',
-      currentShift: 'Morning',
-      currentShiftTiming: '9:00 AM - 5:00 PM',
-      requestedShift: 'Evening',
-      requestedShiftTiming: '2:00 PM - 10:00 PM',
-      reason: 'Personal commitment in the morning. Need to attend a family function.',
-      status: 'pending',
-      submittedOn: '10 Sep 2024, 10:24 AM',
-    },
-    {
-      id: 'swp_2',
-      requestCode: 'SSW-2024-002',
-      requesterId: 'emp_rohan_004',
-      requesterName: 'Rohan Mehta',
-      requesterDept: 'Sales',
-      swapWithId: 'emp_vikram_010',
-      swapWithName: 'Vikram Singh',
-      swapWithDept: 'Sales',
-      date: '14 Sep 2024 (Sat)',
-      currentShift: 'Evening',
-      currentShiftTiming: '2:00 PM - 10:00 PM',
-      requestedShift: 'Morning',
-      requestedShiftTiming: '9:00 AM - 5:00 PM',
-      reason: 'Family event.',
-      status: 'approved',
-      submittedOn: '09 Sep 2024, 02:15 PM',
-    },
-  ];
+  private shiftSwaps: ShiftSwapRequestDTO[] = [];
 
   getShifts(): ShiftDTO[] {
     return this.shifts;

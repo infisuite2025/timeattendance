@@ -10,26 +10,8 @@ export interface AuthenticatedRequest extends Request {
 
 export function authGuard(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
-  const isDevelopment = config.nodeEnv === 'development' || config.nodeEnv === 'test';
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    if (isDevelopment) {
-      req.user = {
-        id: 'usr_naresh_001',
-        tenantId: 'ten_acme_001',
-        email: 'naresh@company.com',
-        username: 'naresh',
-        firstName: 'Naresh',
-        lastName: 'Andukoori',
-        avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&auto=format&fit=crop',
-        role: 'ADMIN',
-        employeeId: 'emp_naresh_001',
-        departmentName: 'Human Resources',
-        locationName: 'Hyderabad Main Office',
-        permissions: ['*'],
-      };
-      return next();
-    }
+  if (!authHeader || !authHeader.startsWith('Bearer ') || authHeader.slice(7).trim() === '') {
     return res.status(401).json({
       success: false,
       error: { code: 'ERR_UNAUTHORIZED', message: 'Missing or invalid bearer token' },
@@ -73,24 +55,6 @@ export function authGuard(req: AuthenticatedRequest, res: Response, next: NextFu
     req.user = decoded;
     next();
   } catch (err: any) {
-    if (isDevelopment && token.startsWith('demo-jwt-token')) {
-      req.user = {
-        id: 'usr_naresh_001',
-        tenantId: 'ten_acme_001',
-        email: 'naresh@company.com',
-        username: 'naresh',
-        firstName: 'Naresh',
-        lastName: 'Andukoori',
-        avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&auto=format&fit=crop',
-        role: 'ADMIN',
-        employeeId: 'emp_naresh_001',
-        departmentName: 'Human Resources',
-        locationName: 'Hyderabad Main Office',
-        permissions: ['*'],
-      };
-      return next();
-    }
-
     const isExpired = err instanceof jwt.TokenExpiredError || err?.name === 'TokenExpiredError';
     const errorCode = isExpired ? 'ERR_TOKEN_EXPIRED' : 'ERR_TOKEN_INVALID';
     const errorMessage = isExpired ? 'Access token expired or invalid' : 'Invalid or malformed authentication token';

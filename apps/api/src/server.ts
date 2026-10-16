@@ -19,6 +19,7 @@ import { punchesRouter } from './modules/punches/punches.controller.js';
 import { exceptionsRouter } from './modules/exceptions/exceptions.controller.js';
 import { approvalsRouter } from './modules/approvals/approvals.controller.js';
 import { devicesRouter } from './modules/devices/devices.controller.js';
+import { notificationsRouter } from './modules/notifications/notifications.controller.js';
 import { finalisationRouter } from './modules/finalisation/finalisation.controller.js';
 import { reportsRouter } from './modules/reports/reports.controller.js';
 import { superadminRouter } from './modules/superadmin/superadmin.controller.js';
@@ -35,13 +36,14 @@ import { globalPayrollRouter } from './modules/global-payroll/global-payroll.con
 import { billingRouter } from './modules/billing/billing.controller.js';
 import { helpBotRouter } from './modules/help-bot/help-bot.controller.js';
 import { dpdpaRouter } from './modules/dpdpa/dpdpa.controller.js';
+import { databaseReachable } from './database/core-repository.js';
 
 const app = express();
 
 // Security & Middlewares
 app.use(helmet());
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
-app.use(express.json());
+app.use(express.json({ limit: '12mb' }));
 
 // Tenant-Aware API Rate Limiting
 const limiter = rateLimit({
@@ -57,9 +59,11 @@ app.use(limiter);
 app.use('/api/v1/auth', authRouter);
 
 // Health Check
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
+  const database = (await databaseReachable()) ? 'connected' : 'unavailable';
   res.json({
-    status: 'healthy',
+    status: database === 'connected' ? 'healthy' : 'degraded',
+    database,
     service: 'InfiTimePro API Gateway',
     timestamp: new Date().toISOString(),
     version: '1.0.0',
@@ -87,6 +91,7 @@ app.use('/api/v1/punches', superAdminPrivacyGuard, punchesRouter);
 app.use('/api/v1/exceptions', superAdminPrivacyGuard, exceptionsRouter);
 app.use('/api/v1/approvals', superAdminPrivacyGuard, approvalsRouter);
 app.use('/api/v1/devices', superAdminPrivacyGuard, devicesRouter);
+app.use('/api/v1/notifications', superAdminPrivacyGuard, notificationsRouter);
 app.use('/api/v1/finalisation', superAdminPrivacyGuard, finalisationRouter);
 app.use('/api/v1/reports', superAdminPrivacyGuard, reportsRouter);
 app.use('/api/v1/integrations', superAdminPrivacyGuard, integrationsRouter);

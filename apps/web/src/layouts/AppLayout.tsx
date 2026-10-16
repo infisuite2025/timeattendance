@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   Clock,
@@ -41,11 +41,9 @@ import { HelpBotWidget } from '../components/help/HelpBotWidget.tsx';
 
 export const AppLayout: React.FC = () => {
   const { t, isRtl } = useI18n();
-  const { user, role, switchPersona, logout } = useAuth();
+  const { user, role, logout } = useAuth();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
-  const isDemoMode = (import.meta as any).env?.VITE_DEMO_MODE === 'true' || (import.meta as any).env?.DEV;
 
   const getNavItems = () => {
     if (role === 'SUPER_ADMIN') {
@@ -60,30 +58,18 @@ export const AppLayout: React.FC = () => {
 
     if (role === 'EMPLOYEE') {
       return [
-        { label: t('nav.attendance'), path: '/attendance/my', icon: Clock },
-        { label: t('nav.approvals'), path: '/attendance/regularisations', icon: CheckSquare },
-        { label: t('nav.finalisation'), path: '/attendance/overtime', icon: FileSpreadsheet },
-        { label: t('nav.shifts'), path: '/shifts/schedule', icon: CalendarRange },
-        { label: t('nav.leaves'), path: '/policies/leaves', icon: Palmtree },
-        { label: t('nav.coreHr'), path: '/hr', icon: UsersRound, badge: t('payroll.addon', 'Add-on') },
-        { label: t('nav.employees'), path: '/profile', icon: User },
-        { label: t('nav.mobile'), path: '/mobile/simulator', icon: Smartphone },
+        { label: 'My Attendance', path: '/attendance/my', icon: Clock },
+        { label: 'My Requests', path: '/attendance/regularisations', icon: CheckSquare },
+        { label: 'My Schedule', path: '/shifts/schedule', icon: CalendarRange },
+        { label: 'My Profile', path: '/profile', icon: User },
       ];
     }
 
     if (role === 'MANAGER') {
       return [
-        { label: t('nav.attendance'), path: '/attendance/team', icon: Users },
+        { label: 'Team Attendance', path: '/attendance/team', icon: Users },
         { label: t('nav.approvals'), path: '/approvals', icon: CheckSquare },
         { label: t('nav.shifts'), path: '/shifts/schedule', icon: CalendarRange },
-        { label: t('nav.coreHr'), path: '/hr', icon: UsersRound, badge: t('payroll.addon', 'Add-on') },
-        { label: t('nav.tmBilling'), path: '/tm', icon: Briefcase, badge: t('payroll.addon', 'Add-on') },
-        { label: t('nav.aiSecurity'), path: '/security', icon: ShieldAlert, badge: t('payroll.addon', 'Add-on') },
-        { label: t('nav.payrollDisbursement'), path: '/payroll-disbursement', icon: WalletCards, badge: t('payroll.addon', 'Add-on') },
-        { label: t('nav.fieldForce'), path: '/field-force', icon: Truck, badge: t('payroll.addon', 'Add-on') },
-        { label: t('nav.globalPayroll'), path: '/global-payroll', icon: Globe2, badge: t('payroll.addon', 'Add-on') },
-        { label: t('nav.reports'), path: '/reports', icon: BarChart3 },
-        { label: t('nav.mobile'), path: '/mobile/simulator', icon: Smartphone },
       ];
     }
 
@@ -99,25 +85,10 @@ export const AppLayout: React.FC = () => {
     return [
       { label: t('nav.dashboard'), path: '/dashboard', icon: LayoutDashboard },
       { label: t('nav.attendance'), path: '/attendance/live', icon: Clock },
+      { label: 'Team Attendance', path: '/attendance/team', icon: Users },
       { label: t('nav.approvals'), path: '/approvals', icon: CheckSquare },
-      { label: t('nav.finalisation'), path: '/attendance/finalisation', icon: FileSpreadsheet },
       { label: t('nav.employees'), path: '/employees', icon: Users },
-      { label: t('nav.coreHr'), path: '/hr', icon: UsersRound, badge: t('payroll.addon', 'Add-on') },
-      { label: t('nav.tmBilling'), path: '/tm', icon: Briefcase, badge: t('payroll.addon', 'Add-on') },
-      { label: t('nav.aiSecurity'), path: '/security', icon: ShieldAlert, badge: t('payroll.addon', 'Add-on') },
-      { label: t('nav.payrollDisbursement'), path: '/payroll-disbursement', icon: WalletCards, badge: t('payroll.addon', 'Add-on') },
-      { label: t('nav.fieldForce'), path: '/field-force', icon: Truck, badge: t('payroll.addon', 'Add-on') },
-      { label: t('nav.globalPayroll'), path: '/global-payroll', icon: Globe2, badge: t('payroll.addon', 'Add-on') },
       { label: t('nav.shifts'), path: '/shifts/library', icon: CalendarRange },
-      { label: t('nav.devices'), path: '/devices', icon: TabletSmartphone },
-      { label: t('nav.geofencing'), path: '/geofencing', icon: MapPin },
-      { label: t('nav.policies'), path: '/policies', icon: FileText },
-      { label: t('nav.leaves'), path: '/policies/leaves', icon: Palmtree },
-      { label: t('nav.mobile'), path: '/mobile/simulator', icon: Smartphone },
-      { label: t('nav.integrations'), path: '/integrations', icon: Share2 },
-      { label: t('nav.reports'), path: '/reports', icon: BarChart3 },
-      { label: t('nav.admin'), path: '/admin', icon: Settings },
-      { label: t('nav.tenantBilling'), path: '/billing', icon: WalletCards },
     ];
   };
 
@@ -276,84 +247,6 @@ export const AppLayout: React.FC = () => {
                       <span className="text-[10px] text-slate-400">• {user.department}</span>
                     </div>
                   </div>
-
-                  {/* Switch Persona Quick Toggles (Rendered only in Demo / Development Mode) */}
-                  {isDemoMode && (
-                    <div className="px-2 py-2 border-b border-slate-100">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 px-1">Switch View / Persona (Demo Mode)</p>
-                      <div className="space-y-1">
-                        <button
-                          onClick={() => {
-                            switchPersona('SUPER_ADMIN');
-                            setUserDropdownOpen(false);
-                            navigate('/admin/tenants');
-                          }}
-                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition ${
-                            role === 'SUPER_ADMIN' ? 'bg-purple-50 text-purple-700 font-bold' : 'text-slate-700 hover:bg-slate-50'
-                          }`}
-                        >
-                          <span className="flex items-center gap-2">👑 SuperAdmin (Platform Owner)</span>
-                          {role === 'SUPER_ADMIN' && <span className="text-[10px] bg-purple-200 text-purple-800 px-1 rounded">Active</span>}
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            switchPersona('ADMIN');
-                            setUserDropdownOpen(false);
-                            navigate('/dashboard');
-                          }}
-                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition ${
-                            role === 'ADMIN' ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700 hover:bg-slate-50'
-                          }`}
-                        >
-                          <span className="flex items-center gap-2">🏢 Tenant Administrator</span>
-                          {role === 'ADMIN' && <span className="text-[10px] bg-blue-200 text-blue-800 px-1 rounded">Active</span>}
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            switchPersona('MANAGER');
-                            setUserDropdownOpen(false);
-                            navigate('/attendance/team');
-                          }}
-                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition ${
-                            role === 'MANAGER' ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-slate-700 hover:bg-slate-50'
-                          }`}
-                        >
-                          <span className="flex items-center gap-2">👔 Manager / Supervisor</span>
-                          {role === 'MANAGER' && <span className="text-[10px] bg-emerald-200 text-emerald-800 px-1 rounded">Active</span>}
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            switchPersona('EMPLOYEE');
-                            setUserDropdownOpen(false);
-                            navigate('/attendance/my');
-                          }}
-                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition ${
-                            role === 'EMPLOYEE' ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-slate-700 hover:bg-slate-50'
-                          }`}
-                        >
-                          <span className="flex items-center gap-2">👷 Employee (ESS)</span>
-                          {role === 'EMPLOYEE' && <span className="text-[10px] bg-indigo-200 text-indigo-800 px-1 rounded">Active</span>}
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            switchPersona('DATA_PROTECTION_OFFICER' as any);
-                            setUserDropdownOpen(false);
-                            navigate('/compliance/dpo-workspace');
-                          }}
-                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition ${
-                            role === 'DATA_PROTECTION_OFFICER' ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-slate-700 hover:bg-slate-50'
-                          }`}
-                        >
-                          <span className="flex items-center gap-2">🛡️ Data Protection Officer (DPO)</span>
-                          {role === 'DATA_PROTECTION_OFFICER' && <span className="text-[10px] bg-emerald-200 text-emerald-800 px-1 rounded">Active</span>}
-                        </button>
-                      </div>
-                    </div>
-                  )}
 
                   <NavLink
                     to="/profile"

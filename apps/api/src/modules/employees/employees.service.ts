@@ -1,5 +1,6 @@
 import { EmployeeDetailDTO, EmployeeSummaryDTO } from '@infi-timepro/shared-types';
 import { AuditService } from '../audit/audit.service.js';
+import { createEmployee as createEmployeeRow, getEmployeeById as getEmployeeRow, listEmployees, updateEmployee as updateEmployeeRow } from '../../database/core-repository.js';
 
 export class EmployeesService {
   private employees: EmployeeDetailDTO[] = [];
@@ -326,131 +327,44 @@ export class EmployeesService {
     this.employees = generated;
   }
 
-  async getEmployees(params?: {
+  async getEmployees(tenantId: string, params?: {
     search?: string;
     departmentId?: string;
     locationId?: string;
     status?: string;
   }): Promise<EmployeeSummaryDTO[]> {
-    let result = [...this.employees];
-
-    if (params?.search) {
-      const q = params.search.toLowerCase();
-      result = result.filter(
-        (e) =>
-          e.fullName.toLowerCase().includes(q) ||
-          e.employeeCode.toLowerCase().includes(q) ||
-          e.jobTitle.toLowerCase().includes(q)
-      );
-    }
-
-    if (params?.departmentId && params.departmentId !== 'all') {
-      const deptId = params.departmentId;
-      result = result.filter((e) => e.departmentId === deptId || e.departmentName.toLowerCase() === deptId.toLowerCase());
-    }
-
-    if (params?.locationId && params.locationId !== 'all') {
-      const locId = params.locationId;
-      result = result.filter((e) => e.locationId === locId || e.locationName.toLowerCase() === locId.toLowerCase());
-    }
-
-    return result;
+    return listEmployees(tenantId, params) as Promise<EmployeeSummaryDTO[]>;
   }
 
-  async getEmployeeById(id: string): Promise<EmployeeDetailDTO | null> {
-    const found = this.employees.find((e) => e.id === id || e.employeeCode === id);
-    return found || this.employees[0];
+  async getEmployeeById(tenantId: string, id: string): Promise<EmployeeDetailDTO | null> {
+    return getEmployeeRow(tenantId, id) as Promise<EmployeeDetailDTO | null>;
   }
 
-  async createEmployee(payload: any): Promise<EmployeeDetailDTO> {
-    if (!payload.firstName?.trim() || !payload.lastName?.trim() || !payload.email?.trim()) {
-      throw new Error('Mandatory field validation failed: First Name, Last Name, and Corporate Email are required.');
-    }
-
-    const emailLower = payload.email.trim().toLowerCase();
-    const existing = this.employees.find((e) => e.email?.toLowerCase() === emailLower);
-    if (existing) {
-      throw new Error(`Duplicate profile conflict: Corporate email "${payload.email.trim()}" is already registered to ${existing.fullName} (${existing.employeeCode}).`);
-    }
-
-    const newEmp: EmployeeDetailDTO = {
-      id: `emp_${Date.now()}`,
-      employeeCode: `TP${Math.floor(1000 + Math.random() * 9000)}`,
-      firstName: payload.firstName.trim(),
-      lastName: payload.lastName.trim(),
-      fullName: `${payload.firstName.trim()} ${payload.lastName.trim()}`,
-      jobTitle: payload.jobTitle?.trim() || 'Software Engineer',
-      departmentId: payload.departmentId || 'dept_eng_001',
-      departmentName: 'Engineering',
-      locationId: payload.locationId || 'loc_hyd_001',
-      locationName: 'Hyderabad Main Office',
-      employmentType: payload.employmentType || 'full_time',
-      employmentStatus: 'active',
-      joiningDate: new Date().toISOString().split('T')[0],
-      overtimeEligible: true,
-      remoteWorkEligible: true,
-      email: emailLower,
-      currentShift: {
-        id: 'shf_gen_001',
-        code: 'GS',
-        name: 'General Shift',
-        timing: '09:00 AM - 06:00 PM',
-      },
-      attendanceSummary: {
-        presentDays: 0,
-        absentDays: 0,
-        lateDays: 0,
-        leaveDays: 0,
-        wfhDays: 0,
-        totalHours: '0h 00m',
-        attendanceRate: 100,
-      },
-    };
-    this.employees.unshift(newEmp);
-
+  async createEmployee(tenantId: string, payload: any): Promise<EmployeeDetailDTO> {
+    const created = await createEmployeeRow(tenantId, payload);
     AuditService.recordEvent({
       eventCode: 'EMPLOYEE_PROFILE_CREATED',
       category: 'security',
       severity: 'info',
       targetEntity: 'EmployeeProfile',
-      targetId: newEmp.id,
-      description: `Created new workforce profile for ${newEmp.fullName} (${newEmp.employeeCode} - ${newEmp.email}).`,
-      afterState: { id: newEmp.id, code: newEmp.employeeCode, email: newEmp.email, role: newEmp.jobTitle }
+      targetId: created?.id || '',
+      description: `Created workforce profile for ${created?.fullName} (${created?.employeeCode}).`,
+      afterState: { id: created?.id, code: created?.employeeCode, email: payload.email }
     }).catch(() => null);
-
-    return newEmp;
+    return created as EmployeeDetailDTO;
   }
 
-  async updateEmployee(id: string, payload: any): Promise<EmployeeDetailDTO> {
-    const index = this.employees.findIndex((e) => e.id === id || e.employeeCode === id);
-    if (index === -1) {
-      throw new Error('Employee not found');
-    }
-    const current = this.employees[index];
-    const updated: EmployeeDetailDTO = {
-      ...current,
-      fullName: payload.name || payload.fullName || current.fullName,
-      jobTitle: payload.designation || payload.jobTitle || current.jobTitle,
-      departmentName: payload.department || payload.departmentName || current.departmentName,
-      locationName: payload.location || payload.locationName || current.locationName,
-      email: payload.email || current.email,
-      phoneNumber: payload.phone || payload.phoneNumber || current.phoneNumber,
-      employmentStatus: payload.status ? (payload.status.toLowerCase() === 'active' ? 'active' : payload.status.toLowerCase()) : current.employmentStatus,
-    };
-    this.employees[index] = updated;
-
+  async updateEmployee(tenantId: string, id: string, payload: any): Promise<EmployeeDetailDTO> {
+    const updated = await updateEmployeeRow(tenantId, id, payload);
     AuditService.recordEvent({
       eventCode: 'EMPLOYEE_PROFILE_MUTATED',
       category: 'security',
       severity: 'warning',
       targetEntity: 'EmployeeProfile',
-      targetId: updated.id,
-      description: `Updated profile details for ${updated.fullName} (${updated.employeeCode}).`,
-      beforeState: { jobTitle: current.jobTitle, status: current.employmentStatus },
-      afterState: { jobTitle: updated.jobTitle, status: updated.employmentStatus }
+      targetId: updated?.id || id,
+      description: `Updated profile details for ${updated?.fullName} (${updated?.employeeCode}).`,
     }).catch(() => null);
-
-    return updated;
+    return updated as EmployeeDetailDTO;
   }
 }
 

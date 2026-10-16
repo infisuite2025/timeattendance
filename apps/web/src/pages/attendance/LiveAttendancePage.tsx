@@ -47,23 +47,24 @@ export const LiveAttendancePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'employee' | 'location' | 'department' | 'shift'>('employee');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('All Locations');
-  const [selectedDate, setSelectedDate] = useState('2026-09-18');
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedEmpIds, setSelectedEmpIds] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const [kpis, setKpis] = useState<DashboardKPISummaryDTO>({
-    totalEmployees: { count: 1248, changeVsLastMonth: '+2.4%' },
-    present: { count: 892, percentage: 71.5 },
-    notArrived: { count: 156, percentage: 12.5 },
-    late: { count: 62, percentage: 5.0 },
-    onLeave: { count: 58, percentage: 4.6 },
-    wfh: { count: 44, percentage: 3.5 },
-    fieldDuty: { count: 26, percentage: 2.1 },
-    missingPunch: { count: 10, percentage: 0.8 },
+    totalEmployees: { count: 0, changeVsLastMonth: '0' },
+    present: { count: 0, percentage: 0 },
+    notArrived: { count: 0, percentage: 0 },
+    late: { count: 0, percentage: 0 },
+    onLeave: { count: 0, percentage: 0 },
+    wfh: { count: 0, percentage: 0 },
+    fieldDuty: { count: 0, percentage: 0 },
+    missingPunch: { count: 0, percentage: 0 },
   });
 
-  const [employees, setEmployees] = useState<LiveEmployeeRecord[]>([
+  const [employees, setEmployees] = useState<LiveEmployeeRecord[]>([]);
+  const _retiredLiveRows: LiveEmployeeRecord[] = [
     { id: '1', name: 'Srinivas Reddy', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop', empId: 'TP1012', dept: 'Engineering', shift: 'General Shift', firstIn: '08:58 AM', lastOut: '--', duration: '1h 34m', status: 'present', location: 'Hyderabad' },
     { id: '2', name: 'Priya Sharma', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop', empId: 'TP0456', dept: 'Product', shift: 'General Shift', firstIn: '08:47 AM', lastOut: '--', duration: '1h 45m', status: 'present', location: 'Bengaluru' },
     { id: '3', name: 'Amit Kumar', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop', empId: 'TP0783', dept: 'Sales & Marketing', shift: 'General Shift', firstIn: '09:15 AM', lastOut: '--', duration: '1h 17m', status: 'late', location: 'Mumbai' },
@@ -76,16 +77,33 @@ export const LiveAttendancePage: React.FC = () => {
     { id: '10', name: 'Divya Reddy', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&auto=format&fit=crop', empId: 'TP1367', dept: 'Engineering', shift: 'WFH Shift', firstIn: '08:40 AM', lastOut: '--', duration: '1h 52m', status: 'wfh', location: 'Remote' },
     { id: '11', name: 'Sameer Khan', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop', empId: 'TP2301', dept: 'Sales & Marketing', shift: 'Field Shift', firstIn: '08:15 AM', lastOut: '--', duration: '2h 17m', status: 'field_duty', location: 'Client Site' },
     { id: '12', name: 'Pooja Kulkarni', avatar: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=120&auto=format&fit=crop', empId: 'TP2456', dept: 'Finance & Accounts', shift: 'General Shift', firstIn: '09:00 AM', lastOut: '--', duration: '1h 30m', status: 'missing_punch', location: 'Hyderabad' },
-  ]);
+  ];
+  void _retiredLiveRows;
 
   const fetchLiveAttendanceData = async (showToast = false) => {
     setIsRefreshing(true);
     try {
-      const [sumRes] = await Promise.all([
+      const [sumRes, liveRes] = await Promise.all([
         apiClient.get('/analytics/dashboard-summary', { location: selectedLocation, date: selectedDate }),
+        apiClient.get<any[]>('/attendance/live-stream', { date: selectedDate }),
       ]);
       if (sumRes.success && sumRes.data) {
         setKpis(sumRes.data);
+      }
+      if (liveRes.success && Array.isArray(liveRes.data)) {
+        setEmployees(liveRes.data.map((row) => ({
+          id: String(row.employeeId || row.id),
+          name: row.employeeName || 'Employee',
+          avatar: '',
+          empId: row.employeeCode || '',
+          dept: row.department || '',
+          shift: row.shiftName || '',
+          firstIn: row.firstInTime || '--',
+          lastOut: row.lastOutTime || '--',
+          duration: '--',
+          status: row.status === 'late' ? 'late' : row.status === 'absent' ? 'not_arrived' : row.status === 'on_leave' ? 'on_leave' : row.status === 'wfh' ? 'wfh' : row.status === 'field_duty' ? 'field_duty' : row.status === 'missing_punch' ? 'missing_punch' : 'present',
+          location: row.location || '',
+        })));
       }
       if (showToast) {
         toast.success('Live Attendance Synchronized', `Updated live feeds for ${selectedLocation} (${selectedDate}).`);
@@ -210,7 +228,7 @@ export const LiveAttendancePage: React.FC = () => {
               onChange={(e) => setSelectedLocation(e.target.value)}
               className="bg-transparent border-0 text-xs font-semibold text-slate-900 focus:outline-none cursor-pointer"
             >
-              <option value="All Locations">{t('dashboard.allLocations', 'All Locations')} (1,248 Staff)</option>
+              <option value="All Locations">{t('dashboard.allLocations', 'All Locations')} ({kpis.totalEmployees.count} Staff)</option>
               <option value="Hyderabad Main Office">Hyderabad Main Office</option>
               <option value="Bengaluru Tech Park">Bengaluru Tech Park</option>
               <option value="Mumbai Financial Centre">Mumbai Financial Centre</option>

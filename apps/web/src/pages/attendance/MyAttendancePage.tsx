@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Calendar,
@@ -30,20 +30,77 @@ import {
 } from '@infi-timepro/shared-types';
 import { useNotification } from '../../context/NotificationContext.tsx';
 import { useI18n } from '../../context/I18nContext.tsx';
+import { useAuth } from '../../context/AuthContext.tsx';
+import { apiClient } from '../../services/apiClient.ts';
 
 export const MyAttendancePage: React.FC = () => {
   const { t } = useI18n();
   const navigate = useNavigate();
   const { toast } = useNotification();
+  const { user } = useAuth();
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const today = new Date();
   const [viewMode, setViewMode] = useState<'calendar' | 'table'>('calendar');
-  const [selectedMonth, setSelectedMonth] = useState('September');
-  const [selectedYear, setSelectedYear] = useState(2026);
+  const [selectedMonth, setSelectedMonth] = useState(monthNames[today.getMonth()]);
+  const [selectedYear, setSelectedYear] = useState(today.getFullYear());
   const [selectedDay, setSelectedDay] = useState<MyAttendanceDayRecordDTO | null>(null);
   const [showPunchModal, setShowPunchModal] = useState(false);
-  const [webPunchState, setWebPunchState] = useState<'IDLE' | 'PUNCHED_IN'>('PUNCHED_IN');
+  const [days, setDays] = useState<MyAttendanceDayRecordDTO[]>([]);
+  const [summary, setSummary] = useState<MyAttendanceMonthViewDTO['summary'] | null>(null);
+  const [punching, setPunching] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
-  // Sample Month Data
-  const days: MyAttendanceDayRecordDTO[] = Array.from({ length: 30 }, (_, i) => {
+  useEffect(() => {
+    let active = true;
+    apiClient.get<MyAttendanceMonthViewDTO>('/attendance/my-attendance', { month: selectedMonth, year: String(selectedYear) }).then((res) => {
+      if (!active || !res.success || !res.data) return;
+      const monthIndex = monthNames.indexOf(selectedMonth);
+      const recorded = new Map((res.data.days || []).map((day) => [String(day.date).slice(0, 10), day]));
+      const count = new Date(selectedYear, monthIndex + 1, 0).getDate();
+      const built: MyAttendanceDayRecordDTO[] = [];
+      for (let day = 1; day <= count; day += 1) {
+        const date = `${selectedYear}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const existing = recorded.get(date);
+        const weekday = new Date(selectedYear, monthIndex, day).getDay();
+        const off = weekday === 0 || weekday === 6;
+        const isFuture = date > today.toISOString().slice(0, 10);
+        built.push(existing ? {
+          ...existing,
+          date,
+          regularDurationMinutes: existing.regularDurationMinutes ?? 0,
+          overtimeMinutes: existing.overtimeMinutes ?? 0,
+          earlyOutByMinutes: existing.earlyOutByMinutes ?? 0,
+          isSandwichPenalty: existing.isSandwichPenalty ?? false,
+          punches: existing.punches ?? [],
+        } : {
+          id: `empty-${date}`,
+          date,
+          dayOfWeek: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][weekday],
+          shiftCode: off ? 'WO' : 'GS',
+          shiftName: off ? 'Weekly Off' : 'General Shift',
+          shiftTiming: off ? 'Non-Working Day' : '09:00 AM - 06:00 PM',
+          grossDurationMinutes: 0,
+          breakDurationMinutes: 0,
+          netWorkDurationMinutes: 0,
+          regularDurationMinutes: 0,
+          overtimeMinutes: 0,
+          status: off ? 'weekly_off' : 'unscheduled',
+          isLate: false,
+          lateByMinutes: 0,
+          isEarlyOut: false,
+          earlyOutByMinutes: 0,
+          isRegularised: false,
+          isSandwichPenalty: false,
+          punches: [],
+        });
+      }
+      setSummary(res.data.summary);
+      setDays(built);
+    }).catch(() => undefined);
+    return () => { active = false; };
+  }, [selectedMonth, selectedYear, reloadKey, user.email]);
+
+  const _retiredSampleStart = false && Array.from({ length: 30 }, (_, i) => {
     const day = i + 1;
     const dateStr = `2026-09-${day < 10 ? '0' + day : day}`;
     const d = new Date(dateStr);
@@ -186,6 +243,12 @@ export const MyAttendancePage: React.FC = () => {
             Leave
           </span>
         );
+      case 'unscheduled':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-500">
+            No record
+          </span>
+        );
       case 'weekly_off':
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-600">
@@ -215,7 +278,7 @@ export const MyAttendancePage: React.FC = () => {
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{t('attendance.my_attendance', 'My Attendance')}</h1>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
               <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-              Sarah Jenkins (EMP-1001)</span>
+              {user.name} ({user.employeeCode})</span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
             Track your daily attendance punches, working hours, leaves, and submit regularisation requests.
@@ -226,14 +289,30 @@ export const MyAttendancePage: React.FC = () => {
           {/* Month Navigator */}
           <div className="inline-flex items-center bg-slate-100 rounded-lg p-1 border border-slate-200 text-sm font-semibold text-slate-700">
             <button
-              onClick={() => {}}
+              onClick={() => {
+                const index = monthNames.indexOf(selectedMonth);
+                if (index === 0) {
+                  setSelectedMonth('December');
+                  setSelectedYear((year) => year - 1);
+                } else {
+                  setSelectedMonth(monthNames[index - 1]);
+                }
+              }}
               className="p-1 hover:bg-white rounded-md text-slate-600 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="px-3">September 2026</span>
+            <span className="px-3">{selectedMonth} {selectedYear}</span>
             <button
-              onClick={() => {}}
+              onClick={() => {
+                const index = monthNames.indexOf(selectedMonth);
+                if (index === 11) {
+                  setSelectedMonth('January');
+                  setSelectedYear((year) => year + 1);
+                } else {
+                  setSelectedMonth(monthNames[index + 1]);
+                }
+              }}
               className="p-1 hover:bg-white rounded-md text-slate-600 transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
@@ -284,38 +363,38 @@ export const MyAttendancePage: React.FC = () => {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="text-xs font-medium text-slate-500">Working Days</div>
-          <div className="text-2xl font-bold text-slate-900 mt-1">22</div>
-          <div className="text-[11px] text-slate-400 mt-0.5">September 2026</div>
+          <div className="text-2xl font-bold text-slate-900 mt-1">{summary?.totalWorkingDays ?? 0}</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">{selectedMonth} {selectedYear}</div>
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="text-xs font-medium text-slate-500">Present Days</div>
-          <div className="text-2xl font-bold text-emerald-600 mt-1">21</div>
-          <div className="text-[11px] text-emerald-700 font-medium mt-0.5">95.4% Attendance</div>
+          <div className="text-2xl font-bold text-emerald-600 mt-1">{summary?.presentDays ?? 0}</div>
+          <div className="text-[11px] text-emerald-700 font-medium mt-0.5">{summary?.attendancePercentage ?? 0}% Attendance</div>
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="text-xs font-medium text-slate-500">Late Marks</div>
-          <div className="text-2xl font-bold text-amber-600 mt-1">1</div>
-          <div className="text-[11px] text-amber-700 font-medium mt-0.5">Late by 24 mins</div>
+          <div className="text-2xl font-bold text-amber-600 mt-1">{summary?.lateDays ?? 0}</div>
+          <div className="text-[11px] text-amber-700 font-medium mt-0.5">Late marks this month</div>
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="text-xs font-medium text-slate-500">Leaves Taken</div>
-          <div className="text-2xl font-bold text-blue-600 mt-1">1</div>
-          <div className="text-[11px] text-blue-700 font-medium mt-0.5">Annual Leave (Approved)</div>
+          <div className="text-2xl font-bold text-blue-600 mt-1">{summary?.leaveDays ?? 0}</div>
+          <div className="text-[11px] text-blue-700 font-medium mt-0.5">Leave days</div>
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="text-xs font-medium text-slate-500">Hours Logged</div>
-          <div className="text-2xl font-bold text-slate-900 mt-1">178.5h</div>
-          <div className="text-[11px] text-slate-500 font-medium mt-0.5">Req: 176.0h</div>
+          <div className="text-2xl font-bold text-slate-900 mt-1">{summary?.totalWorkDurationHours ?? 0}h</div>
+          <div className="text-[11px] text-slate-500 font-medium mt-0.5">Recorded hours</div>
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="text-xs font-medium text-slate-500">Overtime Logged</div>
-          <div className="text-2xl font-bold text-purple-600 mt-1">3.5h</div>
-          <div className="text-[11px] text-purple-700 font-medium mt-0.5">100% Approved</div>
+          <div className="text-xs font-medium text-slate-500">Absent Days</div>
+          <div className="text-2xl font-bold text-purple-600 mt-1">{summary?.absentDays ?? 0}</div>
+          <div className="text-[11px] text-purple-700 font-medium mt-0.5">Absent days</div>
         </div>
       </div>
 
@@ -336,12 +415,13 @@ export const MyAttendancePage: React.FC = () => {
           {/* Calendar Grid (Days 1 to 30) */}
           <div className="grid grid-cols-7 gap-2.5">
             {/* Blank leading slots if month starts on Tuesday */}
-            <div className="min-h-[100px] p-2 bg-slate-50/50 rounded-xl border border-dashed border-slate-200 opacity-40"></div>
-            <div className="min-h-[100px] p-2 bg-slate-50/50 rounded-xl border border-dashed border-slate-200 opacity-40"></div>
+            {Array.from({ length: new Date(selectedYear, monthNames.indexOf(selectedMonth), 1).getDay() }).map((_, index) => (
+              <div key={`blank-${index}`} className="min-h-[100px] p-2 bg-slate-50/50 rounded-xl border border-dashed border-slate-200 opacity-40"></div>
+            ))}
 
-            {days.map((d, index) => {
-              const dayNum = index + 1;
-              const isToday = dayNum === 14;
+            {days.map((d) => {
+              const dayNum = Number(d.date.slice(-2));
+              const isToday = d.date === today.toISOString().slice(0, 10);
 
               return (
                 <div
@@ -587,10 +667,25 @@ export const MyAttendancePage: React.FC = () => {
               >
                 Cancel</button>
               <button
-                onClick={() => {
-                  toast.success('Punch Registered Successfully', 'Web Kiosk attendance punch logged at ' + new Date().toLocaleTimeString() + ' (Bengaluru HQ).');
-                  setShowPunchModal(false);
-                  setWebPunchState('PUNCHED_IN');
+                disabled={punching}
+                onClick={async () => {
+                  setPunching(true);
+                  try {
+                    const res = await apiClient.post('/punches/ingest', {
+                      employeeId: user.employeeCode,
+                      timestamp: new Date().toISOString(),
+                      eventType: 'IN',
+                      source: 'web_portal',
+                    });
+                    if (!res.success) throw new Error(res.error?.message || 'Punch was not accepted');
+                    toast.success('Punch Registered', 'Your check-in is saved for today.');
+                    setShowPunchModal(false);
+                    setReloadKey((value) => value + 1);
+                  } catch (error) {
+                    toast.error('Punch Failed', error instanceof Error ? error.message : 'Could not save the punch');
+                  } finally {
+                    setPunching(false);
+                  }
                 }}
                 className="px-5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm"
               >

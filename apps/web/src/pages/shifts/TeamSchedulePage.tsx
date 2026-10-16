@@ -137,30 +137,39 @@ export const TeamSchedulePage: React.FC = () => {
     try {
       const res = await apiClient.get<any>('/shifts/schedule-matrix');
       if (res.data?.schedule && Array.isArray(res.data.schedule)) {
-        const matrixList = res.data.schedule;
-        setSchedules(prev => {
-          return prev.map((s, idx) => {
-            const match = matrixList[idx % matrixList.length];
-            if (match && match.shifts) {
-              const mappedDays: ScheduledDay[] = match.shifts.map((ds: any) => {
-                const code = (ds.shiftCode || 'GS').toLowerCase();
-                const typeKey = (code in SHIFT_TEMPLATES ? code : 'gs') as keyof typeof SHIFT_TEMPLATES;
-                const tmpl = SHIFT_TEMPLATES[typeKey];
-                return {
-                  type: typeKey,
-                  name: ds.shiftName || tmpl.name,
-                  text: ds.timing || tmpl.text,
-                  inTime: 'inTime' in tmpl ? tmpl.inTime : undefined,
-                  outTime: 'outTime' in tmpl ? tmpl.outTime : undefined,
-                  breakTime: 'breakTime' in tmpl ? tmpl.breakTime : undefined,
-                  grace: 'grace' in tmpl ? tmpl.grace : undefined,
-                };
-              });
-              return { ...s, days: mappedDays };
-            }
-            return s;
+        const matrixList = res.data.schedule as any[];
+        if (typeof res.data.weekRange === 'string' && matrixList[0]?.shifts) {
+          const days = (matrixList[0].shifts as any[]).map((cell) => Number(String(cell.date || '').slice(-2))).filter((day) => !Number.isNaN(day));
+          if (days.length === 7) setLiveWeek({ label: res.data.weekRange, days });
+        }
+        setSchedules(matrixList.map((match) => {
+          const mappedDays: ScheduledDay[] = (match.shifts || []).map((ds: any) => {
+            const code = String(ds.shiftCode || 'GS').toLowerCase();
+            const typeKey = (code in SHIFT_TEMPLATES ? code : 'gs') as keyof typeof SHIFT_TEMPLATES;
+            const tmpl = SHIFT_TEMPLATES[typeKey];
+            return {
+              type: typeKey,
+              name: ds.shiftName || tmpl.name,
+              text: ds.timing || tmpl.text,
+              inTime: 'inTime' in tmpl ? tmpl.inTime : undefined,
+              outTime: 'outTime' in tmpl ? tmpl.outTime : undefined,
+              breakTime: 'breakTime' in tmpl ? tmpl.breakTime : undefined,
+              grace: 'grace' in tmpl ? tmpl.grace : undefined,
+            };
           });
-        });
+          return {
+            employeeCode: match.employeeCode || '',
+            name: match.employeeName || 'Employee',
+            designation: '',
+            dept: '',
+            avatar: '',
+            assignedShift: mappedDays.find((day) => day.type !== 'off')?.name || '',
+            shiftTiming: mappedDays.find((day) => day.type !== 'off')?.text || '',
+            weeklyOffsCount: mappedDays.filter((day) => day.type === 'off').length,
+            workingDaysCount: mappedDays.filter((day) => day.type !== 'off').length,
+            days: mappedDays,
+          };
+        }));
       }
     } catch {
       // Keep default roster state if offline
@@ -174,186 +183,18 @@ export const TeamSchedulePage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedShiftFilter, setSelectedShiftFilter] = useState('ALL');
 
-  // Mock Rosters stored in state so updates immediately reflect
-  const [schedules, setSchedules] = useState<EmployeeRosterRecord[]>([
-    {
-      employeeCode: 'MGR-104',
-      name: 'Vikram Singh',
-      designation: 'Operations Lead & Supervisor',
-      dept: 'Operations & Assembly',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
-      assignedShift: 'General Shift',
-      shiftTiming: '09:00 AM – 05:00 PM',
-      weeklyOffsCount: 8,
-      workingDaysCount: 22,
-      days: [
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift', inTime: '09:00 AM', outTime: '05:00 PM', breakTime: '01:00 PM - 02:00 PM', grace: '15 mins' },
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift', inTime: '09:00 AM', outTime: '05:00 PM', breakTime: '01:00 PM - 02:00 PM', grace: '15 mins' },
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift', inTime: '09:00 AM', outTime: '05:00 PM', breakTime: '01:00 PM - 02:00 PM', grace: '15 mins' },
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift', inTime: '09:00 AM', outTime: '05:00 PM', breakTime: '01:00 PM - 02:00 PM', grace: '15 mins' },
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift', inTime: '09:00 AM', outTime: '05:00 PM', breakTime: '01:00 PM - 02:00 PM', grace: '15 mins' },
-        { type: 'off', text: 'Off', name: 'Weekly Off' },
-        { type: 'off', text: 'Off', name: 'Weekly Off' },
-      ],
-    },
-    {
-      employeeCode: 'EMP-1001',
-      name: 'Sarah Jenkins',
-      designation: 'Senior Process Specialist',
-      dept: 'Operations & Assembly',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-      assignedShift: 'General Shift',
-      shiftTiming: '09:00 AM – 05:00 PM',
-      weeklyOffsCount: 8,
-      workingDaysCount: 22,
-      days: [
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift', inTime: '09:00 AM', outTime: '05:00 PM', breakTime: '01:00 PM - 02:00 PM', grace: '15 mins' },
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift', inTime: '09:00 AM', outTime: '05:00 PM', breakTime: '01:00 PM - 02:00 PM', grace: '15 mins' },
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift', inTime: '09:00 AM', outTime: '05:00 PM', breakTime: '01:00 PM - 02:00 PM', grace: '15 mins' },
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift', inTime: '09:00 AM', outTime: '05:00 PM', breakTime: '01:00 PM - 02:00 PM', grace: '15 mins' },
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift', inTime: '09:00 AM', outTime: '05:00 PM', breakTime: '01:00 PM - 02:00 PM', grace: '15 mins' },
-        { type: 'off', text: 'Off', name: 'Weekly Off' },
-        { type: 'off', text: 'Off', name: 'Weekly Off' },
-      ],
-    },
-    {
-      employeeCode: 'EMP-1003',
-      name: 'Marcus Brody',
-      designation: 'Senior Machine Operator',
-      dept: 'Operations & Assembly',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-      assignedShift: 'Morning Shift',
-      shiftTiming: '08:00 AM – 04:00 PM',
-      weeklyOffsCount: 8,
-      workingDaysCount: 22,
-      days: [
-        { type: 'ms', text: '8:00 AM – 4:00 PM', name: 'Morning Shift' },
-        { type: 'ms', text: '8:00 AM – 4:00 PM', name: 'Morning Shift' },
-        { type: 'ms', text: '8:00 AM – 4:00 PM', name: 'Morning Shift' },
-        { type: 'ms', text: '8:00 AM – 4:00 PM', name: 'Morning Shift' },
-        { type: 'ms', text: '8:00 AM – 4:00 PM', name: 'Morning Shift' },
-        { type: 'off', text: 'Off', name: 'Weekly Off' },
-        { type: 'off', text: 'Off', name: 'Weekly Off' },
-      ],
-    },
-    {
-      employeeCode: 'EMP-1005',
-      name: 'Elena Rostova',
-      designation: 'Quality Assurance Specialist',
-      dept: 'Operations & Assembly',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-      assignedShift: 'Evening Shift',
-      shiftTiming: '02:00 PM – 10:00 PM',
-      weeklyOffsCount: 8,
-      workingDaysCount: 22,
-      days: [
-        { type: 'es', text: '2:00 PM – 10:00 PM', name: 'Evening Shift' },
-        { type: 'es', text: '2:00 PM – 10:00 PM', name: 'Evening Shift' },
-        { type: 'es', text: '2:00 PM – 10:00 PM', name: 'Evening Shift' },
-        { type: 'es', text: '2:00 PM – 10:00 PM', name: 'Evening Shift' },
-        { type: 'es', text: '2:00 PM – 10:00 PM', name: 'Evening Shift' },
-        { type: 'off', text: 'Off', name: 'Weekly Off' },
-        { type: 'off', text: 'Off', name: 'Weekly Off' },
-      ],
-    },
-    {
-      employeeCode: 'EMP-1006',
-      name: 'Tariq Mansoor',
-      designation: 'Assembly Technician',
-      dept: 'Operations & Assembly',
-      avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150',
-      assignedShift: 'Night Shift',
-      shiftTiming: '10:00 PM – 06:00 AM',
-      weeklyOffsCount: 8,
-      workingDaysCount: 22,
-      days: [
-        { type: 'ns', text: '10:00 PM – 6:00 AM', name: 'Night Shift' },
-        { type: 'ns', text: '10:00 PM – 6:00 AM', name: 'Night Shift' },
-        { type: 'ns', text: '10:00 PM – 6:00 AM', name: 'Night Shift' },
-        { type: 'ns', text: '10:00 PM – 6:00 AM', name: 'Night Shift' },
-        { type: 'off', text: 'Off', name: 'Weekly Off' },
-        { type: 'off', text: 'Off', name: 'Weekly Off' },
-        { type: 'ns', text: '10:00 PM – 6:00 AM', name: 'Night Shift' },
-      ],
-    },
-    {
-      employeeCode: 'EMP-1002',
-      name: 'Aarav Sharma',
-      designation: 'Senior Software Engineer',
-      dept: 'Technology',
-      avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=120&auto=format&fit=crop',
-      assignedShift: 'General Shift',
-      shiftTiming: '09:00 AM – 05:00 PM',
-      weeklyOffsCount: 8,
-      workingDaysCount: 22,
-      days: [
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift' },
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift' },
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift' },
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift' },
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift' },
-        { type: 'off', text: 'Off', name: 'Weekly Off' },
-        { type: 'off', text: 'Off', name: 'Weekly Off' },
-      ],
-    },
-    {
-      employeeCode: 'EMP-1004',
-      name: 'Priya Nair',
-      designation: 'Talent Operations Lead',
-      dept: 'HR',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop',
-      assignedShift: 'General Shift',
-      shiftTiming: '09:00 AM – 05:00 PM',
-      weeklyOffsCount: 8,
-      workingDaysCount: 22,
-      days: [
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift' },
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift' },
-        { type: 'off', text: 'Off', name: 'Weekly Off' },
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift' },
-        { type: 'gs', text: '9:00 AM – 5:00 PM', name: 'General Shift' },
-        { type: 'es', text: '10:00 AM – 6:00 PM', name: 'Evening Shift' },
-        { type: 'off', text: 'Off', name: 'Weekly Off' },
-      ],
-    },
-    {
-      employeeCode: 'EMP-1007',
-      name: 'Rohan Mehta',
-      designation: 'Account Executive',
-      dept: 'Sales',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop',
-      assignedShift: 'Morning Shift',
-      shiftTiming: '08:00 AM – 04:00 PM',
-      weeklyOffsCount: 8,
-      workingDaysCount: 22,
-      days: [
-        { type: 'ms', text: '8:00 AM – 4:00 PM', name: 'Morning Shift' },
-        { type: 'ms', text: '8:00 AM – 4:00 PM', name: 'Morning Shift' },
-        { type: 'ms', text: '8:00 AM – 4:00 PM', name: 'Morning Shift' },
-        { type: 'off', text: 'Off', name: 'Weekly Off' },
-        { type: 'ms', text: '8:00 AM – 4:00 PM', name: 'Morning Shift' },
-        { type: 'ms', text: '8:00 AM – 4:00 PM', name: 'Morning Shift' },
-        { type: 'off', text: 'Off', name: 'Weekly Off' },
-      ],
-    }
-  ]);
+  const [schedules, setSchedules] = useState<EmployeeRosterRecord[]>([]);
+  const [liveWeek, setLiveWeek] = useState<{ label: string; days: number[] } | null>(null);
 
   // Scoped Schedule based on Persona Role and View Scope
   const scopedSchedule = schedules.filter(emp => {
     if (role === 'EMPLOYEE') {
-      return emp.employeeCode === user.employeeCode || emp.employeeCode === 'EMP-1001';
+      return emp.employeeCode === user.employeeCode;
     }
-    if (role === 'MANAGER') {
-      let isScopeMatch = true;
-      if (managerScopeMode === 'team') {
-        isScopeMatch = emp.employeeCode !== 'MGR-104' && emp.dept === 'Operations & Assembly';
-      } else if (managerScopeMode === 'self') {
-        isScopeMatch = emp.employeeCode === 'MGR-104' || emp.employeeCode === user.employeeCode;
-      } else {
-        isScopeMatch = emp.dept === 'Operations & Assembly';
-      }
-
-      if (!isScopeMatch) return false;
+    if (role === 'MANAGER' && managerScopeMode === 'self' && emp.employeeCode !== user.employeeCode) {
+      return false;
+    }
+    if (role === 'MANAGER' || role === 'ADMIN') {
 
       // Filter by Search Query if present
       if (searchQuery.trim()) {
@@ -468,19 +309,24 @@ export const TeamSchedulePage: React.FC = () => {
     );
   };
 
-  const handleSwapSubmit = (e: React.FormEvent) => {
+  const handleSwapSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmittingSwap(true);
-
-    setTimeout(() => {
-      setIsSubmittingSwap(false);
+    try {
+      await apiClient.post('/shifts/swaps', {
+        date: swapDate,
+        reason: swapReason || 'Shift swap',
+        currentShift: 'General Shift',
+        requestedShift: 'General Shift',
+      });
       setShowSwapModal(false);
       setSwapReason('');
-      toast.success(
-        'Shift Swap Requested',
-        `Swap request for ${swapDate} submitted to manager for approval.`
-      );
-    }, 450);
+      toast.success('Shift Swap Requested', `Swap request for ${swapDate} was sent to your manager.`);
+    } catch {
+      toast.error('Swap was not saved', 'Check that you are signed in and try again.');
+    } finally {
+      setIsSubmittingSwap(false);
+    }
   };
 
   // Month View Day Shift Calculation for Month Grid
@@ -503,7 +349,7 @@ export const TeamSchedulePage: React.FC = () => {
     }
   };
 
-  const currentWeek = WEEKS_LIST[weekIndex] || WEEKS_LIST[2];
+  const currentWeek = liveWeek || WEEKS_LIST[weekIndex] || WEEKS_LIST[2];
   const currentMonth = MONTHS_LIST[monthIndex] || MONTHS_LIST[1];
   const weekDayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -535,8 +381,8 @@ export const TeamSchedulePage: React.FC = () => {
             {isEmployee
               ? 'My Monthly Shift Schedule & Roster'
               : isManager
-              ? 'Team Schedule (Operations & Assembly)'
-              : 'Enterprise Team Schedule & Master Matrix'}</h1>
+              ? 'Team Schedule'
+              : 'Team Schedule'}</h1>
 
           <p className="text-xs text-slate-500 mt-0.5">
             {isEmployee
@@ -555,24 +401,7 @@ export const TeamSchedulePage: React.FC = () => {
               <RotateCcw className="h-4 w-4" />
               <span>Request Shift Swap</span>
             </button>
-          ) : (
-            <>
-              <button
-                onClick={() => toast.success('Roster Broadcast', 'Published weekly schedule notification to team!')}
-                className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition"
-              >
-                <Send className="h-4 w-4" />
-                <span>Publish Schedule</span>
-              </button>
-              <button 
-                onClick={() => toast.info('Export Matrix', 'Generating CSV roster export...')}
-                className="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-600 hover:bg-slate-50 transition"
-                title="Export schedule"
-              >
-                <Download className="h-4 w-4" />
-              </button>
-            </>
-          )}</div>
+          ) : null}</div>
       </div>
 
       {/* Admin Module Sub-navigation (Hidden for Employee) */}
@@ -973,12 +802,7 @@ export const TeamSchedulePage: React.FC = () => {
 
               {isEmployee && (
                 <div className="p-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                  <span>Showing personal roster schedule for <strong>Sarah Jenkins (EMP-1001)</strong></span>
-                  <button
-                    onClick={() => toast.info('Roster Export', 'Downloading your monthly schedule in PDF...')}
-                    className="font-semibold text-blue-600 hover:underline"
-                  >
-                    {t('shifts.downloadRosterPdf', 'Download My Roster (PDF)')}</button>
+                  <span>Showing personal roster schedule for <strong>{user.name} ({user.employeeCode})</strong></span>
                 </div>
               )}
             </>
@@ -1235,30 +1059,6 @@ export const TeamSchedulePage: React.FC = () => {
               </>
             ) : (
               <>
-                <button
-                  onClick={async () => {
-                    const confirmed = await confirm({
-                      title: 'Copy Previous Week Assignments?',
-                      text: 'This will copy all shift allocations from the preceding week into the current schedule.',
-                      confirmButtonText: 'Yes, Copy Schedule',
-                      icon: 'info',
-                    });
-                    if (confirmed) {
-                      toast.success('Roster Cloned', 'Successfully cloned schedule pattern to active week!');
-                    }
-                  }}
-                  className="flex w-full items-center gap-2 rounded-lg bg-blue-50 p-2 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition"
-                >
-                  <Copy className="h-3.5 w-3.5" />
-                  <span>Copy Last Week</span>
-                </button>
-                <button
-                  onClick={() => toast.info('Auto Roster', 'Auto-assigning balanced morning/evening rotation...')}
-                  className="flex w-full items-center gap-2 rounded-lg border border-slate-200 p-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
-                >
-                  <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-                  <span>Auto-Balance Shifts</span>
-                </button>
                 <NavLink
                   to="/shifts/library"
                   className="flex items-center gap-2 rounded-lg border border-slate-200 p-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
