@@ -283,7 +283,7 @@ export async function createEmployee(tenantId: string, payload: any) {
   const locationId = payload.locationId || 'loc_hyd_001';
   const userId = crypto.randomUUID();
   const employeeId = crypto.randomUUID();
-  const employeeCode = payload.employeeCode || `TP${Math.floor(1000 + Math.random() * 9000)}`;
+  const employeeCode = payload.employeeCode || `TP${crypto.randomInt(1000, 10000)}`;
   const password = payload.password || crypto.randomBytes(9).toString('base64url');
   const conn = await pool.getConnection();
   try {
@@ -557,7 +557,7 @@ export async function getRecentPunches(tenantId: string, employeeId?: string, ro
     eventType: row.event_type,
     source: row.source,
     locationName: row.location_name || '',
-    timeDisplay: DateTime.fromSQL(String(row.punch_timestamp_utc).replace('T', ' ').slice(0, 19), { zone: 'utc' }).setZone(ZONE).toFormat('hh:mm a'),
+    timeDisplay: DateTime.fromSQL(String(row.punch_timestamp_utc).replaceAll('T', ' ').slice(0, 19), { zone: 'utc' }).setZone(ZONE).toFormat('hh:mm a'),
     status: row.is_flagged ? 'flagged' : 'accepted',
     flagReason: row.flag_reason || undefined,
   }));
@@ -696,7 +696,7 @@ export async function getHourlyTrend(tenantId: string, location?: string, date?:
   return hours.map((hour) => {
     const seen = new Set<string>();
     for (const row of rows) {
-      const local = DateTime.fromSQL(String(row.punch_timestamp_utc).replace('T', ' ').slice(0, 19), { zone: 'utc' }).setZone(ZONE);
+      const local = DateTime.fromSQL(String(row.punch_timestamp_utc).replaceAll('T', ' ').slice(0, 19), { zone: 'utc' }).setZone(ZONE);
       if (local.hour <= hour) seen.add(String(row.employee_id));
     }
     return {
@@ -995,7 +995,7 @@ export async function createRegularisation(tenantId: string, employeeId: string,
   reasonCategory?: string;
   reasonText?: string;
 }) {
-  const id = `reg_${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`;
+  const id = `reg_${crypto.randomUUID().replaceAll(/-/g, '').slice(0, 12)}`;
   const requestCode = `REG-${Date.now().toString().slice(-6)}`;
   const reason = [payload.reasonCategory, payload.reasonText].filter(Boolean).join(': ') || 'Attendance correction';
   await pool.query(
@@ -1042,7 +1042,7 @@ export async function createRegularisation(tenantId: string, employeeId: string,
       `INSERT INTO tp_approval_instances
         (id, tenant_id, entity_type, entity_id, current_step, total_steps, current_assignee_id, status)
        VALUES (?, ?, 'regularisation', ?, 1, 1, ?, 'pending')`,
-      [`appr_${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`, tenantId, id, assigneeId]
+      [`appr_${crypto.randomUUID().replaceAll(/-/g, '').slice(0, 12)}`, tenantId, id, assigneeId]
     );
   }
   const saved = mapRegularisation(rows[0]);
@@ -1187,7 +1187,7 @@ async function recordGeofenceException(tenantId: string, employeeId: string, att
     `INSERT INTO tp_attendance_exceptions
       (id, tenant_id, attendance_day_id, employee_id, exception_type, severity, status, details)
      VALUES (?, ?, ?, ?, 'geofence_breach', 'high', 'open', ?)`,
-    [`exc_${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`, tenantId, dayId, employeeId, details]
+    [`exc_${crypto.randomUUID().replaceAll(/-/g, '').slice(0, 12)}`, tenantId, dayId, employeeId, details]
   );
 }
 
@@ -1323,7 +1323,7 @@ export async function createShiftSwap(tenantId: string, employeeId: string, payl
   reason?: string;
 }) {
   await ensureSwapTable();
-  const id = `swp_${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`;
+  const id = `swp_${crypto.randomUUID().replaceAll(/-/g, '').slice(0, 12)}`;
   const code = `SSW-${Date.now().toString().slice(-6)}`;
   const swapDate = String(payload.date || DateTime.now().setZone(ZONE).toISODate());
   await pool.query(

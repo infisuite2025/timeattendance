@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { randomInt } from '../../utils/safe-values.js';
 import { config } from '../../config/env.js';
 
 export interface SupportGrantDTO {
@@ -45,7 +46,7 @@ export class SupportAccessService {
     }
 
     const maxDuration = Math.min(durationHours, 1); // Capped at maximum 1 hour
-    const grantId = `sp-grant-${Math.floor(1000 + Math.random() * 9000)}`;
+    const grantId = `sp-grant-${randomInt(1000, 10000)}`;
     const expiresAt = new Date(Date.now() + maxDuration * 3600 * 1000).toISOString();
 
     const payload = {

@@ -58,7 +58,7 @@ attendanceRouter.get('/my-attendance', authGuard, async (req: AuthenticatedReque
   try {
     const employeeId = req.user?.employeeId || req.user?.id || '';
     const month = (req.query.month as string) || 'October';
-    const year = req.query.year ? parseInt(req.query.year as string, 10) : new Date().getFullYear();
+    const year = req.query.year ? Number.parseInt(req.query.year as string, 10) : new Date().getFullYear();
     const data = await getMyAttendance(req.user?.tenantId || 'ten_acme_001', employeeId, month, year);
 
     res.json({

@@ -1,4 +1,5 @@
 import { EmployeeDetailDTO, EmployeeSummaryDTO } from '@infi-timepro/shared-types';
+import { randomInt } from '../../utils/safe-values.js';
 import { AuditService } from '../audit/audit.service.js';
 import { createEmployee as createEmployeeRow, getEmployeeById as getEmployeeRow, listEmployees, updateEmployee as updateEmployeeRow } from '../../database/core-repository.js';
 
@@ -305,7 +306,7 @@ export class EmployeesService {
         overtimeEligible: true,
         remoteWorkEligible: !isContractor,
         email: `${fn.toLowerCase()}.${ln.toLowerCase()}${i}@company.com`,
-        phoneNumber: `+91 98${Math.floor(10000000 + Math.random() * 90000000)}`,
+        phoneNumber: `+91 98${randomInt(10000000, 100000000)}`,
         currentShift: {
           id: 'shf_gen_001',
           code: 'GS',

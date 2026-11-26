@@ -29,7 +29,7 @@ export async function listRecords<T>(tenantId: string, kind: string): Promise<T[
 
 export async function saveRecord<T extends Record<string, unknown>>(tenantId: string, kind: string, payload: T): Promise<T & { id: string }> {
   await ensureRecords();
-  const id = String(payload.id || `${kind.slice(0, 3)}_${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`);
+  const id = String(payload.id || `${kind.slice(0, 3)}_${crypto.randomUUID().replaceAll(/-/g, '').slice(0, 12)}`);
   const stored = { ...payload, id };
   await pool.query(
     `INSERT INTO tp_saved_records (id, tenant_id, kind, payload) VALUES (?, ?, ?, ?)`,

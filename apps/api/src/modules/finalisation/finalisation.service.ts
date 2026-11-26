@@ -7,6 +7,7 @@ import {
   PayrollExportBatchDTO
 } from '@infi-timepro/shared-types';
 import crypto from 'crypto';
+import { randomInt } from '../../utils/safe-values.js';
 
 export class FinalisationService {
   private static periods: PayPeriodDTO[] = [
@@ -222,7 +223,7 @@ export class FinalisationService {
 
   static async exportPayroll(payload: PayrollExportRequestDTO, exporterName: string): Promise<PayrollExportBatchDTO> {
     const period = this.periods.find(p => p.id === payload.periodId) || this.periods[1];
-    const batchId = `EXP-BATCH-${Math.floor(1000 + Math.random() * 9000)}`;
+    const batchId = `EXP-BATCH-${randomInt(1000, 10000)}`;
 
     const newBatch: PayrollExportBatchDTO = {
       batchId,
@@ -233,7 +234,7 @@ export class FinalisationService {
       exportedBy: exporterName,
       exportedAt: new Date().toISOString(),
       downloadUrl: `/downloads/payroll_${period.periodCode}_${payload.format}.${payload.format === 'sap_json' ? 'json' : payload.format}`,
-      fileSizeBytes: Math.floor(80000 + Math.random() * 70000),
+      fileSizeBytes: randomInt(80000, 150000),
       lockHash: period.lockSignature || '0x4a1c9012f45e78bc90123a456def78192039485710293847561029384'
     };
 

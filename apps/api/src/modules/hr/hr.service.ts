@@ -10,6 +10,7 @@ import {
   AssetCategory,
   TicketCategory
 } from '@infi-timepro/shared-types';
+import { randomInt } from '../../utils/safe-values.js';
 
 export class HRService {
   // Mock In-Memory Data Store for HR Entities
@@ -496,7 +497,7 @@ export class HRService {
       fileName: doc.fileName || 'Document_Upload.pdf',
       fileSizeBytes: doc.fileSizeBytes || 1024000,
       fileType: doc.fileType || 'application/pdf',
-      documentNumber: doc.documentNumber || `DOC-${Math.floor(1000 + Math.random() * 9000)}`,
+      documentNumber: doc.documentNumber || `DOC-${randomInt(1000, 10000)}`,
       issueDate: doc.issueDate || new Date().toISOString().split('T')[0],
       expiryDate: doc.expiryDate,
       expiryStatus: doc.expiryDate ? 'valid' : 'not_applicable',
@@ -568,7 +569,7 @@ export class HRService {
   static async createTicket(payload: Partial<HRHelpdeskTicketDTO>): Promise<HRHelpdeskTicketDTO> {
     const newTicket: HRHelpdeskTicketDTO = {
       id: `tkt-${Date.now()}`,
-      ticketNumber: `TKT-HR-${Math.floor(1000 + Math.random() * 9000)}`,
+      ticketNumber: `TKT-HR-${randomInt(1000, 10000)}`,
       employeeId: payload.employeeId || 'EMP-1001',
       employeeName: payload.employeeName || 'Sarah Jenkins',
       employeeCode: payload.employeeCode || 'EMP-1001',

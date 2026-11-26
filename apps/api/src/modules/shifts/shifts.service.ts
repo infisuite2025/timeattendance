@@ -5,6 +5,7 @@ import {
   ShiftGroupDTO,
   ShiftSwapRequestDTO,
 } from '@infi-timepro/shared-types';
+import { randomInt } from '../../utils/safe-values.js';
 
 export class ShiftsService {
   private shifts: ShiftDTO[] = [
@@ -508,7 +509,7 @@ export class ShiftsService {
   createShiftGroup(payload: any): ShiftGroupDTO {
     const newGroup: ShiftGroupDTO = {
       id: `grp_${Date.now()}`,
-      code: payload.code || `GRP-${Math.floor(100 + Math.random() * 900)}`,
+      code: payload.code || `GRP-${randomInt(100, 1000)}`,
       name: payload.name || 'New Shift Group',
       description: payload.description || 'Custom shift group.',
       includedShifts: payload.includedShifts || ['General Shift'],
@@ -543,7 +544,7 @@ export class ShiftsService {
   createShiftSwap(payload: any): ShiftSwapRequestDTO {
     const newSwap: ShiftSwapRequestDTO = {
       id: `swp_${Date.now()}`,
-      requestCode: `SSW-2026-${Math.floor(100 + Math.random() * 900)}`,
+      requestCode: `SSW-2026-${randomInt(100, 1000)}`,
       requesterId: payload.requesterId || 'emp_001',
       requesterName: payload.requesterName || 'Aarav Sharma',
       requesterDept: payload.requesterDept || 'Technology',

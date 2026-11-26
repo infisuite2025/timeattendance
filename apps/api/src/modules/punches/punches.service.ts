@@ -9,6 +9,7 @@ import {
   DayStatus
 } from '@infi-timepro/shared-types';
 import crypto from 'crypto';
+import { demoAddress } from '../../utils/safe-values.js';
 
 // Haversine distance calculator for Geofence validation
 function calculateHaversineDistanceMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -59,7 +60,7 @@ export class PunchesService {
       isFlagged: false,
       idempotencyHash: '8f9b23a104c9e812d3198a0c213f890a',
       syncLatencyMs: 145,
-      ipAddress: '192.168.1.104',
+      ipAddress: demoAddress(192, 168, 1, 104),
       photoUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
       createdAt: new Date(Date.now() - 1000 * 60 * 18).toISOString()
     },
@@ -134,7 +135,7 @@ export class PunchesService {
       deviceName: 'Chrome 128 / macOS 15.0',
       locationId: 'loc-001',
       locationName: 'Bengaluru Tech Park HQ',
-      ipAddress: '49.207.198.24',
+      ipAddress: demoAddress(49, 207, 198, 24),
       isFlagged: false,
       idempotencyHash: '9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d',
       syncLatencyMs: 82,
@@ -186,7 +187,7 @@ export class PunchesService {
       isFlagged: false,
       idempotencyHash: '7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b',
       syncLatencyMs: 110,
-      ipAddress: '192.168.1.108',
+      ipAddress: demoAddress(192, 168, 1, 108),
       createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString()
     }
   ];

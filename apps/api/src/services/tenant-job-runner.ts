@@ -1,4 +1,5 @@
 import { tenantStorage, TenantContext, getTenantContext } from '../middleware/tenant-context.js';
+import { randomInt } from '../utils/safe-values.js';
 
 export interface TenantJobPayload<T = any> {
   jobId: string;
@@ -37,7 +38,7 @@ export class TenantJobRunner {
   static enqueueJob<T>(jobType: string, payload: T, explicitTenantId?: string): TenantJobPayload<T> {
     const tenantId = explicitTenantId || getTenantContext().tenantId;
     const job: TenantJobPayload<T> = {
-      jobId: `job_${Math.floor(100000 + Math.random() * 900000)}`,
+      jobId: `job_${randomInt(100000, 1000000)}`,
       jobType,
       tenantId,
       payload,

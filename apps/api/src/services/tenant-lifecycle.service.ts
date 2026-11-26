@@ -1,4 +1,5 @@
 import { getTenantContext, tenantStorage, TenantContext } from '../middleware/tenant-context.js';
+import { randomInt } from '../utils/safe-values.js';
 import { TenantScopedRepository, TenantSecurityException } from '../database/tenant-repository.js';
 import { TenantStorageService } from './tenant-storage.service.js';
 
@@ -83,7 +84,7 @@ export class TenantLifecycleService {
     return {
       tenantId: activeTenantId,
       exportedAt: new Date().toISOString(),
-      checksum: `chk_${Math.floor(100000 + Math.random() * 900000)}`,
+      checksum: `chk_${randomInt(100000, 1000000)}`,
       data: backupData,
     };
   }

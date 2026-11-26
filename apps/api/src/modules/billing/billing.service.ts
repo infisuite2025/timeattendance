@@ -4,6 +4,7 @@ import {
   TenantInvoiceDTO,
   GlobalRevenueSummaryDTO
 } from '@infi-timepro/shared-types';
+import crypto from 'crypto';
 
 export class BillingService {
   private static gatewayConfigs: Record<string, PaymentGatewayConfigDTO> = {
@@ -197,7 +198,7 @@ export class BillingService {
     inv.status = 'PAID';
     inv.paidAt = new Date().toISOString();
     inv.paymentMethodUsed = paymentMethod;
-    inv.transactionId = `txn_${Math.random().toString(36).substring(2, 10)}`;
+    inv.transactionId = `txn_${crypto.randomBytes(6).toString('hex').slice(0, 8)}`;
     return inv;
   }
 

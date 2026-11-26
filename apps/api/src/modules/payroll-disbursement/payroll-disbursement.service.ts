@@ -6,6 +6,7 @@ import {
   FinEWARequestDTO,
   FinPayrollDashboardSummaryDTO,
 } from '@infi-timepro/shared-types';
+import crypto from 'crypto';
 
 export class PayrollDisbursementService {
 
@@ -118,7 +119,7 @@ export class PayrollDisbursementService {
     run.approvedBy = approvedBy;
     run.approvedAt = new Date().toISOString();
     run.lockedAt = new Date().toISOString();
-    run.cryptoHash = `sha256-${Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join('')}`;
+    run.cryptoHash = `sha256-${crypto.randomBytes(32).toString('hex')}`;
     return run;
   }
 

@@ -46,7 +46,7 @@ dpdpaRouter.put('/consents/:consentId', authGuard, async (req: AuthenticatedRequ
 dpdpaRouter.get('/personal-data-summary', authGuard, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const empId = (req.query.employeeId as string) || req.user?.employeeId || 'emp_naresh_001';
-    const empCode = req.user?.employeeId ? 'TP0001' : 'TP0001';
+    const empCode = 'TP0001';
     const name = req.user ? `${req.user.firstName} ${req.user.lastName}` : 'Naresh Andukoori';
     const email = req.user?.email || 'naresh@company.com';
 

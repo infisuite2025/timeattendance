@@ -5,6 +5,7 @@ import {
   AdminUserDTO,
   TenantQuotaUsageDTO
 } from '@infi-timepro/shared-types';
+import { demoAddress, randomInt } from '../../utils/safe-values.js';
 
 export class OrganizationService {
   private locations: LocationDTO[] = [
@@ -122,7 +123,7 @@ export class OrganizationService {
     passwordRotationDays: 90,
     sessionTimeoutMinutes: 30,
     ipWhitelistingEnabled: false,
-    allowedIpRanges: ['103.21.144.0/24', '49.207.198.0/24'],
+    allowedIpRanges: [`${demoAddress(103, 21, 144, 0)}/24`, `${demoAddress(49, 207, 198, 0)}/24`],
     updatedAt: new Date().toISOString()
   };
 
@@ -217,7 +218,7 @@ export class OrganizationService {
 
   inviteAdminUser(payload: Partial<AdminUserDTO>): AdminUserDTO {
     const newUser: AdminUserDTO = {
-      id: `adm-${Math.floor(100 + Math.random() * 900)}`,
+      id: `adm-${randomInt(100, 1000)}`,
       tenantId: 'tenant-001',
       name: payload.name || 'New Admin User',
       email: payload.email || 'admin@company.com',

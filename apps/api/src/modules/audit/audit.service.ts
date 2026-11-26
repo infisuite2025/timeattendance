@@ -4,6 +4,7 @@ import {
   AuditFilterParametersDTO
 } from '@infi-timepro/shared-types';
 import crypto from 'crypto';
+import { demoAddress, randomInt } from '../../utils/safe-values.js';
 
 export class AuditService {
   private static logs: AuditLogEntryDTO[] = [
@@ -20,7 +21,7 @@ export class AuditService {
       actorRole: 'Head of HR & Payroll',
       targetEntity: 'PayPeriod',
       targetId: 'PAY-2026-AUG',
-      ipAddress: '106.51.72.19',
+      ipAddress: demoAddress(106, 51, 72, 19),
       userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/128.0.0.0',
       location: 'Bengaluru, India',
       description: 'Applied immutable cryptographic lock and generated SHA-256 seal for August 2026 Monthly Pay Period.',
@@ -42,7 +43,7 @@ export class AuditService {
       actorRole: 'Administrator',
       targetEntity: 'AttendanceDay',
       targetId: 'att-20260914-emp002',
-      ipAddress: '183.82.112.44',
+      ipAddress: demoAddress(183, 82, 112, 44),
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0',
       location: 'Hyderabad, India',
       description: 'Approved manual check-in regularisation of 09:00 AM for Michael Chang (EMP-1002) due to gate terminal sync lag.',
@@ -64,7 +65,7 @@ export class AuditService {
       actorRole: 'Administrator',
       targetEntity: 'GeofenceZone',
       targetId: 'geo-001',
-      ipAddress: '183.82.112.44',
+      ipAddress: demoAddress(183, 82, 112, 44),
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0',
       location: 'Hyderabad, India',
       description: 'Updated geofence radius boundary for Bengaluru Tech Park campus from 100m to 120m.',
@@ -86,7 +87,7 @@ export class AuditService {
       actorRole: 'SuperAdmin',
       targetEntity: 'TenantFeatureFlag',
       targetId: 'tenant-002:antiSpoofingSensors',
-      ipAddress: '183.82.112.44',
+      ipAddress: demoAddress(183, 82, 112, 44),
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0',
       location: 'Hyderabad, India',
       description: 'Enabled hardware mock-GPS anti-spoofing sensor heuristics for TechNova Cloud Solutions instance.',
@@ -108,7 +109,7 @@ export class AuditService {
       actorRole: 'Administrator',
       targetEntity: 'UserSession',
       targetId: 'sess-89021',
-      ipAddress: '183.82.112.44',
+      ipAddress: demoAddress(183, 82, 112, 44),
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0',
       location: 'Hyderabad, India',
       description: 'Successful administrative login with 2-Factor Authentication (TOTP).',
@@ -174,7 +175,7 @@ export class AuditService {
 
   static async recordEvent(event: Partial<AuditLogEntryDTO>): Promise<AuditLogEntryDTO> {
     const previousHash = this.logs.length > 0 ? this.logs[0].hashSignature : '0x0000000000000000000000000000000000000000000000000000000000000000';
-    const id = `aud-${Math.floor(1000 + Math.random() * 9000)}`;
+    const id = `aud-${randomInt(1000, 10000)}`;
     const timestamp = new Date().toISOString();
     
     const rawContent = `${id}:${timestamp}:${event.eventCode}:${event.actorEmail}:${event.description}:${previousHash}`;
@@ -193,7 +194,7 @@ export class AuditService {
       actorRole: event.actorRole || 'Administrator',
       targetEntity: event.targetEntity || 'SystemResource',
       targetId: event.targetId || 'res-001',
-      ipAddress: event.ipAddress || '183.82.112.44',
+      ipAddress: event.ipAddress || demoAddress(183, 82, 112, 44),
       userAgent: event.userAgent || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
       location: event.location || 'Hyderabad, India',
       description: event.description || 'Audit log event captured.',

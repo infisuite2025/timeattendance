@@ -4,6 +4,7 @@ import {
   CreateTenantRequestDTO,
   UpdateTenantStatusRequestDTO
 } from '@infi-timepro/shared-types';
+import { randomInt } from '../../utils/safe-values.js';
 
 export class SuperAdminService {
   private static tenants: TenantDTO[] = [
@@ -137,7 +138,7 @@ export class SuperAdminService {
 
   static async createTenant(payload: CreateTenantRequestDTO): Promise<TenantDTO> {
     const newTenant: TenantDTO = {
-      id: `tenant-${Math.floor(100 + Math.random() * 900)}`,
+      id: `tenant-${randomInt(100, 1000)}`,
       code: payload.code.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
       name: payload.name,
       subdomain: `${payload.subdomain.toLowerCase()}.infitimepro.com`,

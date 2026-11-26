@@ -5,6 +5,7 @@ import {
   TriggerWebhookTestRequestDTO
 } from '@infi-timepro/shared-types';
 import crypto from 'crypto';
+import { randomInt } from '../../utils/safe-values.js';
 
 export class IntegrationsService {
   private static connectors: IntegrationConnectorDTO[] = [
@@ -155,7 +156,7 @@ export class IntegrationsService {
 
   static async createConnector(payload: Partial<IntegrationConnectorDTO>): Promise<IntegrationConnectorDTO> {
     const newConnector: IntegrationConnectorDTO = {
-      id: `int-${Math.floor(100 + Math.random() * 900)}`,
+      id: `int-${randomInt(100, 1000)}`,
       code: payload.code || `custom-bridge-${Date.now()}`,
       name: payload.name || 'Custom Enterprise Connector',
       category: payload.category || 'hrms',
@@ -204,7 +205,7 @@ export class IntegrationsService {
   static async createWebhook(payload: Omit<WebhookSubscriptionDTO, 'id' | 'createdAt' | 'successRate' | 'secretKey'>): Promise<WebhookSubscriptionDTO> {
     const newWebhook: WebhookSubscriptionDTO = {
       ...payload,
-      id: `wh-${Math.floor(100 + Math.random() * 900)}`,
+      id: `wh-${randomInt(100, 1000)}`,
       secretKey: 'whsec_' + crypto.randomBytes(16).toString('hex'),
       successRate: 100,
       createdAt: new Date().toISOString()
@@ -230,12 +231,12 @@ export class IntegrationsService {
   static async triggerTestWebhook(payload: TriggerWebhookTestRequestDTO): Promise<WebhookDeliveryLogDTO> {
     const webhook = this.webhooks.find(w => w.id === payload.webhookId) || this.webhooks[0];
     const log: WebhookDeliveryLogDTO = {
-      id: `del-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: `del-${randomInt(1000, 10000)}`,
       webhookId: webhook.id,
       eventType: payload.eventType || 'test.ping',
       timestamp: new Date().toISOString(),
       statusCode: 200,
-      durationMs: Math.floor(80 + Math.random() * 90),
+      durationMs: randomInt(80, 170),
       payload: payload.samplePayload || {
         event: payload.eventType || 'test.ping',
         tenantId: 'tenant-demo-001',

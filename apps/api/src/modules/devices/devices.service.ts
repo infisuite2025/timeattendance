@@ -5,6 +5,7 @@ import {
   DeviceCommandRequestDTO,
   DeviceCommandResponseDTO
 } from '@infi-timepro/shared-types';
+import { demoAddress, randomInt } from '../../utils/safe-values.js';
 
 export class DevicesService {
   private static devices: DeviceDTO[] = [
@@ -16,7 +17,7 @@ export class DevicesService {
       deviceType: 'face_recognition',
       locationId: 'loc-001',
       locationName: 'Bengaluru Tech Park HQ',
-      ipAddress: '192.168.1.104',
+      ipAddress: demoAddress(192, 168, 1, 104),
       port: 4370,
       macAddress: '00:1A:79:8F:32:01',
       status: 'online',
@@ -39,7 +40,7 @@ export class DevicesService {
       deviceType: 'biometric_terminal',
       locationId: 'loc-001',
       locationName: 'Bengaluru Tech Park HQ',
-      ipAddress: '192.168.1.108',
+      ipAddress: demoAddress(192, 168, 1, 108),
       port: 4370,
       macAddress: '00:1A:79:8F:32:02',
       status: 'online',
@@ -62,7 +63,7 @@ export class DevicesService {
       deviceType: 'rfid_reader',
       locationId: 'loc-001',
       locationName: 'Bengaluru Tech Park HQ',
-      ipAddress: '192.168.1.112',
+      ipAddress: demoAddress(192, 168, 1, 112),
       port: 5005,
       macAddress: '00:1A:79:8F:44:11',
       status: 'online',
@@ -85,7 +86,7 @@ export class DevicesService {
       deviceType: 'face_recognition',
       locationId: 'loc-002',
       locationName: 'Mumbai Financial Centre',
-      ipAddress: '10.20.4.15',
+      ipAddress: demoAddress(10, 20, 4, 15),
       port: 4370,
       macAddress: '00:1A:79:8F:90:88',
       status: 'warning',
@@ -108,7 +109,7 @@ export class DevicesService {
       deviceType: 'biometric_terminal',
       locationId: 'loc-003',
       locationName: 'Singapore Regional Hub',
-      ipAddress: '172.16.8.22',
+      ipAddress: demoAddress(172, 16, 8, 22),
       port: 4370,
       macAddress: '00:1A:79:99:12:44',
       status: 'offline',
@@ -213,9 +214,9 @@ export class DevicesService {
       deviceType: payload.deviceType,
       locationId: payload.locationId,
       locationName: 'Bengaluru Tech Park HQ',
-      ipAddress: payload.ipAddress || '192.168.1.150',
+      ipAddress: payload.ipAddress || demoAddress(192, 168, 1, 150),
       port: payload.port || 4370,
-      macAddress: '00:1A:79:' + Math.floor(10 + Math.random() * 89) + ':AA:BB',
+      macAddress: '00:1A:79:' + randomInt(10, 99) + ':AA:BB',
       status: 'online',
       lastHeartbeatAt: new Date().toISOString(),
       enrolledTemplatesCount: 0,

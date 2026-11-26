@@ -4,6 +4,7 @@ import {
   ReportFilterParametersDTO,
   ReportScheduleDTO
 } from '@infi-timepro/shared-types';
+import { demoAddress, randomInt } from '../../utils/safe-values.js';
 
 export interface DailySummaryReportRecord {
   employeeId: string;
@@ -453,7 +454,7 @@ export class ReportsService {
       distanceFromPerimeterMeters: 18,
       mockGpsDetected: false,
       status: 'Compliant',
-      ipAddress: '103.21.144.12'
+      ipAddress: demoAddress(103, 21, 144, 12)
     },
     {
       timestamp: '2026-09-14 09:12:44',
@@ -465,7 +466,7 @@ export class ReportsService {
       distanceFromPerimeterMeters: 480,
       mockGpsDetected: false,
       status: 'Breached',
-      ipAddress: '49.207.198.11'
+      ipAddress: demoAddress(49, 207, 198, 11)
     },
     {
       timestamp: '2026-09-14 09:18:30',
@@ -477,7 +478,7 @@ export class ReportsService {
       distanceFromPerimeterMeters: 5,
       mockGpsDetected: true,
       status: 'Quarantined',
-      ipAddress: '182.72.19.45'
+      ipAddress: demoAddress(182, 72, 19, 45)
     },
     {
       timestamp: '2026-09-14 18:30:15',
@@ -489,7 +490,7 @@ export class ReportsService {
       distanceFromPerimeterMeters: 12,
       mockGpsDetected: false,
       status: 'Compliant',
-      ipAddress: '103.21.144.88'
+      ipAddress: demoAddress(103, 21, 144, 88)
     }
   ];
 
@@ -670,7 +671,7 @@ export class ReportsService {
   static async createSchedule(payload: Omit<ReportScheduleDTO, 'id' | 'createdAt'>): Promise<ReportScheduleDTO> {
     const newSchedule: ReportScheduleDTO = {
       ...payload,
-      id: `sch-${Math.floor(100 + Math.random() * 900)}`,
+      id: `sch-${randomInt(100, 1000)}`,
       createdAt: new Date().toISOString()
     };
     this.schedules.unshift(newSchedule);

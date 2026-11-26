@@ -19,8 +19,9 @@ async function main() {
     multipleStatements: true,
   });
 
-  const migrationFiles = fs.readdirSync(migrationDir).filter((name) => name.endsWith('.sql')).sort();
-  const seedFiles = fs.readdirSync(seedDir).filter((name) => name.endsWith('.sql')).sort();
+  const byName = (a: string, b: string) => a.localeCompare(b);
+  const migrationFiles = fs.readdirSync(migrationDir).filter((name) => name.endsWith('.sql')).sort(byName);
+  const seedFiles = fs.readdirSync(seedDir).filter((name) => name.endsWith('.sql')).sort(byName);
   const schema = migrationFiles.filter((name) => name.startsWith('001'));
   const afterSeed = migrationFiles.filter((name) => !name.startsWith('001'));
   const files = [
@@ -35,9 +36,9 @@ async function main() {
     await connection.query(sql);
   }
 
-  const user = config.db.user.replace(/[^a-zA-Z0-9_]/g, '');
-  const password = config.db.password.replace(/'/g, "''");
-  const database = config.db.database.replace(/[^a-zA-Z0-9_]/g, '');
+  const user = config.db.user.replaceAll(/[^a-zA-Z0-9_]/g, '');
+  const password = config.db.password.replaceAll(/'/g, "''");
+  const database = config.db.database.replaceAll(/[^a-zA-Z0-9_]/g, '');
   await connection.query(
     `CREATE USER IF NOT EXISTS '${user}'@'localhost' IDENTIFIED BY '${password}'`
   );

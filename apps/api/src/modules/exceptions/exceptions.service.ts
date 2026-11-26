@@ -8,6 +8,7 @@ import {
   ExceptionSeverity,
   ExceptionStatus
 } from '@infi-timepro/shared-types';
+import { randomInt } from '../../utils/safe-values.js';
 
 export class ExceptionsService {
   private static exceptions: AttendanceExceptionDTO[] = [
@@ -258,7 +259,7 @@ export class ExceptionsService {
   static async createRegularisation(tenantId: string, employeeId: string, payload: CreateRegularisationRequestDTO): Promise<RegularisationDetailDTO> {
     const newReq: RegularisationDetailDTO = {
       id: `reg-${Date.now()}`,
-      requestCode: `REG-${Math.floor(1000 + Math.random() * 9000)}`,
+      requestCode: `REG-${randomInt(1000, 10000)}`,
       tenantId,
       employeeId,
       employeeCode: 'EMP-1001',

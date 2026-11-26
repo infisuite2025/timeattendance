@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { getTenantContext, TenantContext } from '../middleware/tenant-context.js';
 
 export class TenantSecurityException extends Error {
@@ -79,7 +80,7 @@ export class TenantScopedRepository<T extends TenantScopedEntity> {
     const currentTenant = this.getCurrentTenant();
     const newEntity = {
       ...data,
-      id: data.id || `${this.entityName.toLowerCase().slice(0, 3)}-${Math.floor(100 + Math.random() * 900)}`,
+      id: data.id || `${this.entityName.toLowerCase().slice(0, 3)}-${crypto.randomInt(100, 1000)}`,
       tenantId: currentTenant.tenantId,
       createdAt: new Date().toISOString()
     } as unknown as T;

@@ -19,8 +19,8 @@ punchesRouter.get('/raw', async (req: Request, res: Response) => {
       eventType: req.query.eventType as any,
       isFlagged: req.query.isFlagged !== undefined ? req.query.isFlagged === 'true' : undefined,
       departmentId: req.query.departmentId as string,
-      page: req.query.page ? parseInt(req.query.page as string, 10) : 1,
-      limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 25,
+      page: req.query.page ? Number.parseInt(req.query.page as string, 10) : 1,
+      limit: req.query.limit ? Number.parseInt(req.query.limit as string, 10) : 25,
     };
 
     const result = await PunchesService.getPunches(tenantId, filter);

@@ -3,6 +3,7 @@ import {
   PolicyEvaluationInputDTO,
   PolicyEvaluationResultDTO,
 } from '@infi-timepro/shared-types';
+import { randomInt } from '../../utils/safe-values.js';
 
 export class PolicyEngineService {
   private policies: AttendancePolicyDTO[] = [
@@ -103,7 +104,7 @@ export class PolicyEngineService {
   createPolicy(input: Partial<AttendancePolicyDTO>): AttendancePolicyDTO {
     const newPolicy: AttendancePolicyDTO = {
       id: input.id || `pol_${Date.now()}`,
-      code: input.code || `POL-CUSTOM-${Math.floor(100 + Math.random() * 900)}`,
+      code: input.code || `POL-CUSTOM-${randomInt(100, 1000)}`,
       name: input.name || 'New Custom Policy',
       description: input.description || 'Custom workplace attendance policy.',
       version: input.version || 'v1.0',
@@ -169,7 +170,7 @@ export class PolicyEngineService {
     // Time parsing helper
     const parseTimeMinutes = (timeStr: string) => {
       const parts = timeStr.split(':');
-      return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+      return Number.parseInt(parts[0], 10) * 60 + Number.parseInt(parts[1], 10);
     };
 
     const firstIn = parseTimeMinutes(input.firstInTime);

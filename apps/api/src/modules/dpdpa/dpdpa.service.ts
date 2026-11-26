@@ -8,6 +8,7 @@ import {
   DpdpaAuditTrailLogDTO
 } from '@infi-timepro/shared-types';
 import crypto from 'crypto';
+import { demoAddress, randomInt } from '../../utils/safe-values.js';
 import { AuditService } from '../audit/audit.service.js';
 
 export class DpdpaService {
@@ -130,7 +131,7 @@ export class DpdpaService {
       actorName: 'Sarah Jenkins',
       actorRole: 'EMPLOYEE',
       targetSubject: 'Sarah Jenkins (EMP-1001)',
-      ipAddress: '106.51.72.19',
+      ipAddress: demoAddress(106, 51, 72, 19),
       sha256VerificationSeal: '0x8f4a119b22e49c81a2080f'
     },
     {
@@ -141,7 +142,7 @@ export class DpdpaService {
       actorName: 'Sarah Jenkins',
       actorRole: 'EMPLOYEE',
       targetSubject: 'Mobile Device UUID Binding',
-      ipAddress: '106.51.72.19',
+      ipAddress: demoAddress(106, 51, 72, 19),
       sha256VerificationSeal: '0x11ab449c00ef1294829100'
     }
   ];
@@ -250,7 +251,7 @@ export class DpdpaService {
   }
 
   static async filePrivacyGrievance(employeeId: string, employeeName: string, category: any, description: string): Promise<DpdpaPrivacyGrievanceDTO> {
-    const id = `grv-${Math.floor(1000 + Math.random() * 9000)}`;
+    const id = `grv-${randomInt(1000, 10000)}`;
     const filedAt = new Date().toISOString();
 
     const grievance: DpdpaPrivacyGrievanceDTO = {
@@ -370,14 +371,14 @@ export class DpdpaService {
 
   private static recordAuditLog(eventType: any, actorId: string, actorName: string, actorRole: string, targetSubject: string) {
     const log: DpdpaAuditTrailLogDTO = {
-      id: `aud-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: `aud-${randomInt(1000, 10000)}`,
       timestamp: new Date().toISOString(),
       eventType,
       actorId,
       actorName,
       actorRole,
       targetSubject,
-      ipAddress: '106.51.72.19',
+      ipAddress: demoAddress(106, 51, 72, 19),
       sha256VerificationSeal: '0x' + crypto.createHash('sha256').update(`${actorId}:${eventType}:${Date.now()}`).digest('hex').substring(0, 22)
     };
     this.auditLogs.unshift(log);
