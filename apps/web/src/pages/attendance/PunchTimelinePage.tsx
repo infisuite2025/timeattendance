@@ -244,7 +244,7 @@ export const PunchTimelinePage: React.FC = () => {
         isFlagged,
         flagReason,
         isMockLocation: simMockGps,
-        idempotencyHash: crypto.randomUUID().replaceAll('-', ''),
+        idempotencyHash: crypto.randomUUID().split('-').join(''),
         syncLatencyMs: 50 + (crypto.getRandomValues(new Uint32Array(1))[0] % 200),
         batteryLevel: 92,
         createdAt: new Date().toISOString()
