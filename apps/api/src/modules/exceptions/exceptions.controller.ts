@@ -4,6 +4,12 @@ import { createRegularisation, decideRegularisation, listExceptions, listRegular
 
 export const exceptionsRouter = Router();
 
+function regularisationDecision(action: string): string {
+  if (action === 'approve') return 'approved';
+  if (action === 'reject') return 'rejected';
+  return 'sent_back';
+}
+
 // GET /api/v1/exceptions
 exceptionsRouter.get('/', authGuard, async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -84,7 +90,7 @@ exceptionsRouter.post('/regularisations/:id/action', authGuard, async (req: Auth
     if (req.user?.role === 'EMPLOYEE') {
       return res.status(403).json({ success: false, error: { code: 'ERR_FORBIDDEN', message: 'Employees cannot approve regularisation requests.' } });
     }
-    const data = await decideRegularisation(req.user?.tenantId || 'ten_acme_001', req.params.id, action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'sent_back', req.user?.id, req.user?.role, comments);
+    const data = await decideRegularisation(req.user?.tenantId || 'ten_acme_001', req.params.id, regularisationDecision(action), req.user?.id, req.user?.role, comments);
     res.json({
       success: true,
       data,

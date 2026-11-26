@@ -1,7 +1,7 @@
-import crypto from 'crypto';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { pool } from '../../database/db.js';
 import type { RowDataPacket } from 'mysql2';
 

@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { Router, Response } from 'express';
 import type { RowDataPacket } from 'mysql2';
 import { AuthenticatedRequest, authGuard } from '../../middleware/auth-guard.js';

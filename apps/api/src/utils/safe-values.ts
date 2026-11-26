@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 /** Inclusive lower bound, exclusive upper bound. Same span as Math.floor(min + Math.random() * span). */
 export function randomInt(minInclusive: number, maxExclusive: number): number {

@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { getTenantContext, TenantContext } from '../middleware/tenant-context.js';
 
 export class TenantSecurityException extends Error {

@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import mysql from 'mysql2/promise';
 import { config } from '../config/env.js';
 
@@ -36,9 +36,9 @@ async function main() {
     await connection.query(sql);
   }
 
-  const user = config.db.user.replaceAll(/[^a-zA-Z0-9_]/g, '');
-  const password = config.db.password.replaceAll(/'/g, "''");
-  const database = config.db.database.replaceAll(/[^a-zA-Z0-9_]/g, '');
+  const user = config.db.user.replaceAll(/\W/g, '');
+  const password = config.db.password.replaceAll("'", "''");
+  const database = config.db.database.replaceAll(/\W/g, '');
   await connection.query(
     `CREATE USER IF NOT EXISTS '${user}'@'localhost' IDENTIFIED BY '${password}'`
   );
@@ -48,7 +48,10 @@ async function main() {
   process.stdout.write(`Database ${database} is ready for ${user}.\n`);
 }
 
-main().catch((err) => {
-  process.stderr.write(`Database setup failed: ${err.message}\n`);
+try {
+  await main();
+} catch (err) {
+  const message = err instanceof Error ? err.message : 'Unknown database setup error';
+  process.stderr.write(`Database setup failed: ${message}\n`);
   process.exit(1);
-});
+}

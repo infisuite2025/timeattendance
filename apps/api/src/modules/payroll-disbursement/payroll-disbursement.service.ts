@@ -6,7 +6,7 @@ import {
   FinEWARequestDTO,
   FinPayrollDashboardSummaryDTO,
 } from '@infi-timepro/shared-types';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 export class PayrollDisbursementService {
 

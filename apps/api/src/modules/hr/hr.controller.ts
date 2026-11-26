@@ -1,7 +1,7 @@
-import crypto from 'crypto';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Router, Response } from 'express';
 import { AuthenticatedRequest } from '../../middleware/auth-guard.js';
 import { listRecords, replaceRecord, saveRecord } from '../../database/live-records.js';
@@ -46,7 +46,8 @@ hrRouter.get('/dashboard', async (req: AuthenticatedRequest, res: Response) => {
 });
 
 hrRouter.get('/onboarding', async (req: AuthenticatedRequest, res: Response) => {
-  const stage = String(req.query.stage || '');
+  const stageQuery = req.query.stage;
+  const stage = typeof stageQuery === 'string' ? stageQuery : '';
   let data = await listRecords<any>(tenant(req), 'hr_candidate');
   if (stage && stage !== 'all') data = data.filter((item) => item.stage === stage);
   res.json({ success: true, data });

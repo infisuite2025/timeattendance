@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import { config } from '../../config/env.js';
 import { UserProfileDTO } from '@infi-timepro/shared-types';
@@ -50,18 +50,7 @@ export class AuthService {
       throw err;
     }
 
-    let decoded: any;
-    try {
-      decoded = jwt.verify(refreshTokenStr, config.jwtSecret);
-    } catch (err: any) {
-      const isExpired = err instanceof jwt.TokenExpiredError || err?.name === 'TokenExpiredError';
-      const error: any = new Error(isExpired ? 'Refresh token expired. Please log in again.' : 'Invalid refresh token');
-      error.code = isExpired ? 'ERR_TOKEN_EXPIRED' : 'ERR_TOKEN_INVALID';
-      if (isExpired && err.expiredAt) {
-        error.expiredAt = err.expiredAt.toISOString();
-      }
-      throw error;
-    }
+    const decoded = verifyRefreshToken(refreshTokenStr);
 
     if (decoded.tokenType !== 'refresh') {
       const err: any = new Error('Supplied token is not a valid refresh token');
@@ -164,6 +153,18 @@ export class AuthService {
     if (refreshToken) {
       TokenBlacklistService.revokeToken(refreshToken);
     }
+  }
+}
+
+function verifyRefreshToken(refreshTokenStr: string): any {
+  try {
+    return jwt.verify(refreshTokenStr, config.jwtSecret) as jwt.JwtPayload;
+  } catch (err: any) {
+    const isExpired = err instanceof jwt.TokenExpiredError || err?.name === 'TokenExpiredError';
+    const error: any = new Error(isExpired ? 'Refresh token expired. Please log in again.' : 'Invalid refresh token');
+    error.code = isExpired ? 'ERR_TOKEN_EXPIRED' : 'ERR_TOKEN_INVALID';
+    if (isExpired && err.expiredAt) error.expiredAt = err.expiredAt.toISOString();
+    throw error;
   }
 }
 

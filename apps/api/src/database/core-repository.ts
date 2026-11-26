@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { DateTime } from 'luxon';
 import type { RowDataPacket } from 'mysql2';
 import { pool } from './db.js';
@@ -62,10 +62,27 @@ function permissionsFor(role: string): string[] {
   return ['self_service.attendance.view', 'self_service.punch.create', 'regularisation.create'];
 }
 
+function asDisplayText(value: unknown): string | undefined {
+  if (typeof value === 'string') return value === '' ? undefined : value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (value instanceof Date) return value.toISOString();
+  return undefined;
+}
+
+function regularisationStatus(decision: string): string {
+  if (decision === 'approved' || decision === 'rejected') return decision;
+  return 'sent_back';
+}
+
+function exceptionResolutionStatus(action: string): string {
+  if (action === 'reject') return 'rejected';
+  return 'resolved';
+}
+
 function clockLabel(value: unknown): string | undefined {
-  if (value == null || value === '') return undefined;
-  const text = String(value);
-  const match = text.match(/(\d{2}):(\d{2})/);
+  const text = asDisplayText(value);
+  if (!text) return undefined;
+  const match = /(\d{2}):(\d{2})/.exec(text);
   if (!match) return text;
   const hours = Number(match[1]);
   const suffix = hours >= 12 ? 'PM' : 'AM';
@@ -880,7 +897,7 @@ function minutesLabel(minutes: number): string {
 
 function sqlTime(value?: string | null): string | null {
   if (!value) return null;
-  const match = String(value).match(/(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i);
+  const match = /(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i.exec(value);
   if (!match) return null;
   let hours = Number(match[1]);
   const minutes = match[2];
@@ -995,7 +1012,7 @@ export async function createRegularisation(tenantId: string, employeeId: string,
   reasonCategory?: string;
   reasonText?: string;
 }) {
-  const id = `reg_${crypto.randomUUID().replaceAll(/-/g, '').slice(0, 12)}`;
+  const id = `reg_${crypto.randomUUID().replaceAll('-', '').slice(0, 12)}`;
   const requestCode = `REG-${Date.now().toString().slice(-6)}`;
   const reason = [payload.reasonCategory, payload.reasonText].filter(Boolean).join(': ') || 'Attendance correction';
   await pool.query(
@@ -1042,7 +1059,7 @@ export async function createRegularisation(tenantId: string, employeeId: string,
       `INSERT INTO tp_approval_instances
         (id, tenant_id, entity_type, entity_id, current_step, total_steps, current_assignee_id, status)
        VALUES (?, ?, 'regularisation', ?, 1, 1, ?, 'pending')`,
-      [`appr_${crypto.randomUUID().replaceAll(/-/g, '').slice(0, 12)}`, tenantId, id, assigneeId]
+      [`appr_${crypto.randomUUID().replaceAll('-', '').slice(0, 12)}`, tenantId, id, assigneeId]
     );
   }
   const saved = mapRegularisation(rows[0]);
@@ -1077,7 +1094,7 @@ export async function listApprovalHistory(tenantId: string, role?: string, emplo
     category: 'regularisation',
     employeeName: `${row.first_name} ${row.last_name}`,
     employeeCode: row.employee_code,
-    decision: row.status === 'approved' ? 'approved' : row.status === 'rejected' ? 'rejected' : row.status,
+    decision: row.status,
     approverName: `${row.manager_first || ''} ${row.manager_last || ''}`.trim() || 'Manager',
     approverRole: 'Reporting Manager',
     decisionTimestamp: row.updated_at,
@@ -1100,7 +1117,7 @@ export async function approvalMetrics(tenantId: string, role?: string, employeeI
 }
 
 export async function decideRegularisation(tenantId: string, id: string, decision: string, actorUserId?: string, actorRole?: string, comments?: string) {
-  const status = decision === 'approved' ? 'approved' : decision === 'rejected' ? 'rejected' : 'sent_back';
+  const status = regularisationStatus(decision);
   const [result] = await pool.query(
     `UPDATE tp_regularisation_requests SET status = ? WHERE id = ? AND tenant_id = ?`,
     [status, id, tenantId]
@@ -1187,7 +1204,7 @@ async function recordGeofenceException(tenantId: string, employeeId: string, att
     `INSERT INTO tp_attendance_exceptions
       (id, tenant_id, attendance_day_id, employee_id, exception_type, severity, status, details)
      VALUES (?, ?, ?, ?, 'geofence_breach', 'high', 'open', ?)`,
-    [`exc_${crypto.randomUUID().replaceAll(/-/g, '').slice(0, 12)}`, tenantId, dayId, employeeId, details]
+    [`exc_${crypto.randomUUID().replaceAll('-', '').slice(0, 12)}`, tenantId, dayId, employeeId, details]
   );
 }
 
@@ -1239,7 +1256,7 @@ export async function listExceptions(tenantId: string, role?: string, employeeId
 }
 
 export async function resolveException(tenantId: string, exceptionId: string, action: string, notes: string | undefined, resolvedBy: string | undefined) {
-  const status = action === 'waive' ? 'resolved' : action === 'reject' ? 'rejected' : 'resolved';
+  const status = exceptionResolutionStatus(action);
   const [result] = await pool.query(
     `UPDATE tp_attendance_exceptions
      SET status = ?, resolution_notes = ?, resolved_by = ?, resolved_at = CURRENT_TIMESTAMP
@@ -1323,7 +1340,7 @@ export async function createShiftSwap(tenantId: string, employeeId: string, payl
   reason?: string;
 }) {
   await ensureSwapTable();
-  const id = `swp_${crypto.randomUUID().replaceAll(/-/g, '').slice(0, 12)}`;
+  const id = `swp_${crypto.randomUUID().replaceAll('-', '').slice(0, 12)}`;
   const code = `SSW-${Date.now().toString().slice(-6)}`;
   const swapDate = String(payload.date || DateTime.now().setZone(ZONE).toISODate());
   await pool.query(

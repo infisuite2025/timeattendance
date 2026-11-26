@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import type { RowDataPacket } from 'mysql2';
 import { pool } from './db.js';
 
@@ -29,7 +29,7 @@ export async function listRecords<T>(tenantId: string, kind: string): Promise<T[
 
 export async function saveRecord<T extends Record<string, unknown>>(tenantId: string, kind: string, payload: T): Promise<T & { id: string }> {
   await ensureRecords();
-  const id = String(payload.id || `${kind.slice(0, 3)}_${crypto.randomUUID().replaceAll(/-/g, '').slice(0, 12)}`);
+  const id = recordId(kind, payload.id);
   const stored = { ...payload, id };
   await pool.query(
     `INSERT INTO tp_saved_records (id, tenant_id, kind, payload) VALUES (?, ?, ?, ?)`,
@@ -57,6 +57,52 @@ export async function removeRecord(tenantId: string, kind: string, id: string): 
   return (result as { affectedRows?: number }).affectedRows === 1;
 }
 
+function recordId(kind: string, existing: unknown): string {
+  if (typeof existing === 'string' && existing.length > 0) return existing;
+  const suffix = crypto.randomUUID().replaceAll('-', '').slice(0, 12);
+  return `${kind.slice(0, 3)}_${suffix}`;
+}
+
+function musterMark(dayStatus: string, present: boolean): string {
+  if (present) return 'P';
+  if (dayStatus === 'weekly_off') return 'WO';
+  if (dayStatus === 'on_leave') return 'L';
+  if (dayStatus === 'holiday') return 'H';
+  return 'A';
+}
+
+function emptyMuster(row: RowDataPacket) {
+  return {
+    employeeId: row.id,
+    employeeCode: row.employee_code,
+    employeeName: `${row.first_name} ${row.last_name}`.trim(),
+    department: row.department || '',
+    designation: row.job_title || '',
+    totalDays: 0,
+    presentDays: 0,
+    weeklyOffs: 0,
+    paidLeaves: 0,
+    holidays: 0,
+    lopDays: 0,
+    totalWorkHours: 0,
+    totalOvertimeHours: 0,
+    dailyStatus: {} as Record<number, string>,
+  };
+}
+
+function applyMusterDay(person: ReturnType<typeof emptyMuster>, row: RowDataPacket) {
+  const present = ['present', 'late', 'early_departure', 'wfh', 'field_duty', 'half_day'].includes(row.day_status);
+  person.totalDays += 1;
+  if (present) person.presentDays += row.day_status === 'half_day' ? 0.5 : 1;
+  if (row.day_status === 'weekly_off') person.weeklyOffs += 1;
+  if (row.day_status === 'on_leave') person.paidLeaves += 1;
+  if (row.day_status === 'holiday') person.holidays += 1;
+  if (row.day_status === 'absent') person.lopDays += 1;
+  person.totalWorkHours += Number(row.net_work_duration_minutes || 0) / 60;
+  person.totalOvertimeHours += Number(row.overtime_duration_minutes || 0) / 60;
+  person.dailyStatus[new Date(row.attendance_date).getDate()] = musterMark(row.day_status, present);
+}
+
 export async function musterRoll(tenantId: string, dateFrom: string, dateTo: string) {
   const [rows] = await pool.query<RowDataPacket[]>(
     `SELECT e.id, e.employee_code, e.first_name, e.last_name, e.job_title, d.name AS department,
@@ -70,39 +116,10 @@ export async function musterRoll(tenantId: string, dateFrom: string, dateTo: str
      ORDER BY e.first_name, a.attendance_date`,
     [dateFrom, dateTo, tenantId]
   );
-  const people = new Map<string, any>();
+  const people = new Map<string, ReturnType<typeof emptyMuster>>();
   for (const row of rows) {
-    if (!people.has(row.id)) {
-      people.set(row.id, {
-        employeeId: row.id,
-        employeeCode: row.employee_code,
-        employeeName: `${row.first_name} ${row.last_name}`.trim(),
-        department: row.department || '',
-        designation: row.job_title || '',
-        totalDays: 0,
-        presentDays: 0,
-        weeklyOffs: 0,
-        paidLeaves: 0,
-        holidays: 0,
-        lopDays: 0,
-        totalWorkHours: 0,
-        totalOvertimeHours: 0,
-        dailyStatus: {},
-      });
-    }
-    if (!row.attendance_date) continue;
-    const person = people.get(row.id);
-    const day = new Date(row.attendance_date).getDate();
-    const present = ['present', 'late', 'early_departure', 'wfh', 'field_duty', 'half_day'].includes(row.day_status);
-    person.totalDays += 1;
-    if (present) person.presentDays += row.day_status === 'half_day' ? 0.5 : 1;
-    if (row.day_status === 'weekly_off') person.weeklyOffs += 1;
-    if (row.day_status === 'on_leave') person.paidLeaves += 1;
-    if (row.day_status === 'holiday') person.holidays += 1;
-    if (row.day_status === 'absent') person.lopDays += 1;
-    person.totalWorkHours += Number(row.net_work_duration_minutes || 0) / 60;
-    person.totalOvertimeHours += Number(row.overtime_duration_minutes || 0) / 60;
-    person.dailyStatus[day] = present ? 'P' : row.day_status === 'weekly_off' ? 'WO' : row.day_status === 'on_leave' ? 'L' : row.day_status === 'holiday' ? 'H' : 'A';
+    if (!people.has(row.id)) people.set(row.id, emptyMuster(row));
+    if (row.attendance_date) applyMusterDay(people.get(row.id)!, row);
   }
   const records = [...people.values()].map((person) => ({
     ...person,

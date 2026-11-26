@@ -4,7 +4,7 @@ import {
   TenantInvoiceDTO,
   GlobalRevenueSummaryDTO
 } from '@infi-timepro/shared-types';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 export class BillingService {
   private static gatewayConfigs: Record<string, PaymentGatewayConfigDTO> = {
