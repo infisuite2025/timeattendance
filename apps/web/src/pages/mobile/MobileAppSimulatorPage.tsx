@@ -435,10 +435,11 @@ export const MobileAppSimulatorPage: React.FC = () => {
             {screens.map((scr) => {
               const isSelected = activeScreenId === scr.id;
               return (
-                <div
+                <button
+                  type="button"
                   key={scr.id}
                   onClick={() => setActiveScreenId(scr.id)}
-                  className={`p-3 rounded-xl border cursor-pointer transition flex items-center justify-between text-xs ${
+                  className={`w-full p-3 rounded-xl border transition flex items-center justify-between text-xs text-left ${
                     isSelected
                       ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-950/20 text-blue-900 dark:text-blue-200 font-bold shadow-sm'
                       : 'border-slate-100 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-slate-700/30 text-slate-700 dark:text-slate-300'
@@ -453,7 +454,7 @@ export const MobileAppSimulatorPage: React.FC = () => {
                     <div className="truncate max-w-[220px]">{scr.title}</div>
                   </div>
                   <ChevronRight className={`w-4 h-4 ${isSelected ? 'text-blue-600' : 'text-slate-400'}`} />
-                </div>
+                </button>
               );
             })}</div>
         </div>
@@ -492,19 +493,20 @@ export const MobileAppSimulatorPage: React.FC = () => {
                   const IconComp = tab.icon;
                   const isActive = activeScreenId === tab.screen;
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={tab.label}
                       onClick={() => {
                         setBottomNavIndex(idx);
                         setActiveScreenId(tab.screen);
                       }}
-                      className={`flex flex-col items-center gap-0.5 cursor-pointer ${
+                      className={`flex flex-col items-center gap-0.5 ${
                         isActive ? 'text-blue-600 font-bold' : 'text-slate-400 font-medium'
                       }`}
                     >
                       <IconComp className="w-4 h-4" />
                       <span className="text-[10px]">{tab.label}</span>
-                    </div>
+                    </button>
                   );
                 })}</div>
             </div>

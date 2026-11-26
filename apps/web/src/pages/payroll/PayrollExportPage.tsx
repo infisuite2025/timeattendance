@@ -230,10 +230,11 @@ export const PayrollExportPage: React.FC = () => {
                 const IconComponent = fmt.icon;
                 const isSelected = selectedFormat === fmt.id;
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={fmt.id}
                     onClick={() => setSelectedFormat(fmt.id as any)}
-                    className={`p-4 rounded-xl border flex items-center justify-between cursor-pointer transition ${
+                    className={`w-full p-4 rounded-xl border flex items-center justify-between text-left transition ${
                       isSelected
                         ? 'border-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/20 ring-2 ring-indigo-600'
                         : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
@@ -259,7 +260,7 @@ export const PayrollExportPage: React.FC = () => {
                       isSelected ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-300 dark:border-slate-600'
                     }`}>
                       {isSelected && <Check className="w-3.5 h-3.5" />}</div>
-                  </div>
+                  </button>
                 );
               })}</div>
           </div>
@@ -271,13 +272,14 @@ export const PayrollExportPage: React.FC = () => {
           <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
             <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
               <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs">3</span>
-              Included Data Attributes
+              <span>Included Data Attributes</span>
             </div>
 
             <div className="space-y-3">
               <label className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30 cursor-pointer">
                 <input
                   type="checkbox"
+                  aria-label="Approved overtime hours"
                   checked={includeOvertimeBreakdown}
                   onChange={(e) => setIncludeOvertimeBreakdown(e.target.checked)}
                   className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500"
@@ -291,6 +293,7 @@ export const PayrollExportPage: React.FC = () => {
               <label className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30 cursor-pointer">
                 <input
                   type="checkbox"
+                  aria-label="Loss of pay and deductions"
                   checked={includeLopDetails}
                   onChange={(e) => setIncludeLopDetails(e.target.checked)}
                   className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500"
@@ -304,6 +307,7 @@ export const PayrollExportPage: React.FC = () => {
               <label className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30 cursor-pointer">
                 <input
                   type="checkbox"
+                  aria-label="Attendance allowance badges"
                   checked={includeAllowances}
                   onChange={(e) => setIncludeAllowances(e.target.checked)}
                   className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500"

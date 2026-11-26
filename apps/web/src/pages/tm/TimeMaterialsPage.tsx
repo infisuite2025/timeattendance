@@ -752,11 +752,11 @@ export const TimeMaterialsPage: React.FC = () => {
                   <div className="text-xs text-gray-600 leading-relaxed grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="bg-white/70 rounded-xl p-3 border border-blue-100">
                       <span className="font-semibold text-blue-800 block mb-1">🛠️ How to Change Rate Cards</span>
-                      Click <strong>"Edit Rate Card"</strong> on any card below or press <strong>"+ Add Rate Card"</strong> to modify hourly billing tariffs ($/hr), overtime multipliers, role titles, and client assignments.
+                      <span>Click <strong>"Edit Rate Card"</strong> on any card below or press <strong>"+ Add Rate Card"</strong> to modify hourly billing tariffs ($/hr), overtime multipliers, role titles, and client assignments.</span>
                     </div>
                     <div className="bg-white/70 rounded-xl p-3 border border-blue-100">
                       <span className="font-semibold text-blue-800 block mb-1">⚖️ Checks & Balances for $0 Invoices</span>
-                      Invoices compile only <strong>Approved Billable Timesheets</strong>. If an invoice shows <strong>$0</strong>, ensure timesheets for that client are approved in the <em>Timesheets</em> tab first.
+                      <span>Invoices compile only <strong>Approved Billable Timesheets</strong>. If an invoice shows <strong>$0</strong>, ensure timesheets for that client are approved in the <em>Timesheets</em> tab first.</span>
                     </div>
                   </div>
                 </div>

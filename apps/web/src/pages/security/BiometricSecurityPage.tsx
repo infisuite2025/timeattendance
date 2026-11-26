@@ -424,16 +424,22 @@ export const BiometricSecurityPage: React.FC = () => {
                           <span>{event.detectionMethod}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2" onMouseDown={e => e.stopPropagation()}>
+                      <div className="flex items-center gap-2">
                         <button
-                          onClick={() => setSelectedEvent(event)}
+                          onClick={(eventClick) => {
+                            eventClick.stopPropagation();
+                            setSelectedEvent(event);
+                          }}
                           className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg font-medium flex items-center gap-1"
                         >
                           <Eye className="w-3.5 h-3.5" /> Details
                         </button>
                         {(event.status === 'confirmed' || event.status === 'under_review') && (
                           <button
-                            onClick={() => handleResolveEvent(event)}
+                            onClick={(eventClick) => {
+                              eventClick.stopPropagation();
+                              handleResolveEvent(event);
+                            }}
                             className="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1.5 text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 whitespace-nowrap"
                           >
                             {t('security.markResolved', 'Mark Resolved')}</button>

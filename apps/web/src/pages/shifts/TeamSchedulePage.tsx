@@ -1107,9 +1107,8 @@ export const TeamSchedulePage: React.FC = () => {
                   {Object.entries(SHIFT_TEMPLATES).map(([key, item]) => {
                     const isSelected = editShiftModal.selectedShiftType === key;
                     return (
-                      <div
+                      <label
                         key={key}
-                        onClick={() => setEditShiftModal(prev => ({ ...prev, selectedShiftType: key as any }))}
                         className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition ${
                           isSelected
                             ? 'border-blue-600 bg-blue-50/70 ring-1 ring-blue-600'
@@ -1121,7 +1120,7 @@ export const TeamSchedulePage: React.FC = () => {
                             type="radio"
                             name="shiftSelection"
                             checked={isSelected}
-                            onChange={() => {}}
+                            onChange={() => setEditShiftModal(prev => ({ ...prev, selectedShiftType: key as any }))}
                             className="text-blue-600 focus:ring-blue-500"
                           />
                           <div>
@@ -1136,7 +1135,7 @@ export const TeamSchedulePage: React.FC = () => {
                           key === 'ns' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600'
                         }`}>
                           {key}</span>
-                      </div>
+                      </label>
                     );
                   })}
                 </div>

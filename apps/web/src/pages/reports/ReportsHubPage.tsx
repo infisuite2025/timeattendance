@@ -496,10 +496,11 @@ export const ReportsHubPage: React.FC = () => {
             const isSelected = selectedReportType === tpl.reportType;
 
             return (
-              <div
+              <button
+                type="button"
                 key={tpl.id}
                 onClick={() => setSelectedReportType(tpl.reportType)}
-                className={`p-5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${
+                className={`p-5 rounded-2xl border text-left transition-all flex flex-col justify-between ${
                   isSelected
                     ? 'border-blue-600 bg-blue-50/40 dark:bg-blue-900/20 ring-2 ring-blue-600 shadow-md'
                     : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 bg-white dark:bg-slate-800'
@@ -527,7 +528,7 @@ export const ReportsHubPage: React.FC = () => {
                     <ChevronRight className="w-3.5 h-3.5" />
                   </span>
                 </div>
-              </div>
+              </button>
             );
           })}</div>
       </div>

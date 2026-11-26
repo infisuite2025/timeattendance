@@ -318,7 +318,7 @@ export const GeofenceOperationsPage: React.FC = () => {
                 <span>Authorized Boundary ({radius}m)</span></span>
               <span className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                Inside Verified
+                <span>Inside Verified</span>
               </span>
             </div>
           </div>

@@ -6,6 +6,12 @@
 
 import { UserRole } from '../context/AuthContext.tsx';
 
+function stripBase64Padding(value: string): string {
+  let trimmed = value;
+  while (trimmed.endsWith('=')) trimmed = trimmed.slice(0, -1);
+  return trimmed;
+}
+
 // Simple obfuscated Base64URL token encoder/decoder for client-side route tokens
 export function encodeSecureToken(rawId: string): string {
   try {
@@ -15,10 +21,7 @@ export function encodeSecureToken(rawId: string): string {
       salt: crypto.randomUUID().split('-').join('').slice(0, 8)
     });
     // Base64Url encode
-    const base64 = btoa(payload)
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, '');
+    const base64 = stripBase64Padding(btoa(payload).split('+').join('-').split('/').join('_'));
     return `tk_${base64}`;
   } catch {
     return rawId;
@@ -33,9 +36,7 @@ export function decodeSecureToken(token: string): string {
   }
 
   try {
-    const base64 = token.substring(3)
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
+    const base64 = token.substring(3).split('-').join('+').split('_').join('/');
     const jsonStr = atob(base64);
     const parsed = JSON.parse(jsonStr);
     return parsed.id || token;
