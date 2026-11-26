@@ -4,12 +4,10 @@ import {
   CalendarRange,
   Users,
   Clock,
-  Send,
   MoreVertical,
   ChevronLeft,
   ChevronRight,
   Plus,
-  Copy,
   Sliders,
   CheckCircle2,
   Calendar,
@@ -17,7 +15,6 @@ import {
   MapPin,
   ArrowRight,
   RotateCcw,
-  Sparkles,
   ShieldCheck,
   Coffee,
   Briefcase,
@@ -26,7 +23,6 @@ import {
   Check,
   UserCheck,
   Edit3,
-  Download,
   Filter,
   RefreshCw,
 } from 'lucide-react';
@@ -85,7 +81,7 @@ const MONTHS_LIST = [
 export const TeamSchedulePage: React.FC = () => {
   const { t } = useI18n();
   const { user, role } = useAuth();
-  const { toast, confirm } = useNotification();
+  const { toast } = useNotification();
   const [viewMode, setViewMode] = useState<'grid' | 'calendar'>('grid');
   
   // Week & Month Navigation
@@ -380,8 +376,6 @@ export const TeamSchedulePage: React.FC = () => {
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
             {isEmployee
               ? 'My Monthly Shift Schedule & Roster'
-              : isManager
-              ? 'Team Schedule'
               : 'Team Schedule'}</h1>
 
           <p className="text-xs text-slate-500 mt-0.5">
@@ -757,13 +751,14 @@ export const TeamSchedulePage: React.FC = () => {
                         const dayName = weekDayNames[idx];
                         return (
                           <td key={idx} className={`p-1.5 text-center ${idx >= 5 ? 'bg-slate-50/30' : ''}`}>
-                            <div 
+                            <button
+                              type="button"
                               onClick={() => {
                                 if (!isEmployee) {
                                   handleOpenEditShift(emp, idx, dayName, dateNum);
                                 }
                               }}
-                              className={`rounded-xl border p-2 text-[10px] transition-all group relative cursor-pointer ${getChipStyle(day.type)} ${
+                              className={`w-full rounded-xl border p-2 text-[10px] transition-all group relative ${getChipStyle(day.type)} ${
                                 !isEmployee ? 'hover:shadow-md hover:scale-[1.02]' : 'hover:shadow-xs'
                               }`}
                               title={!isEmployee ? `Click to change shift for ${emp.name} on ${dayName} Sep ${dateNum}` : undefined}
@@ -791,7 +786,7 @@ export const TeamSchedulePage: React.FC = () => {
                                 >
                                   Swap Day
                                 </button>
-                              )}</div>
+                              )}</button>
                           </td>
                         );
                       })}
@@ -891,19 +886,20 @@ export const TeamSchedulePage: React.FC = () => {
                               shift.type === 'ns' ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-500';
                             
                             return (
-                              <div
+                              <button
+                                type="button"
                                 key={emp.employeeCode}
                                 onClick={() => {
                                   if (!isEmployee) {
                                     handleOpenEditShift(emp, (dayNum % 7), 'Day', dayNum);
                                   }
                                 }}
-                                className={`flex items-center justify-between text-[9px] px-1.5 py-0.5 rounded font-medium truncate ${chipBg} ${!isEmployee ? 'cursor-pointer hover:opacity-80' : ''}`}
+                                className={`w-full flex items-center justify-between text-[9px] px-1.5 py-0.5 rounded font-medium truncate ${chipBg} ${!isEmployee ? 'hover:opacity-80' : ''}`}
                                 title={`${emp.name}: ${shift.name}`}
                               >
                                 <span className="truncate font-semibold">{emp.name.split(' ')[0]}</span>
                                 <span className="text-[8px] font-mono uppercase">{shift.type}</span>
-                              </div>
+                              </button>
                             );
                           })
                         ) : (
@@ -912,17 +908,18 @@ export const TeamSchedulePage: React.FC = () => {
                             const emp = scopedSchedule.find(e => e.employeeCode === monthEmpFilter) || scopedSchedule[0];
                             const shift = getMonthDayShiftForEmp(emp, dayNum);
                             return (
-                              <div 
+                              <button
+                                type="button"
                                 onClick={() => {
                                   if (!isEmployee) {
                                     handleOpenEditShift(emp, (dayNum % 7), 'Day', dayNum);
                                   }
                                 }}
-                                className={`p-1.5 rounded-lg border text-center ${getChipStyle(shift.type)} ${!isEmployee ? 'cursor-pointer hover:shadow-xs' : ''}`}
+                                className={`w-full p-1.5 rounded-lg border text-center ${getChipStyle(shift.type)} ${!isEmployee ? 'hover:shadow-xs' : ''}`}
                               >
                                 <p className="font-bold text-[10px]">{shift.name}</p>
                                 <p className="text-[9px] opacity-75">{shift.text}</p>
-                              </div>
+                              </button>
                             );
                           })()
                         )}</div>
@@ -1058,7 +1055,6 @@ export const TeamSchedulePage: React.FC = () => {
                 </NavLink>
               </>
             ) : (
-              <>
                 <NavLink
                   to="/shifts/library"
                   className="flex items-center gap-2 rounded-lg border border-slate-200 p-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
@@ -1066,7 +1062,6 @@ export const TeamSchedulePage: React.FC = () => {
                   <Sliders className="h-3.5 w-3.5 text-slate-400" />
                   <span>Manage Shift Library</span>
                 </NavLink>
-              </>
             )}</div>
         </div>
       </div>

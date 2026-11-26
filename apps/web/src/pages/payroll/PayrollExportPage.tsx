@@ -184,15 +184,16 @@ export const PayrollExportPage: React.FC = () => {
           <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
             <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
               <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs">1</span>
-              Select Target Locked Pay Period
+              <span>Select Target Locked Pay Period</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {periods.map(period => (
-                <div
+                <button
+                  type="button"
                   key={period.id}
                   onClick={() => setSelectedPeriod(period.id)}
-                  className={`p-4 rounded-xl border cursor-pointer transition ${
+                  className={`p-4 rounded-xl border text-left transition ${
                     selectedPeriod === period.id
                       ? 'border-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/20 ring-2 ring-indigo-600'
                       : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
@@ -213,7 +214,7 @@ export const PayrollExportPage: React.FC = () => {
                   <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-2">
                     {period.totalPayableDays.toLocaleString()} Payable Days • {period.totalOvertimeHours} hrs OT
                   </div>
-                </div>
+                </button>
               ))}</div>
           </div>
 
@@ -221,7 +222,7 @@ export const PayrollExportPage: React.FC = () => {
           <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
             <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
               <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs">2</span>
-              Choose ERP & Payroll Output Format
+              <span>Choose ERP & Payroll Output Format</span>
             </div>
 
             <div className="space-y-2.5">

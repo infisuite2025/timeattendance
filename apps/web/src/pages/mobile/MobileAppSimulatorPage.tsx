@@ -167,45 +167,49 @@ export const MobileAppSimulatorPage: React.FC = () => {
 
             {/* Action Grid */}
             <div className="grid grid-cols-4 gap-2 text-center">
-              <div
+              <button
+                type="button"
                 onClick={() => setClockedIn(!clockedIn)}
-                className="p-3 bg-white border border-slate-200/80 rounded-xl shadow-sm cursor-pointer hover:border-blue-500 active:scale-95 transition"
+                className="p-3 bg-white border border-slate-200/80 rounded-xl shadow-sm hover:border-blue-500 active:scale-95 transition"
               >
                 <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-1">
                   <Check className="w-4 h-4" />
                 </div>
                 <div className="text-[10px] font-bold">{clockedIn ? 'Clock Out' : 'Clock In'}</div>
-              </div>
+              </button>
 
-              <div
+              <button
+                type="button"
                 onClick={() => setActiveScreenId('SCR-MOB-013')}
-                className="p-3 bg-white border border-slate-200/80 rounded-xl shadow-sm cursor-pointer hover:border-blue-500 active:scale-95 transition"
+                className="p-3 bg-white border border-slate-200/80 rounded-xl shadow-sm hover:border-blue-500 active:scale-95 transition"
               >
                 <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-1">
                   <FileText className="w-4 h-4" />
                 </div>
                 <div className="text-[10px] font-bold">Regularise</div>
-              </div>
+              </button>
 
-              <div
+              <button
+                type="button"
                 onClick={() => setActiveScreenId('SCR-MOB-006')}
-                className="p-3 bg-white border border-slate-200/80 rounded-xl shadow-sm cursor-pointer hover:border-blue-500 active:scale-95 transition"
+                className="p-3 bg-white border border-slate-200/80 rounded-xl shadow-sm hover:border-blue-500 active:scale-95 transition"
               >
                 <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center mx-auto mb-1">
                   <Calendar className="w-4 h-4" />
                 </div>
                 <div className="text-[10px] font-bold">Calendar</div>
-              </div>
+              </button>
 
-              <div
+              <button
+                type="button"
                 onClick={() => setActiveScreenId('SCR-MOB-008')}
-                className="p-3 bg-white border border-slate-200/80 rounded-xl shadow-sm cursor-pointer hover:border-blue-500 active:scale-95 transition"
+                className="p-3 bg-white border border-slate-200/80 rounded-xl shadow-sm hover:border-blue-500 active:scale-95 transition"
               >
                 <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-1">
                   <Clock className="w-4 h-4" />
                 </div>
                 <div className="text-[10px] font-bold">Timeline</div>
-              </div>
+              </button>
             </div>
 
             {/* Monthly Attendance Progress Card */}

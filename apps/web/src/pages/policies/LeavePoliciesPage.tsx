@@ -1014,7 +1014,7 @@ export const LeavePoliciesPage: React.FC = () => {
                           max={maxEncashableDays}
                           min={1}
                           value={encashRequestedDays}
-                          onChange={(e) => setEncashRequestedDays(parseInt(e.target.value) || 0)}
+                          onChange={(e) => setEncashRequestedDays(Number.parseInt(e.target.value) || 0)}
                           className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-mono text-slate-900"
                         />
                       </div>
@@ -1233,7 +1233,7 @@ export const LeavePoliciesPage: React.FC = () => {
                     type="number"
                     min={0}
                     value={newTypeQuota}
-                    onChange={(e) => setNewTypeQuota(parseInt(e.target.value, 10) || 0)}
+                    onChange={(e) => setNewTypeQuota(Number.parseInt(e.target.value, 10) || 0)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
@@ -1269,7 +1269,7 @@ export const LeavePoliciesPage: React.FC = () => {
                     <input
                       type="number"
                       value={newTypeMaxCF}
-                      onChange={(e) => setNewTypeMaxCF(parseInt(e.target.value, 10) || 0)}
+                      onChange={(e) => setNewTypeMaxCF(Number.parseInt(e.target.value, 10) || 0)}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-slate-900 font-mono"
                     />
                   </div>

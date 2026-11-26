@@ -636,10 +636,11 @@ export const IntegrationsHubPage: React.FC = () => {
 
             <div className="space-y-2">
               {deliveryLogs.map((log) => (
-                <div
+                <button
+                  type="button"
                   key={log.id}
                   onClick={() => setSelectedDelivery(log)}
-                  className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-between cursor-pointer hover:border-indigo-500 transition"
+                  className="w-full p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30 flex items-center justify-between hover:border-indigo-500 transition text-left"
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
@@ -649,7 +650,7 @@ export const IntegrationsHubPage: React.FC = () => {
                     <span className="text-xs text-slate-400 font-mono">• {log.durationMs}ms latency</span>
                   </div>
                   <span className="text-xs text-slate-400 font-mono">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                </div>
+                </button>
               ))}</div>
           </div>
         </div>

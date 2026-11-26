@@ -24,14 +24,38 @@ import {
 import {
   MyAttendanceMonthViewDTO,
   MyAttendanceDayRecordDTO,
-  DayStatus,
-  PunchType,
-  PunchSource
+  DayStatus
 } from '@infi-timepro/shared-types';
 import { useNotification } from '../../context/NotificationContext.tsx';
 import { useI18n } from '../../context/I18nContext.tsx';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { apiClient } from '../../services/apiClient.ts';
+
+function getStatusBadge(status: DayStatus, _isLate?: boolean, isRegularised?: boolean) {
+  if (isRegularised) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+        Regularised
+      </span>
+    );
+  }
+  switch (status) {
+    case 'present':
+      return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Present</span>;
+    case 'late':
+      return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">Late</span>;
+    case 'on_leave':
+      return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">Leave</span>;
+    case 'unscheduled':
+      return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-500">No record</span>;
+    case 'weekly_off':
+      return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-600">Off</span>;
+    case 'absent':
+      return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">Absent</span>;
+    default:
+      return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-600">{status}</span>;
+  }
+}
 
 export const MyAttendancePage: React.FC = () => {
   const { t } = useI18n();
@@ -63,7 +87,6 @@ export const MyAttendancePage: React.FC = () => {
         const existing = recorded.get(date);
         const weekday = new Date(selectedYear, monthIndex, day).getDay();
         const off = weekday === 0 || weekday === 6;
-        const isFuture = date > today.toISOString().slice(0, 10);
         built.push(existing ? {
           ...existing,
           date,
@@ -100,59 +123,6 @@ export const MyAttendancePage: React.FC = () => {
     return () => { active = false; };
   }, [selectedMonth, selectedYear, reloadKey, user.email]);
 
-
-  const getStatusBadge = (status: DayStatus, isLate?: boolean, isRegularised?: boolean) => {
-    if (isRegularised) {
-      return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
-          Regularised
-        </span>
-      );
-    }
-    switch (status) {
-      case 'present':
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-            Present
-          </span>
-        );
-      case 'late':
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-            Late
-          </span>
-        );
-      case 'on_leave':
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-            Leave
-          </span>
-        );
-      case 'unscheduled':
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-500">
-            No record
-          </span>
-        );
-      case 'weekly_off':
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-600">
-            Off
-          </span>
-        );
-      case 'absent':
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-            Absent
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-600">
-            {status}</span>
-        );
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -300,8 +270,8 @@ export const MyAttendancePage: React.FC = () => {
           {/* Calendar Grid (Days 1 to 30) */}
           <div className="grid grid-cols-7 gap-2.5">
             {/* Blank leading slots if month starts on Tuesday */}
-            {Array.from({ length: new Date(selectedYear, monthNames.indexOf(selectedMonth), 1).getDay() }).map((_, index) => (
-              <div key={`blank-${index}`} className="min-h-[100px] p-2 bg-slate-50/50 rounded-xl border border-dashed border-slate-200 opacity-40"></div>
+            {['sun', 'mon', 'tue', 'wed', 'thu', 'fri'].slice(0, new Date(selectedYear, monthNames.indexOf(selectedMonth), 1).getDay()).map((leadKey) => (
+              <div key={`lead-${selectedYear}-${selectedMonth}-${leadKey}`} className="min-h-[100px] p-2 bg-slate-50/50 rounded-xl border border-dashed border-slate-200 opacity-40"></div>
             ))}
 
             {days.map((d) => {

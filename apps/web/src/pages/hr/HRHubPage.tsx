@@ -84,7 +84,7 @@ export const HRHubPage: React.FC = () => {
   const [newDocTitle, setNewDocTitle] = useState('');
   const [newDocFile, setNewDocFile] = useState<File | null>(null);
   const [newDocCategory, setNewDocCategory] = useState<DocumentCategory>('certification');
-  const [newDocEmployeeName, setNewDocEmployeeName] = useState('');
+  const [newDocEmployeeName] = useState('');
   const [newDocExpiry, setNewDocExpiry] = useState('');
 
   const [allocationEmployee, setAllocationEmployee] = useState('');
@@ -168,7 +168,11 @@ export const HRHubPage: React.FC = () => {
     try {
       const fileBase64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+        reader.onload = () => {
+          const payload = reader.result;
+          const encoded = typeof payload === 'string' ? payload : '';
+          resolve(encoded.split(',')[1] || '');
+        };
         reader.onerror = () => reject(new Error('The file could not be read.'));
         reader.readAsDataURL(newDocFile);
       });

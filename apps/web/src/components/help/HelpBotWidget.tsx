@@ -146,22 +146,45 @@ How can I help you today? Simply type your question below!`,
   };
 
   const renderMarkdownText = (text: string) => {
-    const parts = text.split(/(\*\*.*?\*\*|\[.*?\]\(.*?\)|`.*?`|\n)/g);
-
-    return parts.map((part, idx) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={idx} className="font-semibold text-slate-900">{part.slice(2, -2)}</strong>;
+    const nodes: React.ReactNode[] = [];
+    let plain = '';
+    let cursor = 0;
+    const flushPlain = () => {
+      if (!plain) return;
+      nodes.push(plain);
+      plain = '';
+    };
+    while (cursor < text.length) {
+      if (text.startsWith('**', cursor)) {
+        const end = text.indexOf('**', cursor + 2);
+        if (end > cursor + 2) {
+          flushPlain();
+          const label = text.slice(cursor + 2, end);
+          nodes.push(<strong key={`b-${cursor}`} className="font-semibold text-slate-900">{label}</strong>);
+          cursor = end + 2;
+          continue;
+        }
       }
-      if (part.startsWith('`') && part.endsWith('`')) {
-        return <code key={idx} className="rounded bg-slate-100 px-1 py-0.5 text-[11px] font-mono text-blue-700">{part.slice(1, -1)}</code>;
+      if (text.startsWith('`', cursor)) {
+        const end = text.indexOf('`', cursor + 1);
+        if (end > cursor + 1) {
+          flushPlain();
+          const label = text.slice(cursor + 1, end);
+          nodes.push(<code key={`c-${cursor}`} className="rounded bg-slate-100 px-1 py-0.5 text-[11px] font-mono text-blue-700">{label}</code>);
+          cursor = end + 1;
+          continue;
+        }
       }
-      if (part.startsWith('[') && part.includes('](')) {
-        const linkMatch = part.match(/^\[(.*?)\]\((.*?)\)$/);
-        if (linkMatch) {
-          const [, label, url] = linkMatch;
-          return (
+      if (text.startsWith('[', cursor)) {
+        const labelEnd = text.indexOf('](', cursor + 1);
+        const urlEnd = labelEnd === -1 ? -1 : text.indexOf(')', labelEnd + 2);
+        if (labelEnd > cursor && urlEnd > labelEnd) {
+          flushPlain();
+          const label = text.slice(cursor + 1, labelEnd);
+          const url = text.slice(labelEnd + 2, urlEnd);
+          nodes.push(
             <button
-              key={idx}
+              key={`a-${cursor}`}
               onClick={() => {
                 setIsOpen(false);
                 navigate(url);
@@ -171,13 +194,21 @@ How can I help you today? Simply type your question below!`,
               {label} <ArrowRight className="h-3 w-3 inline" />
             </button>
           );
+          cursor = urlEnd + 1;
+          continue;
         }
       }
-      if (part === '\n') {
-        return <br key={idx} />;
+      if (text.startsWith('\n', cursor)) {
+        flushPlain();
+        nodes.push(<br key={`n-${cursor}`} />);
+        cursor += 1;
+        continue;
       }
-      return part;
-    });
+      plain += text[cursor];
+      cursor += 1;
+    }
+    flushPlain();
+    return nodes;
   };
 
   return (

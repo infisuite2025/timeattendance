@@ -865,8 +865,9 @@ export const AddonMarketplacePage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Annual Rate ($/seat/yr)</label>
+                  <label htmlFor="addon-annual-rate" className="block font-semibold text-slate-700 mb-1">Annual Rate ($/seat/yr)</label>
                   <input
+                    id="addon-annual-rate"
                     type="number"
                     step="0.01"
                     min="0"
@@ -877,8 +878,9 @@ export const AddonMarketplacePage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Trial Days</label>
+                  <label htmlFor="addon-trial-days" className="block font-semibold text-slate-700 mb-1">Trial Days</label>
                   <input
+                    id="addon-trial-days"
                     type="number"
                     min="0"
                     required
@@ -891,18 +893,20 @@ export const AddonMarketplacePage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Badge Text</label>
+                  <label htmlFor="addon-badge-text" className="block font-semibold text-slate-700 mb-1">Badge Text</label>
                   <input
                     type="text"
                     value={editingCatalogItem.badge || ''}
+                    id="addon-badge-text"
                     onChange={e => setEditingCatalogItem({ ...editingCatalogItem, badge: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-purple-500"
                     placeholder="e.g. Most Popular"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Icon Name</label>
+                  <label htmlFor="addon-icon-name" className="block font-semibold text-slate-700 mb-1">Icon Name</label>
                   <select
+                    id="addon-icon-name"
                     value={editingCatalogItem.iconName}
                     onChange={e => setEditingCatalogItem({ ...editingCatalogItem, iconName: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-purple-500"
@@ -965,8 +969,9 @@ export const AddonMarketplacePage: React.FC = () => {
 
             <form onSubmit={handleSaveOverrideGrant} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Target Tenant ID</label>
+                <label htmlFor="addon-override-tenant" className="block font-semibold text-slate-700 mb-1">Target Tenant ID</label>
                 <select
+                  id="addon-override-tenant"
                   value={overrideTenantId}
                   onChange={e => setOverrideTenantId(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-purple-500 font-semibold"
@@ -978,8 +983,9 @@ export const AddonMarketplacePage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Add-on Module</label>
+                <label htmlFor="addon-override-module" className="block font-semibold text-slate-700 mb-1">Add-on Module</label>
                 <select
+                  id="addon-override-module"
                   value={overrideAddonId}
                   onChange={e => setOverrideAddonId(e.target.value as TenantAddonModule)}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-purple-500 font-semibold"
@@ -993,8 +999,9 @@ export const AddonMarketplacePage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Override License Status</label>
+                <label htmlFor="addon-override-status" className="block font-semibold text-slate-700 mb-1">Override License Status</label>
                 <select
+                  id="addon-override-status"
                   value={overrideStatus}
                   onChange={e => setOverrideStatus(e.target.value as 'active' | 'trial' | 'cancelled')}
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-purple-500 font-bold"

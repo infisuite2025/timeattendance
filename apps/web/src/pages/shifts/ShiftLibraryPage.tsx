@@ -500,7 +500,7 @@ export const ShiftLibraryPage: React.FC = () => {
                       {/* Action Popover Menu */}
                       {isActionOpen && (
                         <div
-                          onClick={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
                           className="absolute right-4 top-10 w-48 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl z-50 animate-in fade-in zoom-in-95 text-left"
                         >
                           <button

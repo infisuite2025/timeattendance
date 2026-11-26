@@ -87,7 +87,13 @@ class ApiClient {
           body: JSON.stringify({ refreshToken }),
         });
 
-        const json = await response.json().catch(() => null);
+        let json: any = null;
+        try {
+          json = await response.json();
+        } catch (parseError) {
+          json = null;
+          console.warn('Refresh response was not JSON', parseError instanceof Error ? parseError.message : 'parse failed');
+        }
 
         if (response.ok && json?.data?.token) {
           const newToken = json.data.token;
@@ -98,8 +104,9 @@ class ApiClient {
           this.handleAuthFailure();
           return null;
         }
-      } catch (err) {
+      } catch (refreshError) {
         this.handleAuthFailure();
+        console.warn('Token refresh failed', refreshError instanceof Error ? refreshError.message : 'request failed');
         return null;
       } finally {
         this.refreshPromise = null;
@@ -126,7 +133,8 @@ class ApiClient {
     retryCount: number = 0
   ): Promise<ApiResponse<T>> {
     try {
-      let url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+      const endpointPath = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+      let url = `${this.baseUrl}${endpointPath}`;
       if (options.params) {
         const query = new URLSearchParams();
         Object.entries(options.params).forEach(([key, val]) => {
@@ -146,7 +154,13 @@ class ApiClient {
         body: options.body ? JSON.stringify(options.body) : undefined,
       });
 
-      const json = await response.json().catch(() => null);
+      let json: any = null;
+      try {
+        json = await response.json();
+      } catch (parseError) {
+        json = null;
+        console.warn('API response was not JSON', parseError instanceof Error ? parseError.message : 'parse failed');
+      }
 
       if (!response.ok) {
         const errorCode = json?.error?.code || String(response.status);
@@ -203,7 +217,8 @@ class ApiClient {
   }
 
   async download(endpoint: string, fileName: string): Promise<void> {
-    const url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    const downloadPath = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    const url = `${this.baseUrl}${downloadPath}`;
     const response = await fetch(url, { headers: this.getHeaders() });
     if (!response.ok) throw new Error('The file could not be downloaded.');
     const blob = await response.blob();

@@ -894,8 +894,9 @@ export const TenantSettingsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Max Encrypted Storage (GB)</label>
+                <label htmlFor="quota-max-storage" className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Max Encrypted Storage (GB)</label>
                 <input
+                  id="quota-max-storage"
                   type="number"
                   min="1"
                   required

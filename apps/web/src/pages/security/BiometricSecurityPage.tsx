@@ -398,7 +398,7 @@ export const BiometricSecurityPage: React.FC = () => {
               {filteredSpoof.map(event => {
                 const EventIcon = eventTypeIcons[event.eventType] || AlertCircle;
                 return (
-                  <div key={event.id} className="px-6 py-4 hover:bg-gray-50/50 group transition-colors cursor-pointer" onClick={() => setSelectedEvent(event)}>
+                  <button type="button" key={event.id} className="w-full px-6 py-4 hover:bg-gray-50/50 group transition-colors text-left" onClick={() => setSelectedEvent(event)}>
                     <div className="flex items-start gap-4">
                       <div className={`mt-0.5 p-2 rounded-xl border ${threatColors[event.threatLevel]}`}>
                         <EventIcon className="w-4 h-4" />
@@ -424,7 +424,7 @@ export const BiometricSecurityPage: React.FC = () => {
                           <span>{event.detectionMethod}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                      <div className="flex items-center gap-2" onMouseDown={e => e.stopPropagation()}>
                         <button
                           onClick={() => setSelectedEvent(event)}
                           className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg font-medium flex items-center gap-1"
@@ -439,7 +439,7 @@ export const BiometricSecurityPage: React.FC = () => {
                             {t('security.markResolved', 'Mark Resolved')}</button>
                         )}</div>
                     </div>
-                  </div>
+                  </button>
                 );
               })}</div>
           </div>

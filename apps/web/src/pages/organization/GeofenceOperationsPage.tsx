@@ -221,10 +221,11 @@ export const GeofenceOperationsPage: React.FC = () => {
       {/* 3. Facility Selection Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         {geofences.map((geo) => (
-          <div
+          <button
+            type="button"
             key={geo.id}
             onClick={() => handleSelectGeofence(geo)}
-            className={`p-4 rounded-xl border transition-all cursor-pointer ${
+            className={`p-4 rounded-xl border transition-all text-left ${
               selectedGeo.id === geo.id
                 ? 'border-blue-600 bg-blue-50/40 ring-2 ring-blue-500/20 shadow-xs'
                 : 'border-slate-200 bg-white hover:border-slate-300'
@@ -241,7 +242,7 @@ export const GeofenceOperationsPage: React.FC = () => {
               <span>{geo.activeWorkersCount} Workers</span>
               <span className="text-emerald-600 font-semibold">{geo.complianceRatePercentage}%</span>
             </div>
-          </div>
+          </button>
         ))}</div>
 
       {/* 4. Interactive Perimeter Editor & Simulator */}
@@ -314,7 +315,7 @@ export const GeofenceOperationsPage: React.FC = () => {
             <div className="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-slate-800 text-[11px] text-slate-300 flex items-center gap-3">
               <span className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                Authorized Boundary ({radius}m)</span>
+                <span>Authorized Boundary ({radius}m)</span></span>
               <span className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                 Inside Verified
@@ -336,7 +337,7 @@ export const GeofenceOperationsPage: React.FC = () => {
               max="500"
               step="5"
               value={radius}
-              onChange={(e) => setRadius(parseInt(e.target.value, 10))}
+              onChange={(e) => setRadius(Number.parseInt(e.target.value, 10))}
               className="w-full accent-blue-600 cursor-pointer"
             />
             <div className="flex justify-between text-[11px] text-slate-400 font-mono">
@@ -357,6 +358,7 @@ export const GeofenceOperationsPage: React.FC = () => {
               <label className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer">
                 <input
                   type="checkbox"
+                  aria-label="Reject mock GPS location spoofing"
                   checked={antiMock}
                   onChange={(e) => setAntiMock(e.target.checked)}
                   className="w-4 h-4 mt-0.5 rounded text-blue-600 border-slate-300"
@@ -372,6 +374,7 @@ export const GeofenceOperationsPage: React.FC = () => {
               <label className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer">
                 <input
                   type="checkbox"
+                  aria-label="Auto-punch on perimeter entry"
                   checked={autoPunch}
                   onChange={(e) => setAutoPunch(e.target.checked)}
                   className="w-4 h-4 mt-0.5 rounded text-blue-600 border-slate-300"
@@ -389,7 +392,7 @@ export const GeofenceOperationsPage: React.FC = () => {
                 <input
                   type="number"
                   value={minAccuracy}
-                  onChange={(e) => setMinAccuracy(parseInt(e.target.value, 10) || 15)}
+                  onChange={(e) => setMinAccuracy(Number.parseInt(e.target.value, 10) || 15)}
                   className="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded font-mono"
                 />
                 <p className="text-[10px] text-slate-400">
@@ -414,7 +417,7 @@ export const GeofenceOperationsPage: React.FC = () => {
                     type="number"
                     step="0.0001"
                     value={testLat}
-                    onChange={(e) => setTestLat(parseFloat(e.target.value) || 0)}
+                    onChange={(e) => setTestLat(Number.parseFloat(e.target.value) || 0)}
                     className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded font-mono"
                   />
                 </div>
@@ -424,7 +427,7 @@ export const GeofenceOperationsPage: React.FC = () => {
                     type="number"
                     step="0.0001"
                     value={testLon}
-                    onChange={(e) => setTestLon(parseFloat(e.target.value) || 0)}
+                    onChange={(e) => setTestLon(Number.parseFloat(e.target.value) || 0)}
                     className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded font-mono"
                   />
                 </div>

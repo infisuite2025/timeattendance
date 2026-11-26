@@ -41,6 +41,14 @@ interface LiveEmployeeRecord {
   location: string;
 }
 
+function mapLiveStatus(status: string): LiveEmployeeRecord['status'] {
+  if (status === 'absent') return 'not_arrived';
+  if (status === 'late' || status === 'on_leave' || status === 'wfh' || status === 'field_duty' || status === 'missing_punch') {
+    return status;
+  }
+  return 'present';
+}
+
 export const LiveAttendancePage: React.FC = () => {
   const { toast } = useNotification();
   const { t } = useI18n();
@@ -64,21 +72,6 @@ export const LiveAttendancePage: React.FC = () => {
   });
 
   const [employees, setEmployees] = useState<LiveEmployeeRecord[]>([]);
-  const _retiredLiveRows: LiveEmployeeRecord[] = [
-    { id: '1', name: 'Srinivas Reddy', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop', empId: 'TP1012', dept: 'Engineering', shift: 'General Shift', firstIn: '08:58 AM', lastOut: '--', duration: '1h 34m', status: 'present', location: 'Hyderabad' },
-    { id: '2', name: 'Priya Sharma', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&auto=format&fit=crop', empId: 'TP0456', dept: 'Product', shift: 'General Shift', firstIn: '08:47 AM', lastOut: '--', duration: '1h 45m', status: 'present', location: 'Bengaluru' },
-    { id: '3', name: 'Amit Kumar', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop', empId: 'TP0783', dept: 'Sales & Marketing', shift: 'General Shift', firstIn: '09:15 AM', lastOut: '--', duration: '1h 17m', status: 'late', location: 'Mumbai' },
-    { id: '4', name: 'Neha Singh', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop', empId: 'TP0890', dept: 'Human Resources', shift: 'General Shift', firstIn: '--', lastOut: '--', duration: '--', status: 'not_arrived', location: 'Hyderabad' },
-    { id: '5', name: 'Rakesh Varma', avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=120&auto=format&fit=crop', empId: 'TP1123', dept: 'Engineering', shift: 'General Shift', firstIn: '08:06 AM', lastOut: '05:32 PM', duration: '9h 26m', status: 'present', location: 'Hyderabad' },
-    { id: '6', name: 'Ananya Patel', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&auto=format&fit=crop', empId: 'TP1345', dept: 'Finance & Accounts', shift: 'General Shift', firstIn: '08:51 AM', lastOut: '--', duration: '1h 41m', status: 'present', location: 'Bengaluru' },
-    { id: '7', name: 'Vikram Mehta', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&auto=format&fit=crop', empId: 'TP1678', dept: 'Operations', shift: 'Night Shift', firstIn: '10:05 PM', lastOut: '06:12 AM', duration: '8h 07m', status: 'present', location: 'Delhi' },
-    { id: '8', name: 'Kavya Nair', avatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=120&auto=format&fit=crop', empId: 'TP1890', dept: 'Sales & Marketing', shift: 'General Shift', firstIn: '--', lastOut: '--', duration: '--', status: 'on_leave', location: 'Bengaluru' },
-    { id: '9', name: 'Arjun Iyer', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=120&auto=format&fit=crop', empId: 'TP2011', dept: 'Operations', shift: 'General Shift', firstIn: '09:22 AM', lastOut: '--', duration: '1h 10m', status: 'late', location: 'Chennai' },
-    { id: '10', name: 'Divya Reddy', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&auto=format&fit=crop', empId: 'TP1367', dept: 'Engineering', shift: 'WFH Shift', firstIn: '08:40 AM', lastOut: '--', duration: '1h 52m', status: 'wfh', location: 'Remote' },
-    { id: '11', name: 'Sameer Khan', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop', empId: 'TP2301', dept: 'Sales & Marketing', shift: 'Field Shift', firstIn: '08:15 AM', lastOut: '--', duration: '2h 17m', status: 'field_duty', location: 'Client Site' },
-    { id: '12', name: 'Pooja Kulkarni', avatar: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=120&auto=format&fit=crop', empId: 'TP2456', dept: 'Finance & Accounts', shift: 'General Shift', firstIn: '09:00 AM', lastOut: '--', duration: '1h 30m', status: 'missing_punch', location: 'Hyderabad' },
-  ];
-  void _retiredLiveRows;
 
   const fetchLiveAttendanceData = async (showToast = false) => {
     setIsRefreshing(true);
@@ -101,7 +94,7 @@ export const LiveAttendancePage: React.FC = () => {
           firstIn: row.firstInTime || '--',
           lastOut: row.lastOutTime || '--',
           duration: '--',
-          status: row.status === 'late' ? 'late' : row.status === 'absent' ? 'not_arrived' : row.status === 'on_leave' ? 'on_leave' : row.status === 'wfh' ? 'wfh' : row.status === 'field_duty' ? 'field_duty' : row.status === 'missing_punch' ? 'missing_punch' : 'present',
+          status: mapLiveStatus(String(row.status || '')),
           location: row.location || '',
         })));
       }
@@ -249,77 +242,85 @@ export const LiveAttendancePage: React.FC = () => {
 
       {/* 8 Live Metric KPI Cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
-        <div
+        <button
+          type="button"
           onClick={() => setStatusFilter('all')}
-          className={`rounded-xl border p-3 shadow-sm cursor-pointer transition ${statusFilter === 'all' ? 'border-blue-600 bg-blue-50/50 ring-1 ring-blue-500' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+          className={`rounded-xl border p-3 shadow-sm text-left transition ${statusFilter === 'all' ? 'border-blue-600 bg-blue-50/50 ring-1 ring-blue-500' : 'border-slate-200 bg-white hover:border-slate-300'}`}
         >
           <p className="text-[11px] font-semibold text-slate-500">{t('dashboard.kpiTotalEmp', 'Total Employees')}</p>
           <p className="text-lg font-bold text-slate-900">{kpis.totalEmployees.count.toLocaleString()}</p>
           <p className="text-[10px] text-emerald-600 font-semibold">{kpis.totalEmployees.changeVsLastMonth} vs last mo</p>
-        </div>
+        </button>
 
-        <div
+        <button
+          type="button"
           onClick={() => setStatusFilter('present')}
           className={`rounded-xl border p-3 shadow-sm cursor-pointer transition ${statusFilter === 'present' ? 'border-emerald-600 bg-emerald-50/50 ring-1 ring-emerald-500' : 'border-slate-200 bg-white hover:border-slate-300'}`}
         >
           <p className="text-[11px] font-semibold text-slate-500">{t('status.present', 'Present')}</p>
           <p className="text-lg font-bold text-emerald-600">{kpis.present.count}</p>
           <p className="text-[10px] text-slate-400 font-medium">{kpis.present.percentage}% of total</p>
-        </div>
+        </button>
 
-        <div
+        <button
+          type="button"
           onClick={() => setStatusFilter('not_arrived')}
           className={`rounded-xl border p-3 shadow-sm cursor-pointer transition ${statusFilter === 'not_arrived' ? 'border-rose-600 bg-rose-50/50 ring-1 ring-rose-500' : 'border-slate-200 bg-white hover:border-slate-300'}`}
         >
           <p className="text-[11px] font-semibold text-slate-500">{t('dashboard.notArrived', 'Not Arrived')}</p>
           <p className="text-lg font-bold text-rose-600">{kpis.notArrived.count}</p>
           <p className="text-[10px] text-slate-400 font-medium">{kpis.notArrived.percentage}% of total</p>
-        </div>
+        </button>
 
-        <div
+        <button
+          type="button"
           onClick={() => setStatusFilter('late')}
           className={`rounded-xl border p-3 shadow-sm cursor-pointer transition ${statusFilter === 'late' ? 'border-amber-600 bg-amber-50/50 ring-1 ring-amber-500' : 'border-slate-200 bg-white hover:border-slate-300'}`}
         >
           <p className="text-[11px] font-semibold text-slate-500">{t('status.late', 'Late')}</p>
           <p className="text-lg font-bold text-amber-600">{kpis.late.count}</p>
           <p className="text-[10px] text-slate-400 font-medium">{kpis.late.percentage}% of total</p>
-        </div>
+        </button>
 
-        <div
+        <button
+          type="button"
           onClick={() => setStatusFilter('on_leave')}
           className={`rounded-xl border p-3 shadow-sm cursor-pointer transition ${statusFilter === 'on_leave' ? 'border-purple-600 bg-purple-50/50 ring-1 ring-purple-500' : 'border-slate-200 bg-white hover:border-slate-300'}`}
         >
           <p className="text-[11px] font-semibold text-slate-500">{t('status.onLeave', 'On Leave')}</p>
           <p className="text-lg font-bold text-purple-600">{kpis.onLeave.count}</p>
           <p className="text-[10px] text-slate-400 font-medium">{kpis.onLeave.percentage}% of total</p>
-        </div>
+        </button>
 
-        <div
+        <button
+          type="button"
           onClick={() => setStatusFilter('wfh')}
           className={`rounded-xl border p-3 shadow-sm cursor-pointer transition ${statusFilter === 'wfh' ? 'border-blue-600 bg-blue-50/50 ring-1 ring-blue-500' : 'border-slate-200 bg-white hover:border-slate-300'}`}
         >
           <p className="text-[11px] font-semibold text-slate-500">{t('dashboard.wfhRemote', 'WFH')}</p>
           <p className="text-lg font-bold text-blue-600">{kpis.wfh.count}</p>
           <p className="text-[10px] text-slate-400 font-medium">{kpis.wfh.percentage}% of total</p>
-        </div>
+        </button>
 
-        <div
+        <button
+          type="button"
           onClick={() => setStatusFilter('field_duty')}
           className={`rounded-xl border p-3 shadow-sm cursor-pointer transition ${statusFilter === 'field_duty' ? 'border-teal-600 bg-teal-50/50 ring-1 ring-teal-500' : 'border-slate-200 bg-white hover:border-slate-300'}`}
         >
           <p className="text-[11px] font-semibold text-slate-500">{t('dashboard.onDuty', 'Field Duty')}</p>
           <p className="text-lg font-bold text-teal-600">{kpis.fieldDuty.count}</p>
           <p className="text-[10px] text-slate-400 font-medium">{kpis.fieldDuty.percentage}% of total</p>
-        </div>
+        </button>
 
-        <div
+        <button
+          type="button"
           onClick={() => setStatusFilter('missing_punch')}
           className={`rounded-xl border p-3 shadow-sm cursor-pointer transition ${statusFilter === 'missing_punch' ? 'border-rose-600 bg-rose-50/50 ring-1 ring-rose-500' : 'border-slate-200 bg-white hover:border-slate-300'}`}
         >
           <p className="text-[11px] font-semibold text-slate-500">{t('dashboard.singlePunch', 'Missing Punch')}</p>
           <p className="text-lg font-bold text-rose-600">{kpis.missingPunch.count}</p>
           <p className="text-[10px] text-slate-400 font-medium">{kpis.missingPunch.percentage}% of total</p>
-        </div>
+        </button>
       </div>
 
       {/* Tabs & Live Search Bar Controls */}

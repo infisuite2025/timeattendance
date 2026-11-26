@@ -450,10 +450,11 @@ export const PolicyEditorPage: React.FC = () => {
             const Icon = p.icon;
             const isSelected = selectedPresetId === p.id;
             return (
-              <div
+              <button
+                type="button"
                 key={p.id}
                 onClick={() => handleApplyPreset(p)}
-                className={`p-5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${
+                className={`p-5 rounded-2xl border text-left transition-all flex flex-col justify-between ${
                   isSelected
                     ? 'border-blue-600 bg-blue-50/40 ring-2 ring-blue-600 shadow-md'
                     : 'border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50/60'
@@ -478,7 +479,7 @@ export const PolicyEditorPage: React.FC = () => {
                     {isSelected ? '✓ Active Selection' : 'Click to Load'}</span>
                   <ChevronRight className={`w-4 h-4 ${isSelected ? 'text-blue-600' : 'text-slate-400'}`} />
                 </div>
-              </div>
+              </button>
             );
           })}</div>
       </div>
@@ -646,7 +647,7 @@ export const PolicyEditorPage: React.FC = () => {
                     <input
                       type="number"
                       value={formState.graceIn}
-                      onChange={(e) => setFormState({ ...formState, graceIn: parseInt(e.target.value, 10) || 0 })}
+                      onChange={(e) => setFormState({ ...formState, graceIn: Number.parseInt(e.target.value, 10) || 0 })}
                       className="w-full bg-white border border-slate-200 rounded-xl p-2 font-mono"
                     />
                   </div>
@@ -654,7 +655,7 @@ export const PolicyEditorPage: React.FC = () => {
                     <label className="font-semibold text-slate-700 block mb-1">{t('policies.overtime_multiplier', 'Overtime Multiplier')}</label>
                     <select
                       value={formState.otMultiplier}
-                      onChange={(e) => setFormState({ ...formState, otMultiplier: parseFloat(e.target.value) })}
+                      onChange={(e) => setFormState({ ...formState, otMultiplier: Number.parseFloat(e.target.value) })}
                       className="w-full bg-white border border-slate-200 rounded-xl p-2 font-mono"
                     >
                       <option value="1.0">1.0x (Standard Single Rate)</option>
@@ -671,7 +672,7 @@ export const PolicyEditorPage: React.FC = () => {
                     <input
                       type="number"
                       value={formState.fullDayThreshold}
-                      onChange={(e) => setFormState({ ...formState, fullDayThreshold: parseInt(e.target.value, 10) || 0 })}
+                      onChange={(e) => setFormState({ ...formState, fullDayThreshold: Number.parseInt(e.target.value, 10) || 0 })}
                       className="w-full bg-white border border-slate-200 rounded-xl p-2 font-mono"
                     />
                   </div>
@@ -680,7 +681,7 @@ export const PolicyEditorPage: React.FC = () => {
                     <input
                       type="number"
                       value={formState.autoLunchDeduction}
-                      onChange={(e) => setFormState({ ...formState, autoLunchDeduction: parseInt(e.target.value, 10) || 0 })}
+                      onChange={(e) => setFormState({ ...formState, autoLunchDeduction: Number.parseInt(e.target.value, 10) || 0 })}
                       className="w-full bg-white border border-slate-200 rounded-xl p-2 font-mono"
                     />
                   </div>

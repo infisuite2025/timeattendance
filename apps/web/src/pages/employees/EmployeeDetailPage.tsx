@@ -48,46 +48,6 @@ export const EmployeeDetailPage: React.FC = () => {
   const rawTargetId = decodeSecureToken(id || 'emp_naresh_001');
   const accessCheck = validateAttendanceDetailAccess(role, user.employeeCode, rawTargetId);
 
-  if (!accessCheck.allowed) {
-    const landingPath =
-      role === 'EMPLOYEE' ? '/attendance/my' :
-      role === 'MANAGER' ? '/attendance/team' :
-      role === 'SUPER_ADMIN' ? '/admin/tenants' : '/attendance/live';
-
-    return (
-      <div className="p-8 max-w-3xl mx-auto space-y-6">
-        <div className="p-6 bg-rose-50 border border-rose-200 rounded-3xl space-y-4 text-rose-900 shadow-xl">
-          <div className="flex items-center gap-3.5">
-            <div className="p-3 bg-rose-100 text-rose-700 rounded-2xl">
-              <ShieldAlert className="w-8 h-8" />
-            </div>
-            <div>
-              <h2 className="text-xl font-extrabold text-rose-950">🚨 ACCESS DENIED: Security Guard Intercepted</h2>
-              <p className="text-xs text-rose-700 font-medium">Unauthorized Employee Profile Access Attempt (IDOR & Scope Guard)</p>
-            </div>
-          </div>
-
-          <div className="p-4 bg-white/90 rounded-2xl border border-rose-100 text-xs space-y-2.5">
-            <p className="font-semibold text-slate-800">{accessCheck.reason}</p>
-            <p className="text-slate-500">
-              Your active session persona (<span className="font-bold text-slate-900">{role}</span> - {user.email}) is restricted by tenant role isolation policies from inspecting profile records for worker ID <span className="font-mono font-bold text-rose-700">{rawTargetId}</span>.
-            </p>
-          </div>
-
-          <div className="flex items-center justify-end gap-3 pt-2">
-            <button
-              onClick={() => navigate(landingPath)}
-              className="px-5 py-2.5 bg-rose-700 hover:bg-rose-800 text-white font-bold rounded-xl text-xs shadow transition flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Return to Permitted Portal</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const [activeTab, setActiveTab] = useState<'overview' | 'shifts' | 'devices' | 'hr' | 'audit'>('overview');
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAssignShiftModal, setShowAssignShiftModal] = useState(false);
@@ -196,6 +156,46 @@ export const EmployeeDetailPage: React.FC = () => {
       details: 'Authorized Apple iPhone 15 Pro (UUID: a8b9c7-4421-9988) with Geofence Punch.'
     }
   ]);
+  if (!accessCheck.allowed) {
+    const landingPath =
+      role === 'EMPLOYEE' ? '/attendance/my' :
+      role === 'MANAGER' ? '/attendance/team' :
+      role === 'SUPER_ADMIN' ? '/admin/tenants' : '/attendance/live';
+
+    return (
+      <div className="p-8 max-w-3xl mx-auto space-y-6">
+        <div className="p-6 bg-rose-50 border border-rose-200 rounded-3xl space-y-4 text-rose-900 shadow-xl">
+          <div className="flex items-center gap-3.5">
+            <div className="p-3 bg-rose-100 text-rose-700 rounded-2xl">
+              <ShieldAlert className="w-8 h-8" />
+            </div>
+            <div>
+              <h2 className="text-xl font-extrabold text-rose-950">🚨 ACCESS DENIED: Security Guard Intercepted</h2>
+              <p className="text-xs text-rose-700 font-medium">Unauthorized Employee Profile Access Attempt (IDOR & Scope Guard)</p>
+            </div>
+          </div>
+
+          <div className="p-4 bg-white/90 rounded-2xl border border-rose-100 text-xs space-y-2.5">
+            <p className="font-semibold text-slate-800">{accessCheck.reason}</p>
+            <p className="text-slate-500">
+              Your active session persona (<span className="font-bold text-slate-900">{role}</span> - {user.email}) is restricted by tenant role isolation policies from inspecting profile records for worker ID <span className="font-mono font-bold text-rose-700">{rawTargetId}</span>.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <button
+              onClick={() => navigate(landingPath)}
+              className="px-5 py-2.5 bg-rose-700 hover:bg-rose-800 text-white font-bold rounded-xl text-xs shadow transition flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Return to Permitted Portal</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
 
   const handleOpenEditModal = () => {
     setEditForm({ ...employee });
