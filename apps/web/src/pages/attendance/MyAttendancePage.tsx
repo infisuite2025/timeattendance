@@ -31,6 +31,42 @@ import { useI18n } from '../../context/I18nContext.tsx';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { apiClient } from '../../services/apiClient.ts';
 
+function attendanceDay(date: string, weekday: number, existing?: MyAttendanceDayRecordDTO): MyAttendanceDayRecordDTO {
+  if (existing) {
+    return {
+      ...existing,
+      date,
+      regularDurationMinutes: existing.regularDurationMinutes ?? 0,
+      overtimeMinutes: existing.overtimeMinutes ?? 0,
+      earlyOutByMinutes: existing.earlyOutByMinutes ?? 0,
+      isSandwichPenalty: existing.isSandwichPenalty ?? false,
+      punches: existing.punches ?? [],
+    };
+  }
+  const off = weekday === 0 || weekday === 6;
+  return {
+    id: `empty-${date}`,
+    date,
+    dayOfWeek: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][weekday],
+    shiftCode: off ? 'WO' : 'GS',
+    shiftName: off ? 'Weekly Off' : 'General Shift',
+    shiftTiming: off ? 'Non-Working Day' : '09:00 AM - 06:00 PM',
+    grossDurationMinutes: 0,
+    breakDurationMinutes: 0,
+    netWorkDurationMinutes: 0,
+    regularDurationMinutes: 0,
+    overtimeMinutes: 0,
+    status: off ? 'weekly_off' : 'unscheduled',
+    isLate: false,
+    lateByMinutes: 0,
+    isEarlyOut: false,
+    earlyOutByMinutes: 0,
+    isRegularised: false,
+    isSandwichPenalty: false,
+    punches: [],
+  };
+}
+
 function getStatusBadge(status: DayStatus, _isLate?: boolean, isRegularised?: boolean) {
   if (isRegularised) {
     return (
@@ -84,38 +120,8 @@ export const MyAttendancePage: React.FC = () => {
       const built: MyAttendanceDayRecordDTO[] = [];
       for (let day = 1; day <= count; day += 1) {
         const date = `${selectedYear}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const existing = recorded.get(date);
         const weekday = new Date(selectedYear, monthIndex, day).getDay();
-        const off = weekday === 0 || weekday === 6;
-        built.push(existing ? {
-          ...existing,
-          date,
-          regularDurationMinutes: existing.regularDurationMinutes ?? 0,
-          overtimeMinutes: existing.overtimeMinutes ?? 0,
-          earlyOutByMinutes: existing.earlyOutByMinutes ?? 0,
-          isSandwichPenalty: existing.isSandwichPenalty ?? false,
-          punches: existing.punches ?? [],
-        } : {
-          id: `empty-${date}`,
-          date,
-          dayOfWeek: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][weekday],
-          shiftCode: off ? 'WO' : 'GS',
-          shiftName: off ? 'Weekly Off' : 'General Shift',
-          shiftTiming: off ? 'Non-Working Day' : '09:00 AM - 06:00 PM',
-          grossDurationMinutes: 0,
-          breakDurationMinutes: 0,
-          netWorkDurationMinutes: 0,
-          regularDurationMinutes: 0,
-          overtimeMinutes: 0,
-          status: off ? 'weekly_off' : 'unscheduled',
-          isLate: false,
-          lateByMinutes: 0,
-          isEarlyOut: false,
-          earlyOutByMinutes: 0,
-          isRegularised: false,
-          isSandwichPenalty: false,
-          punches: [],
-        });
+        built.push(attendanceDay(date, weekday, recorded.get(date)));
       }
       setSummary(res.data.summary);
       setDays(built);

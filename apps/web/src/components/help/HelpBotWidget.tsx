@@ -31,6 +31,51 @@ interface ChatMessage {
   timestamp: string;
 }
 
+type MarkdownToken = { kind: 'bold' | 'code' | 'link' | 'break'; label: string; url: string; next: number };
+
+function markdownNode(token: MarkdownToken, openLink: () => void): React.ReactNode {
+  if (token.kind === 'bold') {
+    return <strong key={`b-${token.next}`} className="font-semibold text-slate-900">{token.label}</strong>;
+  }
+  if (token.kind === 'code') {
+    return <code key={`c-${token.next}`} className="rounded bg-slate-100 px-1 py-0.5 text-[11px] font-mono text-blue-700">{token.label}</code>;
+  }
+  if (token.kind === 'link') {
+    return (
+      <button key={`a-${token.next}`} onClick={openLink} className="inline-flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-800 underline underline-offset-2">
+        {token.label} <ArrowRight className="h-3 w-3 inline" />
+      </button>
+    );
+  }
+  return <br key={`n-${token.next}`} />;
+}
+
+function readMarkdownToken(text: string, cursor: number): MarkdownToken | null {
+  if (text.startsWith('**', cursor)) {
+    const end = text.indexOf('**', cursor + 2);
+    if (end > cursor + 2) {
+      return { kind: 'bold', label: text.slice(cursor + 2, end), url: '', next: end + 2 };
+    }
+  }
+  if (text.startsWith('`', cursor)) {
+    const end = text.indexOf('`', cursor + 1);
+    if (end > cursor + 1) {
+      return { kind: 'code', label: text.slice(cursor + 1, end), url: '', next: end + 1 };
+    }
+  }
+  if (text.startsWith('[', cursor)) {
+    const labelEnd = text.indexOf('](', cursor + 1);
+    const urlEnd = labelEnd === -1 ? -1 : text.indexOf(')', labelEnd + 2);
+    if (labelEnd > cursor && urlEnd > labelEnd) {
+      return { kind: 'link', label: text.slice(cursor + 1, labelEnd), url: text.slice(labelEnd + 2, urlEnd), next: urlEnd + 1 };
+    }
+  }
+  if (text.startsWith('\n', cursor)) {
+    return { kind: 'break', label: '', url: '', next: cursor + 1 };
+  }
+  return null;
+}
+
 export const HelpBotWidget: React.FC = () => {
   const { t } = useI18n();
   const navigate = useNavigate();
@@ -155,53 +200,11 @@ How can I help you today? Simply type your question below!`,
       plain = '';
     };
     while (cursor < text.length) {
-      if (text.startsWith('**', cursor)) {
-        const end = text.indexOf('**', cursor + 2);
-        if (end > cursor + 2) {
-          flushPlain();
-          const label = text.slice(cursor + 2, end);
-          nodes.push(<strong key={`b-${cursor}`} className="font-semibold text-slate-900">{label}</strong>);
-          cursor = end + 2;
-          continue;
-        }
-      }
-      if (text.startsWith('`', cursor)) {
-        const end = text.indexOf('`', cursor + 1);
-        if (end > cursor + 1) {
-          flushPlain();
-          const label = text.slice(cursor + 1, end);
-          nodes.push(<code key={`c-${cursor}`} className="rounded bg-slate-100 px-1 py-0.5 text-[11px] font-mono text-blue-700">{label}</code>);
-          cursor = end + 1;
-          continue;
-        }
-      }
-      if (text.startsWith('[', cursor)) {
-        const labelEnd = text.indexOf('](', cursor + 1);
-        const urlEnd = labelEnd === -1 ? -1 : text.indexOf(')', labelEnd + 2);
-        if (labelEnd > cursor && urlEnd > labelEnd) {
-          flushPlain();
-          const label = text.slice(cursor + 1, labelEnd);
-          const url = text.slice(labelEnd + 2, urlEnd);
-          nodes.push(
-            <button
-              key={`a-${cursor}`}
-              onClick={() => {
-                setIsOpen(false);
-                navigate(url);
-              }}
-              className="inline-flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-800 underline underline-offset-2"
-            >
-              {label} <ArrowRight className="h-3 w-3 inline" />
-            </button>
-          );
-          cursor = urlEnd + 1;
-          continue;
-        }
-      }
-      if (text.startsWith('\n', cursor)) {
+      const token = readMarkdownToken(text, cursor);
+      if (token) {
         flushPlain();
-        nodes.push(<br key={`n-${cursor}`} />);
-        cursor += 1;
+        nodes.push(markdownNode(token, () => { setIsOpen(false); navigate(token.url); }));
+        cursor = token.next;
         continue;
       }
       plain += text[cursor];

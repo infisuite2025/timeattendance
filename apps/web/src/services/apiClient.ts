@@ -127,40 +127,41 @@ class ApiClient {
     }
   }
 
+  private buildUrl(endpoint: string, params?: Record<string, any>): string {
+    const endpointPath = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    let url = `${this.baseUrl}${endpointPath}`;
+    if (!params) return url;
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, val]) => {
+      if (val !== undefined && val !== null && val !== '') query.append(key, String(val));
+    });
+    const queryString = query.toString();
+    if (queryString) url += `?${queryString}`;
+    return url;
+  }
+
+  private async readJson(response: Response): Promise<any> {
+    try {
+      return await response.json();
+    } catch (parseError) {
+      console.warn('API response was not JSON', parseError instanceof Error ? parseError.message : 'parse failed');
+      return null;
+    }
+  }
+
   private async executeFetch<T>(
     endpoint: string,
     options: { method: string; body?: any; params?: Record<string, any> },
     retryCount: number = 0
   ): Promise<ApiResponse<T>> {
     try {
-      const endpointPath = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-      let url = `${this.baseUrl}${endpointPath}`;
-      if (options.params) {
-        const query = new URLSearchParams();
-        Object.entries(options.params).forEach(([key, val]) => {
-          if (val !== undefined && val !== null && val !== '') {
-            query.append(key, String(val));
-          }
-        });
-        const queryString = query.toString();
-        if (queryString) {
-          url += `?${queryString}`;
-        }
-      }
-
+      const url = this.buildUrl(endpoint, options.params);
       const response = await fetch(url, {
         method: options.method,
         headers: this.getHeaders(),
         body: options.body ? JSON.stringify(options.body) : undefined,
       });
-
-      let json: any = null;
-      try {
-        json = await response.json();
-      } catch (parseError) {
-        json = null;
-        console.warn('API response was not JSON', parseError instanceof Error ? parseError.message : 'parse failed');
-      }
+      const json = await this.readJson(response);
 
       if (!response.ok) {
         const errorCode = json?.error?.code || String(response.status);
