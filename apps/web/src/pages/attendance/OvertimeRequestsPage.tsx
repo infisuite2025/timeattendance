@@ -167,7 +167,7 @@ export const OvertimeRequestsPage: React.FC = () => {
 
     const newClaims: OvertimeRequestDTO[] = eligible.map(d => ({
       id: `ot-${Date.now()}-${d.id}`,
-      requestCode: `OT-${Math.floor(1000 + Math.random() * 9000)}`,
+      requestCode: `OT-${1000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 9000)}`,
       tenantId: 'tenant-demo-001',
       employeeId: user.id,
       employeeCode: user.employeeCode,
@@ -197,7 +197,7 @@ export const OvertimeRequestsPage: React.FC = () => {
     setTimeout(() => {
       const newOt: OvertimeRequestDTO = {
         id: `ot-${Date.now()}`,
-        requestCode: `OT-${Math.floor(1000 + Math.random() * 9000)}`,
+        requestCode: `OT-${1000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 9000)}`,
         tenantId: 'tenant-demo-001',
         employeeId: 'emp-001',
         employeeCode: 'EMP-1001',
@@ -707,7 +707,7 @@ export const OvertimeRequestsPage: React.FC = () => {
                   type="number"
                   step="15"
                   value={claimMinutes}
-                  onChange={(e) => setClaimMinutes(parseInt(e.target.value, 10) || 0)}
+                  onChange={(e) => setClaimMinutes(Number.parseInt(e.target.value, 10) || 0)}
                   className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg font-mono"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
@@ -725,10 +725,11 @@ export const OvertimeRequestsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <label htmlFor="overtime-work-description" className="block text-xs font-bold text-slate-700 uppercase mb-1">
                   Work Description & Task Deliverables <span className="text-rose-500">*</span>
                 </label>
                 <textarea
+                  id="overtime-work-description"
                   rows={3}
                   required
                   value={claimReason}

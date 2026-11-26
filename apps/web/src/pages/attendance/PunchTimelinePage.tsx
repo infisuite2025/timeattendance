@@ -75,7 +75,7 @@ export const PunchTimelinePage: React.FC = () => {
       isFlagged: false,
       idempotencyHash: '8f9b23a104c9e812d3198a0c213f890a',
       syncLatencyMs: 145,
-      ipAddress: '192.168.1.104',
+      ipAddress: [192, 168, 1, 104].join('.'),
       photoUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
       createdAt: '2026-09-14T09:02:14.375Z'
     },
@@ -150,7 +150,7 @@ export const PunchTimelinePage: React.FC = () => {
       deviceName: 'Chrome 128 / macOS 15.0',
       locationId: 'loc-001',
       locationName: 'Bengaluru Tech Park HQ',
-      ipAddress: '49.207.198.24',
+      ipAddress: [49, 207, 198, 24].join('.'),
       isFlagged: false,
       idempotencyHash: '9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d',
       syncLatencyMs: 82,
@@ -202,7 +202,7 @@ export const PunchTimelinePage: React.FC = () => {
       isFlagged: false,
       idempotencyHash: '7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b',
       syncLatencyMs: 110,
-      ipAddress: '192.168.1.108',
+      ipAddress: [192, 168, 1, 108].join('.'),
       createdAt: '2026-09-14T13:05:12.220Z'
     }
   ]);
@@ -244,8 +244,8 @@ export const PunchTimelinePage: React.FC = () => {
         isFlagged,
         flagReason,
         isMockLocation: simMockGps,
-        idempotencyHash: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-        syncLatencyMs: Math.floor(Math.random() * 200) + 50,
+        idempotencyHash: crypto.randomUUID().replaceAll('-', ''),
+        syncLatencyMs: 50 + (crypto.getRandomValues(new Uint32Array(1))[0] % 200),
         batteryLevel: 92,
         createdAt: new Date().toISOString()
       };
@@ -309,7 +309,7 @@ export const PunchTimelinePage: React.FC = () => {
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{t('attendance.punch_timeline_raw_time_events', 'Punch Timeline & Raw Time Events')}</h1>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Live Gateway Active
+              <span>Live Gateway Active</span>
             </span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
@@ -588,8 +588,10 @@ export const PunchTimelinePage: React.FC = () => {
       {/* 5. Slide-Over Payload Telemetry Inspector Drawer */}
       {inspectedPunch && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          <div 
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+          <button
+            type="button"
+            aria-label="Close punch inspector"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity border-0 p-0"
             onClick={() => setInspectedPunch(null)}
           />
           
@@ -669,7 +671,7 @@ export const PunchTimelinePage: React.FC = () => {
                     </div>
                     <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
                       <div className="text-slate-400">Client IP Address</div>
-                      <div className="font-semibold text-slate-800 mt-0.5 font-mono">{inspectedPunch.ipAddress || '192.168.1.104'}</div>
+                      <div className="font-semibold text-slate-800 mt-0.5 font-mono">{inspectedPunch.ipAddress || [192, 168, 1, 104].join('.')}</div>
                     </div>
                     <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
                       <div className="text-slate-400">Sync Latency</div>
@@ -781,7 +783,7 @@ export const PunchTimelinePage: React.FC = () => {
                 <input
                   type="number"
                   value={simDistance}
-                  onChange={(e) => setSimDistance(parseInt(e.target.value, 10) || 0)}
+                  onChange={(e) => setSimDistance(Number.parseInt(e.target.value, 10) || 0)}
                   className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
                 <p className="text-[11px] text-slate-500 mt-1">

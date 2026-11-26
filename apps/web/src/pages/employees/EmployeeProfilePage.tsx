@@ -881,8 +881,9 @@ export const EmployeeProfilePage: React.FC = () => {
 
             <form onSubmit={handleFileGrievance} className="p-6 space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Grievance Category</label>
+                <label htmlFor="grievance-category" className="block font-semibold text-slate-700 mb-1">Grievance Category</label>
                 <select
+                  id="grievance-category"
                   value={grievanceCategory}
                   onChange={(e) => setGrievanceCategory(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -896,8 +897,9 @@ export const EmployeeProfilePage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Grievance Description *</label>
+                <label htmlFor="grievance-description" className="block font-semibold text-slate-700 mb-1">Grievance Description *</label>
                 <textarea
+                  id="grievance-description"
                   rows={4}
                   required
                   value={grievanceDescription}

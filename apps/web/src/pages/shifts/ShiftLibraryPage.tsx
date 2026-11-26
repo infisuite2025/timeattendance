@@ -82,7 +82,7 @@ export const ShiftLibraryPage: React.FC = () => {
         grace: dto.graceRules || `IN: ${dto.graceInMinutes || 10}m | OUT: ${dto.graceOutMinutes || 10}m`,
         status: dto.status || 'active',
         color: dto.colorHex || '#3B82F6',
-        assignedCount: dto.assignedCount || Math.floor(Math.random() * 40) + 10,
+        assignedCount: dto.assignedCount || (10 + (crypto.getRandomValues(new Uint32Array(1))[0] % 40)),
         description: dto.description || '',
         allowOvertime: dto.allowOvertime !== false,
         otThresholdHours: dto.otThresholdHours || 8.0,

@@ -373,8 +373,10 @@ export const AttendanceExceptionsPage: React.FC = () => {
       {/* 5. Slide-Over Exception Resolution Drawer */}
       {activeException && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+          <button
+            type="button"
+            aria-label="Close exception panel"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity border-0 p-0"
             onClick={() => setActiveException(null)}
           />
 
@@ -527,10 +529,11 @@ export const AttendanceExceptionsPage: React.FC = () => {
                     )}
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      <label htmlFor="exception-resolution-notes" className="block text-xs font-bold text-slate-700 uppercase mb-1">
                         Resolution Notes / Audit Justification <span className="text-rose-500">*</span>
                       </label>
                       <textarea
+                        id="exception-resolution-notes"
                         rows={3}
                         required
                         value={resolutionReason}

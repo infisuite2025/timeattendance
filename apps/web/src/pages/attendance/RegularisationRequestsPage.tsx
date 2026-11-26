@@ -518,10 +518,11 @@ export const RegularisationRequestsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                <label htmlFor="regularisation-remarks" className="block text-xs font-bold text-slate-700 uppercase mb-1">
                   Detailed Remarks & Justification <span className="text-rose-500">*</span>
                 </label>
                 <textarea
+                  id="regularisation-remarks"
                   rows={3}
                   required
                   value={formReason}
@@ -558,8 +559,10 @@ export const RegularisationRequestsPage: React.FC = () => {
       {/* 6. Request Detail Drawer */}
       {selectedRequest && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+          <button
+            type="button"
+            aria-label="Close regularisation request"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity border-0 p-0"
             onClick={() => setSelectedRequest(null)}
           />
 

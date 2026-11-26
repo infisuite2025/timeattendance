@@ -12,7 +12,7 @@ export function encodeSecureToken(rawId: string): string {
     const payload = JSON.stringify({
       id: rawId,
       ts: Date.now(),
-      salt: Math.random().toString(36).substring(2, 9)
+      salt: crypto.randomUUID().replaceAll('-', '').slice(0, 8)
     });
     // Base64Url encode
     const base64 = btoa(payload)

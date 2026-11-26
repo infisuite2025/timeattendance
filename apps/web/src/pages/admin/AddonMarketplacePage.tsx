@@ -789,8 +789,9 @@ export const AddonMarketplacePage: React.FC = () => {
             <form onSubmit={handleSaveCatalogItem} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Add-on Module ID</label>
+                  <label htmlFor="addon-module-id" className="block font-semibold text-slate-700 mb-1">Add-on Module ID</label>
                   <input
+                    id="addon-module-id"
                     type="text"
                     disabled
                     value={editingCatalogItem.id}
@@ -798,8 +799,9 @@ export const AddonMarketplacePage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Category Name</label>
+                  <label htmlFor="addon-category" className="block font-semibold text-slate-700 mb-1">Category Name</label>
                   <select
+                    id="addon-category"
                     value={editingCatalogItem.category}
                     onChange={e => setEditingCatalogItem({ ...editingCatalogItem, category: e.target.value as any })}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-purple-500 font-medium"
@@ -813,8 +815,9 @@ export const AddonMarketplacePage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Module Name</label>
+                <label htmlFor="addon-module-name" className="block font-semibold text-slate-700 mb-1">Module Name</label>
                 <input
+                  id="addon-module-name"
                   type="text"
                   required
                   value={editingCatalogItem.name}
@@ -824,8 +827,9 @@ export const AddonMarketplacePage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Tagline</label>
+                <label htmlFor="addon-tagline" className="block font-semibold text-slate-700 mb-1">Tagline</label>
                 <input
+                  id="addon-tagline"
                   type="text"
                   required
                   value={editingCatalogItem.tagline}
@@ -835,8 +839,9 @@ export const AddonMarketplacePage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Full Description</label>
+                <label htmlFor="addon-description" className="block font-semibold text-slate-700 mb-1">Full Description</label>
                 <textarea
+                  id="addon-description"
                   rows={3}
                   required
                   value={editingCatalogItem.description}
@@ -847,14 +852,15 @@ export const AddonMarketplacePage: React.FC = () => {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Monthly Rate ($/seat)</label>
+                  <label htmlFor="addon-monthly-rate" className="block font-semibold text-slate-700 mb-1">Monthly Rate ($/seat)</label>
                   <input
+                    id="addon-monthly-rate"
                     type="number"
                     step="0.01"
                     min="0"
                     required
                     value={editingCatalogItem.pricePerSeatMonthly}
-                    onChange={e => setEditingCatalogItem({ ...editingCatalogItem, pricePerSeatMonthly: parseFloat(e.target.value) || 0 })}
+                    onChange={e => setEditingCatalogItem({ ...editingCatalogItem, pricePerSeatMonthly: Number.parseFloat(e.target.value) || 0 })}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-purple-500 font-bold text-slate-900"
                   />
                 </div>
@@ -866,7 +872,7 @@ export const AddonMarketplacePage: React.FC = () => {
                     min="0"
                     required
                     value={editingCatalogItem.pricePerSeatAnnual}
-                    onChange={e => setEditingCatalogItem({ ...editingCatalogItem, pricePerSeatAnnual: parseFloat(e.target.value) || 0 })}
+                    onChange={e => setEditingCatalogItem({ ...editingCatalogItem, pricePerSeatAnnual: Number.parseFloat(e.target.value) || 0 })}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-purple-500 font-bold text-slate-900"
                   />
                 </div>
@@ -877,7 +883,7 @@ export const AddonMarketplacePage: React.FC = () => {
                     min="0"
                     required
                     value={editingCatalogItem.trialDays}
-                    onChange={e => setEditingCatalogItem({ ...editingCatalogItem, trialDays: parseInt(e.target.value) || 0 })}
+                    onChange={e => setEditingCatalogItem({ ...editingCatalogItem, trialDays: Number.parseInt(e.target.value, 10) || 0 })}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-purple-500 font-bold text-slate-900"
                   />
                 </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Calendar,
@@ -100,121 +100,6 @@ export const MyAttendancePage: React.FC = () => {
     return () => { active = false; };
   }, [selectedMonth, selectedYear, reloadKey, user.email]);
 
-  const _retiredSampleStart = false && Array.from({ length: 30 }, (_, i) => {
-    const day = i + 1;
-    const dateStr = `2026-09-${day < 10 ? '0' + day : day}`;
-    const d = new Date(dateStr);
-    const dayOfWeekNum = d.getDay();
-    const dayOfWeekName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dayOfWeekNum];
-
-    if (dayOfWeekNum === 0 || dayOfWeekNum === 6) {
-      return {
-        id: `att-day-${day}`,
-        date: dateStr,
-        dayOfWeek: dayOfWeekName,
-        shiftCode: 'WO',
-        shiftName: 'Weekly Off',
-        shiftTiming: 'Non-Working Day',
-        grossDurationMinutes: 0,
-        breakDurationMinutes: 0,
-        netWorkDurationMinutes: 0,
-        regularDurationMinutes: 0,
-        overtimeMinutes: 0,
-        status: 'weekly_off' as DayStatus,
-        isLate: false,
-        lateByMinutes: 0,
-        isEarlyOut: false,
-        earlyOutByMinutes: 0,
-        isRegularised: false,
-        isSandwichPenalty: false,
-        punches: []
-      };
-    }
-
-    if (day === 8) {
-      return {
-        id: `att-day-${day}`,
-        date: dateStr,
-        dayOfWeek: dayOfWeekName,
-        shiftCode: 'GS',
-        shiftName: 'General Shift',
-        shiftTiming: '09:00 AM - 06:00 PM',
-        grossDurationMinutes: 0,
-        breakDurationMinutes: 0,
-        netWorkDurationMinutes: 0,
-        regularDurationMinutes: 0,
-        overtimeMinutes: 0,
-        status: 'on_leave' as DayStatus,
-        isLate: false,
-        lateByMinutes: 0,
-        isEarlyOut: false,
-        earlyOutByMinutes: 0,
-        isRegularised: false,
-        isSandwichPenalty: false,
-        punches: []
-      };
-    }
-
-    if (day === 4) {
-      return {
-        id: `att-day-${day}`,
-        date: dateStr,
-        dayOfWeek: dayOfWeekName,
-        shiftCode: 'GS',
-        shiftName: 'General Shift',
-        shiftTiming: '09:00 AM - 06:00 PM',
-        firstIn: '09:24 AM',
-        lastOut: '06:35 PM',
-        grossDurationMinutes: 551,
-        breakDurationMinutes: 60,
-        netWorkDurationMinutes: 491,
-        regularDurationMinutes: 480,
-        overtimeMinutes: 11,
-        status: 'late' as DayStatus,
-        isLate: true,
-        lateByMinutes: 24,
-        isEarlyOut: false,
-        earlyOutByMinutes: 0,
-        isRegularised: false,
-        isSandwichPenalty: false,
-        punches: [
-          { id: `pch-${day}-1`, time: '09:24 AM', type: 'IN' as PunchType, source: 'mobile_app' as PunchSource, locationName: 'Bengaluru Tech Park HQ', isFlagged: false },
-          { id: `pch-${day}-2`, time: '01:05 PM', type: 'BREAK_OUT' as PunchType, source: 'web_portal' as PunchSource, locationName: 'Bengaluru Tech Park HQ', isFlagged: false },
-          { id: `pch-${day}-3`, time: '02:05 PM', type: 'BREAK_IN' as PunchType, source: 'web_portal' as PunchSource, locationName: 'Bengaluru Tech Park HQ', isFlagged: false },
-          { id: `pch-${day}-4`, time: '06:35 PM', type: 'OUT' as PunchType, source: 'biometric' as PunchSource, locationName: 'Bengaluru Tech Park HQ', isFlagged: false },
-        ]
-      };
-    }
-
-    return {
-      id: `att-day-${day}`,
-      date: dateStr,
-      dayOfWeek: dayOfWeekName,
-      shiftCode: 'GS',
-      shiftName: 'General Shift',
-      shiftTiming: '09:00 AM - 06:00 PM',
-      firstIn: '08:55 AM',
-      lastOut: day === 14 ? '--' : '06:25 PM',
-      grossDurationMinutes: day === 14 ? 360 : 570,
-      breakDurationMinutes: 60,
-      netWorkDurationMinutes: day === 14 ? 300 : 510,
-      regularDurationMinutes: 480,
-      overtimeMinutes: day === 14 ? 0 : 30,
-      status: 'present' as DayStatus,
-      isLate: false,
-      lateByMinutes: 0,
-      isEarlyOut: false,
-      earlyOutByMinutes: 0,
-      isRegularised: day === 11,
-      isSandwichPenalty: false,
-      punches: [
-        { id: `pch-${day}-1`, time: '08:55 AM', type: 'IN' as PunchType, source: 'biometric' as PunchSource, locationName: 'Bengaluru Tech Park HQ', isFlagged: false },
-        { id: `pch-${day}-2`, time: '01:00 PM', type: 'BREAK_OUT' as PunchType, source: 'biometric' as PunchSource, locationName: 'Bengaluru Tech Park HQ', isFlagged: false },
-        { id: `pch-${day}-3`, time: '02:00 PM', type: 'BREAK_IN' as PunchType, source: 'biometric' as PunchSource, locationName: 'Bengaluru Tech Park HQ', isFlagged: false },
-        ...(day !== 14 ? [{ id: `pch-${day}-4`, time: '06:25 PM', type: 'OUT' as PunchType, source: 'biometric' as PunchSource, locationName: 'Bengaluru Tech Park HQ', isFlagged: false }] : [])
-      ]
-    };
-  });
 
   const getStatusBadge = (status: DayStatus, isLate?: boolean, isRegularised?: boolean) => {
     if (isRegularised) {
@@ -424,10 +309,11 @@ export const MyAttendancePage: React.FC = () => {
               const isToday = d.date === today.toISOString().slice(0, 10);
 
               return (
-                <div
+                <button
+                  type="button"
                   key={d.id}
                   onClick={() => setSelectedDay(d)}
-                  className={`min-h-[105px] p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`min-h-[105px] p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between text-left font-inherit ${
                     isToday
                       ? 'border-blue-500 bg-blue-50/30 ring-2 ring-blue-500/20 shadow-xs'
                       : d.status === 'weekly_off'
@@ -464,7 +350,7 @@ export const MyAttendancePage: React.FC = () => {
 
                   <div className="text-[10px] text-slate-400 truncate">
                     {d.shiftCode} ({d.shiftTiming.split(' - ')[0]})</div>
-                </div>
+                </button>
               );
             })}</div>
         </div>
@@ -530,8 +416,10 @@ export const MyAttendancePage: React.FC = () => {
       {/* 5. Day Detail Slide-Over Drawer */}
       {selectedDay && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+          <button
+            type="button"
+            aria-label="Close day detail"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity border-0 p-0"
             onClick={() => setSelectedDay(null)}
           />
 

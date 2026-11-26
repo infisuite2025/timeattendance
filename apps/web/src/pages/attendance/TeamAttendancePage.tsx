@@ -248,7 +248,7 @@ export const TeamAttendancePage: React.FC = () => {
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{t('attendance.team_attendance', 'Team Attendance')}</h1>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Live Shift Tracking
+              <span>Live Shift Tracking</span>
             </span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
@@ -484,8 +484,10 @@ export const TeamAttendancePage: React.FC = () => {
       {/* 5. Slide-Over Member Detail Drawer */}
       {activeMember && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+          <button
+            type="button"
+            aria-label="Close team member panel"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity border-0 p-0"
             onClick={() => setActiveMember(null)}
           />
 

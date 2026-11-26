@@ -180,7 +180,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     apiClient.clearAuth();
 
-    const res = await apiClient.post('/auth/login', { email, password: password || 'Admin@123' });
+    const res = await apiClient.post('/auth/login', { email, password });
     if (!res.success || !res.data?.token) {
       throw new Error(res.error?.message || 'Sign in failed. Check the email and password.');
     }

@@ -40,6 +40,14 @@ interface LocationItem {
   country: string;
 }
 
+function isCorporateEmail(value: string): boolean {
+  const at = value.indexOf('@');
+  if (at <= 0 || value.includes('@', at + 1) || value.includes(' ')) return false;
+  const domain = value.slice(at + 1);
+  const dot = domain.lastIndexOf('.');
+  return dot > 0 && dot < domain.length - 1;
+}
+
 export const EmployeeListPage: React.FC = () => {
   const { t } = useI18n();
   const { toast } = useNotification();
@@ -136,8 +144,7 @@ export const EmployeeListPage: React.FC = () => {
     }
 
     // Email Format Assertion
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(newEmail.trim())) {
+    if (!isCorporateEmail(newEmail.trim())) {
       setFormError('Invalid corporate email address format.');
       return;
     }

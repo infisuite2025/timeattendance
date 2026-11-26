@@ -577,8 +577,9 @@ Data Protection Board of India (DPBI) Regulatory Portal Alignment
 
             <form onSubmit={handleResolveGrievance} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Update Status</label>
+                <label htmlFor="dpo-resolution-status" className="block text-xs font-bold text-slate-700 mb-1">Update Status</label>
                 <select
+                  id="dpo-resolution-status"
                   value={resolutionStatus}
                   onChange={(e: any) => setResolutionStatus(e.target.value)}
                   className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-semibold text-slate-800"
@@ -590,8 +591,9 @@ Data Protection Board of India (DPBI) Regulatory Portal Alignment
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">DPO Resolution Findings & Remarks</label>
+                <label htmlFor="dpo-resolution-notes" className="block text-xs font-bold text-slate-700 mb-1">DPO Resolution Findings & Remarks</label>
                 <textarea
+                  id="dpo-resolution-notes"
                   value={resolutionNotes}
                   onChange={e => setResolutionNotes(e.target.value)}
                   placeholder="Enter official DPO findings, communication sent to employee, or resolution steps..."

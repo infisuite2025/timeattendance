@@ -274,10 +274,11 @@ export const PaymentGatewayConfigPage: React.FC = () => {
               const Icon = prov.icon;
 
               return (
-                <div
+                <button
+                  type="button"
                   key={prov.id}
                   onClick={() => handleProviderSelect(prov.id)}
-                  className={`p-5 rounded-2xl border cursor-pointer transition-all space-y-2 ${
+                  className={`w-full text-left p-5 rounded-2xl border cursor-pointer transition-all space-y-2 ${
                     isSelected
                       ? 'border-indigo-600 bg-indigo-50/40 dark:bg-indigo-900/20 ring-2 ring-indigo-600 shadow-md'
                       : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-300'
@@ -294,7 +295,7 @@ export const PaymentGatewayConfigPage: React.FC = () => {
                       </span>
                     )}</div>
                   <p className="text-xs text-slate-500 leading-relaxed">{prov.desc}</p>
-                </div>
+                </button>
               );
             })}</div>
 
@@ -348,7 +349,7 @@ export const PaymentGatewayConfigPage: React.FC = () => {
                       type="number"
                       step="0.1"
                       value={feePercent}
-                      onChange={(e) => setFeePercent(parseFloat(e.target.value))}
+                      onChange={(e) => setFeePercent(Number.parseFloat(e.target.value))}
                       className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 font-mono"
                     />
                     <Percent className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -481,7 +482,7 @@ export const PaymentGatewayConfigPage: React.FC = () => {
                       step="0.1"
                       value={tier.baseSeatPriceMonthly}
                       onChange={(e) =>
-                        handleUpdateTierPrice(tier.id, parseFloat(e.target.value), tier.baseSeatPriceAnnual)
+                        handleUpdateTierPrice(tier.id, Number.parseFloat(e.target.value), tier.baseSeatPriceAnnual)
                       }
                       className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold font-mono"
                     />
@@ -494,7 +495,7 @@ export const PaymentGatewayConfigPage: React.FC = () => {
                       step="0.1"
                       value={tier.baseSeatPriceAnnual}
                       onChange={(e) =>
-                        handleUpdateTierPrice(tier.id, tier.baseSeatPriceMonthly, parseFloat(e.target.value))
+                        handleUpdateTierPrice(tier.id, tier.baseSeatPriceMonthly, Number.parseFloat(e.target.value))
                       }
                       className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-bold font-mono"
                     />

@@ -46,7 +46,7 @@ export const DeviceManagementPage: React.FC = () => {
   const [formId, setFormId] = useState('BIO-FACIAL-04');
   const [formName, setFormName] = useState('Executive Floor BioTerminal');
   const [formType, setFormType] = useState<DeviceType>('face_recognition');
-  const [formIp, setFormIp] = useState('192.168.1.120');
+  const [formIp, setFormIp] = useState([192, 168, 1, 120].join('.'));
   const [formPort, setFormPort] = useState(4370);
   const [formSerial, setFormSerial] = useState('BM-SF-2026-9904');
   const [formZone, setFormZone] = useState('Level 4 Executive Suite');
@@ -189,7 +189,7 @@ export const DeviceManagementPage: React.FC = () => {
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{t('devices.hardware_terminals_device_heal', 'Hardware Terminals & Device Health Hub')}</h1>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Biometric Mesh Online
+              <span>Biometric Mesh Online</span>
             </span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
@@ -398,8 +398,10 @@ export const DeviceManagementPage: React.FC = () => {
       {/* 5. Slide-Over Diagnostics & Command Console Drawer */}
       {activeDevice && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+          <button
+            type="button"
+            aria-label="Close device panel"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity border-0 p-0"
             onClick={() => setActiveDevice(null)}
           />
 
@@ -618,7 +620,7 @@ export const DeviceManagementPage: React.FC = () => {
                     type="number"
                     required
                     value={formPort}
-                    onChange={(e) => setFormPort(parseInt(e.target.value, 10) || 4370)}
+                    onChange={(e) => setFormPort(Number.parseInt(e.target.value, 10) || 4370)}
                     className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg font-mono"
                   />
                 </div>

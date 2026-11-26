@@ -231,7 +231,7 @@ export const DayDetailPage: React.FC = () => {
                 <tr className="hover:bg-slate-50">
                   <td className="px-4 py-3 font-bold text-slate-900">
                     <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 mr-2"></span>
-                    08:58 AM
+                    <span>08:58 AM</span>
                   </td>
                   <td className="px-4 py-3 font-semibold text-slate-800">
                     Check In <span className="block text-[10px] text-slate-400 font-normal">Work started</span>
@@ -247,7 +247,7 @@ export const DayDetailPage: React.FC = () => {
                 <tr className="hover:bg-slate-50">
                   <td className="px-4 py-3 font-bold text-slate-900">
                     <span className="inline-block h-2 w-2 rounded-full bg-amber-500 mr-2"></span>
-                    12:30 PM
+                    <span>12:30 PM</span>
                   </td>
                   <td className="px-4 py-3 font-semibold text-slate-800">
                     Break Out <span className="block text-[10px] text-slate-400 font-normal">Lunch break</span>
@@ -263,7 +263,7 @@ export const DayDetailPage: React.FC = () => {
                 <tr className="hover:bg-slate-50">
                   <td className="px-4 py-3 font-bold text-slate-900">
                     <span className="inline-block h-2 w-2 rounded-full bg-amber-500 mr-2"></span>
-                    01:30 PM
+                    <span>01:30 PM</span>
                   </td>
                   <td className="px-4 py-3 font-semibold text-slate-800">
                     Break In <span className="block text-[10px] text-slate-400 font-normal">Back from break</span>
@@ -279,7 +279,7 @@ export const DayDetailPage: React.FC = () => {
                 <tr className="hover:bg-slate-50">
                   <td className="px-4 py-3 font-bold text-slate-900">
                     <span className="inline-block h-2 w-2 rounded-full bg-rose-500 mr-2"></span>
-                    06:08 PM
+                    <span>06:08 PM</span>
                   </td>
                   <td className="px-4 py-3 font-semibold text-slate-800">
                     Check Out <span className="block text-[10px] text-slate-400 font-normal">Work completed</span>

@@ -378,7 +378,7 @@ export const LeavePoliciesPage: React.FC = () => {
       const selectedTypeObj = leaveTypes.find(l => l.code === applyLeaveType);
       const newApp: LeaveApplicationRecord = {
         id: `app-${Date.now()}`,
-        requestCode: `LEV-2026-${Math.floor(100 + Math.random() * 900)}`,
+        requestCode: `LEV-2026-${100 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900)}`,
         leaveType: selectedTypeObj ? selectedTypeObj.name : applyLeaveType,
         leaveTypeCode: applyLeaveType,
         startDate: applyStartDate,

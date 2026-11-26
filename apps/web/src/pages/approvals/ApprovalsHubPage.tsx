@@ -606,8 +606,10 @@ export const ApprovalsHubPage: React.FC = () => {
       {/* 6. Unified Deep-Dive Decision Drawer */}
       {inspectedItem && (
         <div className="fixed inset-0 z-50 overflow-hidden">
-          <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+          <button
+            type="button"
+            aria-label="Close approval panel"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity border-0 p-0"
             onClick={() => setInspectedItem(null)}
           />
 

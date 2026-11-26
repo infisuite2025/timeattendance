@@ -205,7 +205,7 @@ export const SuperAdminTenantsPage: React.FC = () => {
     setIsProvisioning(true);
     setTimeout(() => {
       const created: TenantDTO = {
-        id: `tenant-${Math.floor(100 + Math.random() * 900)}`,
+        id: `tenant-${100 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900)}`,
         code: newSubdomain.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
         name: newOrgName,
         subdomain: `${newSubdomain.toLowerCase()}.infitimepro.com`,
@@ -636,7 +636,7 @@ export const SuperAdminTenantsPage: React.FC = () => {
                     <input
                       type="number"
                       value={newMaxSeats}
-                      onChange={(e) => setNewMaxSeats(parseInt(e.target.value))}
+                      onChange={(e) => setNewMaxSeats(Number.parseInt(e.target.value, 10))}
                       className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl p-2.5 text-slate-800 dark:text-slate-200"
                     />
                   </div>

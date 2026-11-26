@@ -71,7 +71,7 @@ export const ShiftGroupsPage: React.FC = () => {
     }
     const res = await apiClient.post('/shifts/groups', {
       name: newGroupName,
-      code: newGroupCode || `GRP-${Math.floor(100 + Math.random() * 900)}`,
+      code: newGroupCode || `GRP-${100 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900)}`,
       patternType: newGroupPattern,
       locations: newGroupDepts,
     });

@@ -460,7 +460,7 @@ export const TenantSettingsPage: React.FC = () => {
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">{t('admin.fiscal_year_start_month', 'Fiscal Year Start Month')}</label>
               <select
                 value={fiscalYearStartMonth}
-                onChange={(e) => setFiscalYearStartMonth(parseInt(e.target.value, 10))}
+                onChange={(e) => setFiscalYearStartMonth(Number.parseInt(e.target.value, 10))}
                 className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 font-semibold"
               >
                 <option value={4}>April (Financial Year Apr - Mar)</option>
@@ -591,7 +591,7 @@ export const TenantSettingsPage: React.FC = () => {
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">{t('admin.mandatory_password_rotation', 'Mandatory Password Rotation')}</label>
                 <select
                   value={passwordRotation}
-                  onChange={(e) => setPasswordRotation(parseInt(e.target.value))}
+                  onChange={(e) => setPasswordRotation(Number.parseInt(e.target.value, 10))}
                   className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 font-bold"
                 >
                   <option value={30}>Every 30 Days (Strict)</option>
@@ -605,7 +605,7 @@ export const TenantSettingsPage: React.FC = () => {
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">{t('admin.session_auto_timeout', 'Session Auto-Timeout')}</label>
                 <select
                   value={sessionTimeout}
-                  onChange={(e) => setSessionTimeout(parseInt(e.target.value))}
+                  onChange={(e) => setSessionTimeout(Number.parseInt(e.target.value, 10))}
                   className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 font-bold"
                 >
                   <option value={15}>15 Minutes of Inactivity</option>
@@ -868,25 +868,27 @@ export const TenantSettingsPage: React.FC = () => {
 
             <form onSubmit={handleSaveQuota} className="space-y-4">
               <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Max Headcount Seats</label>
+                <label htmlFor="quota-max-seats" className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Max Headcount Seats</label>
                 <input
+                  id="quota-max-seats"
                   type="number"
                   min="1"
                   required
                   value={editMaxSeats}
-                  onChange={(e) => setEditMaxSeats(parseInt(e.target.value) || 0)}
+                  onChange={(e) => setEditMaxSeats(Number.parseInt(e.target.value, 10) || 0)}
                   className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 font-bold text-slate-900 dark:text-white"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Max Hardware Devices</label>
+                <label htmlFor="quota-max-devices" className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Max Hardware Devices</label>
                 <input
+                  id="quota-max-devices"
                   type="number"
                   min="1"
                   required
                   value={editMaxDevices}
-                  onChange={(e) => setEditMaxDevices(parseInt(e.target.value) || 0)}
+                  onChange={(e) => setEditMaxDevices(Number.parseInt(e.target.value, 10) || 0)}
                   className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 font-bold text-slate-900 dark:text-white"
                 />
               </div>
@@ -898,7 +900,7 @@ export const TenantSettingsPage: React.FC = () => {
                   min="1"
                   required
                   value={editMaxStorageGb}
-                  onChange={(e) => setEditMaxStorageGb(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => setEditMaxStorageGb(Number.parseFloat(e.target.value) || 0)}
                   className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 font-bold text-slate-900 dark:text-white"
                 />
               </div>

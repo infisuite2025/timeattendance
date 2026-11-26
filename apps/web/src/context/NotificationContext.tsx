@@ -59,7 +59,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, []);
 
   const addToast = useCallback((type: ToastType, title: string, message?: string, duration = 4000) => {
-    const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const id = `toast-${crypto.randomUUID()}`;
     const newToast: ToastItem = { id, type, title, message, duration };
 
     setToasts((prev) => [newToast, ...prev].slice(0, 5));

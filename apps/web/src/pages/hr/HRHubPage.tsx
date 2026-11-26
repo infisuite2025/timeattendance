@@ -612,10 +612,11 @@ export const HRHubPage: React.FC = () => {
                     </span>
                     <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                       {candidate.tasks.map(task => (
-                        <div
+                        <button
+                          type="button"
                           key={task.id}
                           onClick={() => handleToggleTask(candidate.id, task.id)}
-                          className={`p-2.5 rounded-xl border text-xs flex items-start gap-2.5 cursor-pointer transition-all ${
+                          className={`w-full p-2.5 rounded-xl border text-xs flex items-start gap-2.5 cursor-pointer transition-all text-left ${
                             task.completed
                               ? 'bg-emerald-50/50 border-emerald-200 text-slate-600'
                               : 'bg-slate-50 border-slate-200 hover:border-indigo-300 text-slate-800'
@@ -633,7 +634,7 @@ export const HRHubPage: React.FC = () => {
                             <span className="text-[10px] text-slate-400 capitalize">
                               Assigned: {task.assignedToRole}</span>
                           </div>
-                        </div>
+                        </button>
                       ))}</div>
                   </div>
                 </div>
@@ -1084,8 +1085,9 @@ export const HRHubPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">File</label>
+                <label htmlFor="hr-document-file" className="font-bold text-slate-700 block mb-1">File</label>
                 <input
+                  id="hr-document-file"
                   type="file"
                   required
                   accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
